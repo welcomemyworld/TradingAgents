@@ -9,6 +9,7 @@ from tradingagents.agents.utils.agent_utils import (
 from tradingagents.agents.utils.decision_protocol import (
     CATALYST_PATH_SECTION_MAP,
     build_dossier_update,
+    build_temporal_context_update,
 )
 from tradingagents.dataflows.config import get_config
 
@@ -26,8 +27,9 @@ def create_news_analyst(llm):
 
         system_message = (
             "You are the Catalyst Path capability inside an AI-native investment institution. Your job is to map the event chain that can move expectations, compress uncertainty, or force a re-rating. Use get_news(query, start_date, end_date) for company-specific searches and get_global_news(curr_date, look_back_days, limit) for broader macro and industry event flow."
-            + " Write a report with these sections: Event Map, Catalyst Tree, Timeline, and Market-Relevance."
+            + " Write a report with these sections: Event Map, Catalyst Tree, Timeline, Market-Relevance, and Medium-Cycle Re-Rating Path."
             + " Focus on what can change the stock, not just what happened."
+            + " Medium-Cycle Re-Rating Path should explain the multi-week to multi-quarter path by which evidence can force the market to reprice the asset."
             + """ Make sure to append a Markdown table at the end of the report to organize key points in the report, organized and easy to read."""
         )
 
@@ -69,6 +71,13 @@ def create_news_analyst(llm):
         }
         output.update(
             build_dossier_update(
+                state,
+                report,
+                CATALYST_PATH_SECTION_MAP,
+            )
+        )
+        output.update(
+            build_temporal_context_update(
                 state,
                 report,
                 CATALYST_PATH_SECTION_MAP,

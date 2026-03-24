@@ -71,49 +71,71 @@ Adhere strictly to these instructions, and ensure your output is detailed, accur
     def reflect_bull_researcher(self, current_state, returns_losses, bull_memory):
         """Reflect on bull researcher's analysis and update memory."""
         situation = self._extract_current_situation(current_state)
-        bull_debate_history = current_state["investment_debate_state"]["bull_history"]
+        bull_debate_history = (
+            current_state.get("thesis_review", {}).get("outputs", {}).get("thesis_case")
+            or current_state["investment_debate_state"]["bull_history"]
+        )
 
         result = self._reflect_on_component(
             "BULL", bull_debate_history, situation, returns_losses
         )
         bull_memory.add_situations([(situation, result)])
+        return result
 
     def reflect_bear_researcher(self, current_state, returns_losses, bear_memory):
         """Reflect on bear researcher's analysis and update memory."""
         situation = self._extract_current_situation(current_state)
-        bear_debate_history = current_state["investment_debate_state"]["bear_history"]
+        bear_debate_history = (
+            current_state.get("thesis_review", {})
+            .get("outputs", {})
+            .get("challenge_case")
+            or current_state["investment_debate_state"]["bear_history"]
+        )
 
         result = self._reflect_on_component(
             "BEAR", bear_debate_history, situation, returns_losses
         )
         bear_memory.add_situations([(situation, result)])
+        return result
 
     def reflect_trader(self, current_state, returns_losses, trader_memory):
         """Reflect on trader's decision and update memory."""
         situation = self._extract_current_situation(current_state)
-        trader_decision = current_state["trader_investment_plan"]
+        trader_decision = (
+            current_state.get("execution_state", {}).get("full_blueprint")
+            or current_state["trader_investment_plan"]
+        )
 
         result = self._reflect_on_component(
             "TRADER", trader_decision, situation, returns_losses
         )
         trader_memory.add_situations([(situation, result)])
+        return result
 
     def reflect_invest_judge(self, current_state, returns_losses, invest_judge_memory):
         """Reflect on investment judge's decision and update memory."""
         situation = self._extract_current_situation(current_state)
-        judge_decision = current_state["investment_debate_state"]["judge_decision"]
+        judge_decision = (
+            current_state.get("thesis_review", {}).get("final_memo")
+            or current_state["investment_debate_state"]["judge_decision"]
+        )
 
         result = self._reflect_on_component(
             "INVEST JUDGE", judge_decision, situation, returns_losses
         )
         invest_judge_memory.add_situations([(situation, result)])
+        return result
 
     def reflect_portfolio_manager(self, current_state, returns_losses, portfolio_manager_memory):
         """Reflect on portfolio manager's decision and update memory."""
         situation = self._extract_current_situation(current_state)
-        judge_decision = current_state["risk_debate_state"]["judge_decision"]
+        judge_decision = (
+            current_state.get("final_decision", {}).get("full_decision")
+            or current_state["risk_debate_state"]["judge_decision"]
+        )
 
         result = self._reflect_on_component(
             "PORTFOLIO MANAGER", judge_decision, situation, returns_losses
         )
         portfolio_manager_memory.add_situations([(situation, result)])
+        return result

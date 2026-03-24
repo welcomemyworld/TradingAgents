@@ -9,6 +9,7 @@ from tradingagents.agents.utils.agent_utils import (
 from tradingagents.agents.utils.decision_protocol import (
     MARKET_EXPECTATIONS_SECTION_MAP,
     build_dossier_update,
+    build_temporal_context_update,
 )
 from tradingagents.dataflows.config import get_config
 
@@ -33,6 +34,7 @@ Write a report with these sections:
 - What Seems Priced In
 - Positioning / Momentum Read
 - Implications For Timing
+- Execution Window Pressure
 
 Select the **most relevant indicators** for the current setup from the following list. The goal is to choose up to **8 indicators** that provide complementary insight without redundancy. Categories and each category's indicators are:
 
@@ -60,6 +62,7 @@ Volume-Based Indicators:
 
 - Select indicators that provide diverse and complementary information. Avoid redundancy (e.g., do not select both rsi and stochrsi).
 - Explain what the market seems to be discounting, not just what the chart looks like.
+- Keep the focus on the short-cycle execution window: what the tape is forcing now, not whether the business is good over the long run.
 - When you tool call, please use the exact indicator names provided above or the call will fail.
 - Please call get_stock_data first to retrieve the CSV needed to generate indicators, then use get_indicators with the specific indicator names.
 - Write a detailed report that helps the rest of the institution understand expectations, timing, and what is already embedded in price."""
@@ -105,6 +108,13 @@ Volume-Based Indicators:
         }
         output.update(
             build_dossier_update(
+                state,
+                report,
+                MARKET_EXPECTATIONS_SECTION_MAP,
+            )
+        )
+        output.update(
+            build_temporal_context_update(
                 state,
                 report,
                 MARKET_EXPECTATIONS_SECTION_MAP,

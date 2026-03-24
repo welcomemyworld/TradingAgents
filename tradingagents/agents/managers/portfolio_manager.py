@@ -6,8 +6,14 @@ from tradingagents.agents.utils.agent_utils import (
 from tradingagents.agents.utils.decision_protocol import (
     CAPITAL_ALLOCATION_SECTION_MAP,
     CAPITAL_ALLOCATION_DOSSIER_BRIEF_KEYS,
+    build_final_decision_state_update,
+    build_legacy_risk_debate_state,
     build_dossier_update,
+    finalize_review_loop,
     render_dossier_brief,
+    render_portfolio_context_brief,
+    render_temporal_context_brief,
+    render_review_transcript,
 )
 
 
@@ -16,16 +22,30 @@ def create_portfolio_manager(llm, memory):
 
         instrument_context = build_instrument_context(state["company_of_interest"])
 
-        history = state["risk_debate_state"]["history"]
-        risk_debate_state = state["risk_debate_state"]
+        allocation_review = state.get("allocation_review", {})
+        history = render_review_transcript(allocation_review)
         shared_research_context = build_research_context(
             state, state.get("selected_analysts")
         )
-        trader_plan = state["trader_investment_plan"] or state["investment_plan"]
+        execution_state = state.get("execution_state", {})
+        thesis_review = state.get("thesis_review", {})
+        trader_plan = (
+            execution_state.get("full_blueprint")
+            or state.get("trader_investment_plan")
+            or thesis_review.get("final_memo")
+            or state.get("investment_plan", "")
+        )
         dossier_snapshot = render_dossier_brief(
             state.get("decision_dossier"),
             CAPITAL_ALLOCATION_DOSSIER_BRIEF_KEYS,
         )
+        portfolio_context_snapshot = render_portfolio_context_brief(
+            state.get("portfolio_context")
+        )
+        temporal_context_snapshot = render_temporal_context_brief(
+            state.get("temporal_context")
+        )
+        institution_memory_brief = state.get("institution_memory_brief", "")
 
         curr_situation = shared_research_context
         past_memories = memory.get_memories(curr_situation, n_matches=2)
@@ -59,27 +79,29 @@ Context:
 - Research orchestration plan: {state.get("analysis_plan", "")}
 - Capability intelligence: {shared_research_context}
 - Structured dossier snapshot: {dossier_snapshot}
+- Front-loaded portfolio context: {portfolio_context_snapshot}
+- Temporal context: {temporal_context_snapshot}
+- Institutional memory: {institution_memory_brief}
 - Risk review history: {history}
 
-Be decisive and tie every allocation choice to specific evidence."""
+Be decisive and tie every allocation choice to specific evidence. If you override the front-loaded portfolio context, explain why."""
 
         response = llm.invoke(prompt)
-
-        new_risk_debate_state = {
-            "judge_decision": response.content,
-            "history": risk_debate_state["history"],
-            "aggressive_history": risk_debate_state["aggressive_history"],
-            "conservative_history": risk_debate_state["conservative_history"],
-            "neutral_history": risk_debate_state["neutral_history"],
-            "latest_speaker": CAPITAL_ALLOCATION_COMMITTEE,
-            "current_aggressive_response": risk_debate_state["current_aggressive_response"],
-            "current_conservative_response": risk_debate_state["current_conservative_response"],
-            "current_neutral_response": risk_debate_state["current_neutral_response"],
-            "count": risk_debate_state["count"],
-        }
+        finalized_review = finalize_review_loop(
+            allocation_review,
+            CAPITAL_ALLOCATION_COMMITTEE,
+            response.content,
+            completion_reason="capital_committee_decision",
+        )
+        updated_final_decision = build_final_decision_state_update(
+            state.get("final_decision"),
+            response.content,
+        )
 
         result = {
-            "risk_debate_state": new_risk_debate_state,
+            "allocation_review": finalized_review,
+            "risk_debate_state": build_legacy_risk_debate_state(finalized_review),
+            "final_decision": updated_final_decision,
             "final_trade_decision": response.content,
         }
         result.update(

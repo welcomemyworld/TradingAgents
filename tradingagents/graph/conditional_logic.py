@@ -44,23 +44,38 @@ class ConditionalLogic:
 
     def should_continue_debate(self, state: AgentState) -> str:
         """Determine if debate should continue."""
+        thesis_review = state.get("thesis_review", {})
+        round_index = thesis_review.get(
+            "round_index",
+            state["investment_debate_state"]["count"],
+        )
+        active_stage = thesis_review.get(
+            "active_stage",
+            state["investment_debate_state"].get("latest_speaker", ""),
+        )
 
-        if (
-            state["investment_debate_state"]["count"] >= 2 * self.max_debate_rounds
-        ):  # 3 rounds of back-and-forth between 2 agents
+        if round_index >= 2 * self.max_debate_rounds:
             return INVESTMENT_DIRECTOR
-        if state["investment_debate_state"].get("latest_speaker") == THESIS_ENGINE:
+        if active_stage == THESIS_ENGINE:
             return CHALLENGE_ENGINE
         return THESIS_ENGINE
 
     def should_continue_risk_analysis(self, state: AgentState) -> str:
         """Determine if risk analysis should continue."""
-        if (
-            state["risk_debate_state"]["count"] >= 3 * self.max_risk_discuss_rounds
-        ):  # 3 rounds of back-and-forth between 3 agents
+        allocation_review = state.get("allocation_review", {})
+        round_index = allocation_review.get(
+            "round_index",
+            state["risk_debate_state"]["count"],
+        )
+        active_stage = allocation_review.get(
+            "active_stage",
+            state["risk_debate_state"].get("latest_speaker", ""),
+        )
+
+        if round_index >= 3 * self.max_risk_discuss_rounds:
             return CAPITAL_ALLOCATION_COMMITTEE
-        if state["risk_debate_state"]["latest_speaker"] == UPSIDE_CAPTURE_ENGINE:
+        if active_stage == UPSIDE_CAPTURE_ENGINE:
             return DOWNSIDE_GUARDRAIL_ENGINE
-        if state["risk_debate_state"]["latest_speaker"] == DOWNSIDE_GUARDRAIL_ENGINE:
+        if active_stage == DOWNSIDE_GUARDRAIL_ENGINE:
             return PORTFOLIO_FIT_ENGINE
         return UPSIDE_CAPTURE_ENGINE

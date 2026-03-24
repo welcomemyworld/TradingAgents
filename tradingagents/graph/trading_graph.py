@@ -12,11 +12,12 @@ from tradingagents.llm_clients import create_llm_client
 
 from tradingagents.agents import *
 from tradingagents.default_config import DEFAULT_CONFIG
-from tradingagents.agents.utils.memory import FinancialSituationMemory
+from tradingagents.agents.utils.memory import (
+    FinancialSituationMemory,
+    InstitutionalMemoryStore,
+)
 from tradingagents.agents.utils.agent_states import (
     AgentState,
-    InvestDebateState,
-    RiskDebateState,
 )
 from tradingagents.agents.utils.agent_utils import (
     ANALYST_ORDER,
@@ -45,8 +46,8 @@ from .reflection import Reflector
 from .signal_processing import SignalProcessor
 
 
-class TradingAgentsGraph:
-    """Main class that orchestrates the trading agents framework."""
+class FutureInvestGraph:
+    """Main class that orchestrates the Future Invest runtime."""
 
     def __init__(
         self,
@@ -108,6 +109,7 @@ class TradingAgentsGraph:
         self.trader_memory = FinancialSituationMemory("trader_memory", self.config)
         self.invest_judge_memory = FinancialSituationMemory("invest_judge_memory", self.config)
         self.portfolio_manager_memory = FinancialSituationMemory("portfolio_manager_memory", self.config)
+        self.institutional_memory = InstitutionalMemoryStore(self.config)
 
         # Create tool nodes
         self.tool_nodes = self._create_tool_nodes()
@@ -211,6 +213,12 @@ class TradingAgentsGraph:
         init_agent_state = self.propagator.create_initial_state(
             company_name, trade_date, self.selected_analysts
         )
+        init_agent_state["institution_memory_snapshot"] = (
+            self.institutional_memory.get_company_memory_snapshot(company_name)
+        )
+        init_agent_state["institution_memory_brief"] = (
+            self.institutional_memory.render_company_brief(company_name)
+        )
         args = self.propagator.get_graph_args()
 
         if self.debug:
@@ -235,49 +243,13 @@ class TradingAgentsGraph:
         self._log_state(trade_date, final_state)
 
         # Return decision and processed signal
-        return final_state, self.process_signal(final_state["final_trade_decision"])
+        final_decision_text = extract_final_decision_text(final_state)
+        self.institutional_memory.record_run(company_name, trade_date, final_state)
+        return final_state, self.process_signal(final_decision_text)
 
     def _log_state(self, trade_date, final_state):
         """Log the final state to a JSON file."""
-        log_entry = {
-            "company_of_interest": final_state["company_of_interest"],
-            "trade_date": final_state["trade_date"],
-            "selected_analysts": final_state.get("selected_analysts", []),
-            "analysis_plan": final_state.get("analysis_plan", ""),
-            "analysis_brief": final_state.get("analysis_brief", ""),
-            "analysis_artifacts": final_state.get("analysis_artifacts", {}),
-            "orchestration_journal": final_state.get("orchestration_journal", []),
-            "decision_dossier": final_state.get("decision_dossier", {}),
-            "decision_dossier_markdown": final_state.get(
-                "decision_dossier_markdown", ""
-            ),
-            "investment_debate_state": {
-                "bull_history": final_state["investment_debate_state"]["bull_history"],
-                "bear_history": final_state["investment_debate_state"]["bear_history"],
-                "history": final_state["investment_debate_state"]["history"],
-                "latest_speaker": final_state["investment_debate_state"].get(
-                    "latest_speaker", ""
-                ),
-                "current_response": final_state["investment_debate_state"][
-                    "current_response"
-                ],
-                "judge_decision": final_state["investment_debate_state"][
-                    "judge_decision"
-                ],
-            },
-            "trader_investment_decision": final_state["trader_investment_plan"],
-            "risk_debate_state": {
-                "aggressive_history": final_state["risk_debate_state"]["aggressive_history"],
-                "conservative_history": final_state["risk_debate_state"]["conservative_history"],
-                "neutral_history": final_state["risk_debate_state"]["neutral_history"],
-                "history": final_state["risk_debate_state"]["history"],
-                "judge_decision": final_state["risk_debate_state"]["judge_decision"],
-            },
-            "investment_plan": final_state["investment_plan"],
-            "final_trade_decision": final_state["final_trade_decision"],
-        }
-        for report_field in ANALYST_REPORT_FIELDS.values():
-            log_entry[report_field] = final_state[report_field]
+        log_entry = build_state_log_entry(final_state)
         self.log_states_dict[str(trade_date)] = log_entry
 
         # Save to file
@@ -293,22 +265,81 @@ class TradingAgentsGraph:
 
     def reflect_and_remember(self, returns_losses):
         """Reflect on decisions and update memory based on returns."""
-        self.reflector.reflect_bull_researcher(
+        bull_reflection = self.reflector.reflect_bull_researcher(
             self.curr_state, returns_losses, self.bull_memory
         )
-        self.reflector.reflect_bear_researcher(
+        bear_reflection = self.reflector.reflect_bear_researcher(
             self.curr_state, returns_losses, self.bear_memory
         )
-        self.reflector.reflect_trader(
+        trader_reflection = self.reflector.reflect_trader(
             self.curr_state, returns_losses, self.trader_memory
         )
-        self.reflector.reflect_invest_judge(
+        director_reflection = self.reflector.reflect_invest_judge(
             self.curr_state, returns_losses, self.invest_judge_memory
         )
-        self.reflector.reflect_portfolio_manager(
+        allocator_reflection = self.reflector.reflect_portfolio_manager(
             self.curr_state, returns_losses, self.portfolio_manager_memory
+        )
+        self.institutional_memory.record_outcome(
+            self.ticker,
+            self.curr_state.get("trade_date", date.today()),
+            self.curr_state,
+            returns_losses,
+            reflections={
+                "engine::thesis_engine": bull_reflection,
+                "engine::challenge_engine": bear_reflection,
+                "engine::execution_engine": trader_reflection,
+                "engine::investment_director": director_reflection,
+                "engine::capital_allocation_committee": allocator_reflection,
+            },
         )
 
     def process_signal(self, full_signal):
         """Process a signal to extract the core decision."""
         return self.signal_processor.process_signal(full_signal)
+
+
+# Compatibility alias for existing code paths.
+TradingAgentsGraph = FutureInvestGraph
+
+
+def extract_final_decision_text(final_state: Dict[str, Any]) -> str:
+    """Return the canonical final-decision memo, falling back to compatibility fields."""
+    return (
+        final_state.get("final_decision", {}).get("full_decision")
+        or final_state.get("final_trade_decision", "")
+    )
+
+
+def build_state_log_entry(final_state: Dict[str, Any]) -> Dict[str, Any]:
+    """Build the canonical state log entry with a nested compatibility snapshot."""
+    log_entry = {
+        "company_of_interest": final_state["company_of_interest"],
+        "trade_date": final_state["trade_date"],
+        "selected_analysts": final_state.get("selected_analysts", []),
+        "analysis_plan": final_state.get("analysis_plan", ""),
+        "analysis_brief": final_state.get("analysis_brief", ""),
+        "analysis_artifacts": final_state.get("analysis_artifacts", {}),
+        "orchestration_journal": final_state.get("orchestration_journal", []),
+        "orchestration_state": final_state.get("orchestration_state", {}),
+        "portfolio_context": final_state.get("portfolio_context", {}),
+        "temporal_context": final_state.get("temporal_context", {}),
+        "institution_memory_snapshot": final_state.get("institution_memory_snapshot", {}),
+        "institution_memory_brief": final_state.get("institution_memory_brief", ""),
+        "decision_dossier": final_state.get("decision_dossier", {}),
+        "decision_dossier_markdown": final_state.get("decision_dossier_markdown", ""),
+        "thesis_review": final_state.get("thesis_review", {}),
+        "execution_state": final_state.get("execution_state", {}),
+        "allocation_review": final_state.get("allocation_review", {}),
+        "final_decision": final_state.get("final_decision", {}),
+        "compatibility_snapshot": {
+            "investment_debate_state": final_state.get("investment_debate_state", {}),
+            "investment_plan": final_state.get("investment_plan", ""),
+            "trader_investment_plan": final_state.get("trader_investment_plan", ""),
+            "risk_debate_state": final_state.get("risk_debate_state", {}),
+            "final_trade_decision": final_state.get("final_trade_decision", ""),
+        },
+    }
+    for report_field in ANALYST_REPORT_FIELDS.values():
+        log_entry[report_field] = final_state[report_field]
+    return log_entry

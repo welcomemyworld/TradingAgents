@@ -106,6 +106,11 @@ class GraphSetup:
         selected_analysts = normalize_selected_analysts(
             selected_analysts or ANALYST_ORDER
         )
+        compiled_analysts = (
+            ANALYST_ORDER
+            if self.config.get("enable_dynamic_capability_expansion", True)
+            else selected_analysts
+        )
 
         if len(selected_analysts) == 0:
             raise ValueError("Trading Agents Graph Setup Error: no capabilities selected!")
@@ -122,7 +127,7 @@ class GraphSetup:
             "business_truth": create_fundamentals_analyst,
         }
 
-        for analyst_key in selected_analysts:
+        for analyst_key in compiled_analysts:
             analyst_nodes[analyst_key] = analyst_factories[analyst_key](
                 self.quick_thinking_llm
             )
@@ -188,13 +193,13 @@ class GraphSetup:
             self.conditional_logic.route_next_analyst,
             {
                 get_analyst_node_name(analyst_type): get_analyst_node_name(analyst_type)
-                for analyst_type in selected_analysts
+                for analyst_type in compiled_analysts
             }
             | {THESIS_ENGINE: THESIS_ENGINE},
         )
 
         # Analysts are now dynamically re-routed after each completion.
-        for analyst_type in selected_analysts:
+        for analyst_type in compiled_analysts:
             current_analyst = get_analyst_node_name(analyst_type)
             current_tools = get_analyst_tool_node_name(analyst_type)
             current_clear = get_analyst_clear_node_name(analyst_type)

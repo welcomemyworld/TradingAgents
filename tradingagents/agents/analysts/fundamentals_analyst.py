@@ -12,6 +12,7 @@ from tradingagents.agents.utils.agent_utils import (
 from tradingagents.agents.utils.decision_protocol import (
     BUSINESS_TRUTH_SECTION_MAP,
     build_dossier_update,
+    build_temporal_context_update,
 )
 from tradingagents.dataflows.config import get_config
 
@@ -31,8 +32,9 @@ def create_fundamentals_analyst(llm):
 
         system_message = (
             "You are the Business Truth capability inside an AI-native investment institution. Your job is to determine the underlying business reality of the company: earnings power, balance-sheet strength, unit economics, resilience, and structural quality."
-            + " Write a report with these sections: Business Reality, Earnings Power, Balance Sheet / Resilience, and What Must Be True."
+            + " Write a report with these sections: Business Reality, Earnings Power, Balance Sheet / Resilience, What Must Be True, and Long-Cycle Mispricing."
             + " Go beyond generic fundamentals and explain what is economically real about the company."
+            + " Be explicit that Long-Cycle Mispricing is the durable multi-quarter or multi-year edge, not a near-term trade trigger."
             + " Make sure to append a Markdown table at the end of the report to organize key points in the report, organized and easy to read."
             + " Use the available tools: `get_fundamentals` for comprehensive company analysis, `get_balance_sheet`, `get_cashflow`, and `get_income_statement` for specific financial statements.",
         )
@@ -76,6 +78,13 @@ def create_fundamentals_analyst(llm):
         }
         output.update(
             build_dossier_update(
+                state,
+                report,
+                BUSINESS_TRUTH_SECTION_MAP,
+            )
+        )
+        output.update(
+            build_temporal_context_update(
                 state,
                 report,
                 BUSINESS_TRUTH_SECTION_MAP,

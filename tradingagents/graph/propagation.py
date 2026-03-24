@@ -3,10 +3,20 @@
 from typing import Dict, Any, List, Optional
 from tradingagents.agents.utils.agent_states import (
     AgentState,
-    InvestDebateState,
-    RiskDebateState,
 )
 from tradingagents.agents.utils.agent_utils import normalize_selected_analysts
+from tradingagents.agents.utils.decision_protocol import (
+    ALLOCATION_REVIEW_STAGE_ORDER,
+    THESIS_REVIEW_STAGE_ORDER,
+    build_legacy_investment_debate_state,
+    build_legacy_risk_debate_state,
+    create_execution_state,
+    create_final_decision_state,
+    create_orchestration_state,
+    create_portfolio_context_state,
+    create_temporal_context_state,
+    create_review_loop_state,
+)
 
 
 class Propagator:
@@ -33,32 +43,22 @@ class Propagator:
             "analysis_brief": "",
             "analysis_artifacts": {},
             "orchestration_journal": [],
+            "orchestration_state": create_orchestration_state(),
+            "portfolio_context": create_portfolio_context_state(),
+            "temporal_context": create_temporal_context_state(),
+            "institution_memory_snapshot": {},
+            "institution_memory_brief": "",
             "decision_dossier": {},
             "decision_dossier_markdown": "",
-            "investment_debate_state": InvestDebateState(
-                {
-                    "bull_history": "",
-                    "bear_history": "",
-                    "history": "",
-                    "latest_speaker": "",
-                    "current_response": "",
-                    "judge_decision": "",
-                    "count": 0,
-                }
+            "thesis_review": create_review_loop_state(THESIS_REVIEW_STAGE_ORDER),
+            "execution_state": create_execution_state(),
+            "allocation_review": create_review_loop_state(ALLOCATION_REVIEW_STAGE_ORDER),
+            "final_decision": create_final_decision_state(),
+            "investment_debate_state": build_legacy_investment_debate_state(
+                create_review_loop_state(THESIS_REVIEW_STAGE_ORDER)
             ),
-            "risk_debate_state": RiskDebateState(
-                {
-                    "aggressive_history": "",
-                    "conservative_history": "",
-                    "neutral_history": "",
-                    "history": "",
-                    "latest_speaker": "",
-                    "current_aggressive_response": "",
-                    "current_conservative_response": "",
-                    "current_neutral_response": "",
-                    "judge_decision": "",
-                    "count": 0,
-                }
+            "risk_debate_state": build_legacy_risk_debate_state(
+                create_review_loop_state(ALLOCATION_REVIEW_STAGE_ORDER)
             ),
             "market_expectations_report": "",
             "business_truth_report": "",

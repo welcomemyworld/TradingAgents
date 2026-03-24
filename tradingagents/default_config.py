@@ -3,6 +3,11 @@ import os
 DEFAULT_CONFIG = {
     "project_dir": os.path.abspath(os.path.join(os.path.dirname(__file__), ".")),
     "results_dir": os.getenv("TRADINGAGENTS_RESULTS_DIR", "./results"),
+    "institution_memory_dir": os.path.join(
+        os.path.abspath(os.path.join(os.path.dirname(__file__), ".")),
+        "institution_memory",
+    ),
+    "institution_memory_history_limit": 50,
     "data_cache_dir": os.path.join(
         os.path.abspath(os.path.join(os.path.dirname(__file__), ".")),
         "dataflows/data_cache",
@@ -19,6 +24,9 @@ DEFAULT_CONFIG = {
     # Orchestration settings
     "enable_investment_orchestrator": True,
     "analysis_routing_mode": "adaptive",  # Options: adaptive, sequential
+    "enable_dynamic_capability_expansion": True,
+    "orchestrator_token_budget": "balanced",  # Options: tight, balanced, expansive
+    "orchestrator_position_importance": "standard",  # Options: standard, high, critical
     # Debate and discussion settings
     "max_debate_rounds": 1,
     "max_risk_discuss_rounds": 1,

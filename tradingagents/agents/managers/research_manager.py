@@ -5,8 +5,13 @@ from tradingagents.agents.utils.agent_utils import (
 )
 from tradingagents.agents.utils.decision_protocol import (
     INVESTMENT_DIRECTOR_SECTION_MAP,
+    build_legacy_investment_debate_state,
     build_dossier_update,
+    finalize_review_loop,
     render_dossier_brief,
+    render_portfolio_context_brief,
+    render_temporal_context_brief,
+    render_review_transcript,
     RESEARCH_DOSSIER_BRIEF_KEYS,
 )
 
@@ -14,16 +19,23 @@ from tradingagents.agents.utils.decision_protocol import (
 def create_research_manager(llm, memory):
     def research_manager_node(state) -> dict:
         instrument_context = build_instrument_context(state["company_of_interest"])
-        history = state["investment_debate_state"].get("history", "")
+        thesis_review = state.get("thesis_review", {})
+        history = render_review_transcript(thesis_review)
         shared_research_context = build_research_context(
             state, state.get("selected_analysts")
         )
 
-        investment_debate_state = state["investment_debate_state"]
         dossier_snapshot = render_dossier_brief(
             state.get("decision_dossier"),
             RESEARCH_DOSSIER_BRIEF_KEYS,
         )
+        portfolio_context_snapshot = render_portfolio_context_brief(
+            state.get("portfolio_context")
+        )
+        temporal_context_snapshot = render_temporal_context_brief(
+            state.get("temporal_context")
+        )
+        institution_memory_brief = state.get("institution_memory_brief", "")
 
         curr_situation = shared_research_context
         past_memories = memory.get_memories(curr_situation, n_matches=2)
@@ -42,6 +54,9 @@ Write the memo using exactly these markdown headings:
 ## Mispricing Narrative
 ## What The Market Is Missing
 ## Evidence That Matters
+## Long-Cycle Mispricing
+## Medium-Cycle Re-Rating Path
+## Short-Cycle Execution Window
 ## Catalyst Path
 ## Time Horizon
 ## Portfolio Role
@@ -68,22 +83,31 @@ Completed capability intelligence:
 Structured dossier snapshot:
 {dossier_snapshot}
 
+Front-loaded portfolio context:
+{portfolio_context_snapshot}
+
+Temporal context:
+{temporal_context_snapshot}
+
+Institutional memory:
+{institution_memory_brief}
+
 Structured debate history:
 {history}"""
         response = llm.invoke(prompt)
 
-        new_investment_debate_state = {
-            "judge_decision": response.content,
-            "history": investment_debate_state.get("history", ""),
-            "bear_history": investment_debate_state.get("bear_history", ""),
-            "bull_history": investment_debate_state.get("bull_history", ""),
-            "latest_speaker": INVESTMENT_DIRECTOR,
-            "current_response": response.content,
-            "count": investment_debate_state["count"],
-        }
+        finalized_review = finalize_review_loop(
+            thesis_review,
+            INVESTMENT_DIRECTOR,
+            response.content,
+            completion_reason="director_synthesis",
+        )
 
         result = {
-            "investment_debate_state": new_investment_debate_state,
+            "thesis_review": finalized_review,
+            "investment_debate_state": build_legacy_investment_debate_state(
+                finalized_review
+            ),
             "investment_plan": response.content,
         }
         result.update(

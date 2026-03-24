@@ -5,6 +5,7 @@ from tradingagents.agents.utils.agent_utils import build_instrument_context, get
 from tradingagents.agents.utils.decision_protocol import (
     WHY_NOW_SECTION_MAP,
     build_dossier_update,
+    build_temporal_context_update,
 )
 from tradingagents.dataflows.config import get_config
 
@@ -21,8 +22,9 @@ def create_social_media_analyst(llm):
 
         system_message = (
             "You are the Why Now capability inside an AI-native investment institution. Your job is to explain why this idea matters right now rather than in the abstract. Focus on attention, public narrative, sentiment acceleration, and whether interest is broadening or deteriorating. Use the get_news(query, start_date, end_date) tool to search for company-specific news and social discussion."
-            + " Write a report with these sections: Attention Shift, Narrative Momentum, Sentiment Inflection, and Why This Matters Now."
+            + " Write a report with these sections: Attention Shift, Narrative Momentum, Sentiment Inflection, Why This Matters Now, and Short-Cycle Execution Window."
             + " Make sure to separate durable signal from noisy chatter, and explain what would make the timing window strengthen or fade."
+            + " Short-Cycle Execution Window should clearly distinguish the near-term entry/exit window from the medium-cycle re-rating path and the long-cycle business edge."
             + """ Make sure to append a Markdown table at the end of the report to organize key points in the report, organized and easy to read."""
         )
 
@@ -65,6 +67,13 @@ def create_social_media_analyst(llm):
         }
         output.update(
             build_dossier_update(
+                state,
+                report,
+                WHY_NOW_SECTION_MAP,
+            )
+        )
+        output.update(
+            build_temporal_context_update(
                 state,
                 report,
                 WHY_NOW_SECTION_MAP,

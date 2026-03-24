@@ -3,21 +3,32 @@ from tradingagents.agents.utils.agent_utils import (
     build_research_context,
 )
 from tradingagents.agents.utils.decision_protocol import (
+    DOWNSIDE_STAGE_KEY,
     PORTFOLIO_FIT_SECTION_MAP,
+    PORTFOLIO_FIT_STAGE_KEY,
     RISK_DOSSIER_BRIEF_KEYS,
+    UPSIDE_STAGE_KEY,
+    append_review_stage_output,
+    build_legacy_risk_debate_state,
     build_dossier_update,
+    get_review_output,
     render_dossier_brief,
+    render_portfolio_context_brief,
+    render_temporal_context_brief,
+    render_review_transcript,
 )
 
 
 def create_neutral_debator(llm):
     def neutral_node(state) -> dict:
-        risk_debate_state = state["risk_debate_state"]
-        history = risk_debate_state.get("history", "")
-        neutral_history = risk_debate_state.get("neutral_history", "")
-
-        current_aggressive_response = risk_debate_state.get("current_aggressive_response", "")
-        current_conservative_response = risk_debate_state.get("current_conservative_response", "")
+        allocation_review = state.get("allocation_review", {})
+        history = render_review_transcript(allocation_review)
+        current_aggressive_response = get_review_output(
+            allocation_review, UPSIDE_STAGE_KEY
+        )
+        current_conservative_response = get_review_output(
+            allocation_review, DOWNSIDE_STAGE_KEY
+        )
 
         shared_research_context = build_research_context(
             state, state.get("selected_analysts")
@@ -26,8 +37,17 @@ def create_neutral_debator(llm):
             state.get("decision_dossier"),
             RISK_DOSSIER_BRIEF_KEYS,
         )
+        portfolio_context_snapshot = render_portfolio_context_brief(
+            state.get("portfolio_context")
+        )
+        temporal_context_snapshot = render_temporal_context_brief(
+            state.get("temporal_context")
+        )
 
-        trader_decision = state["trader_investment_plan"]
+        execution_state = state.get("execution_state", {})
+        trader_decision = execution_state.get("full_blueprint") or state.get(
+            "trader_investment_plan", ""
+        )
 
         prompt = f"""You are the Portfolio Fit Engine.
 
@@ -45,30 +65,25 @@ Inputs:
 - Research orchestration plan: {state.get("analysis_plan", "")}
 - Capability intelligence: {shared_research_context}
 - Structured dossier snapshot: {dossier_snapshot}
+- Front-loaded portfolio context: {portfolio_context_snapshot}
+- Temporal context: {temporal_context_snapshot}
 - Risk review history: {history}
 - Latest upside capture memo: {current_aggressive_response}
 - Latest downside guardrail memo: {current_conservative_response}
 """
 
         response = llm.invoke(prompt)
+        updated_review = append_review_stage_output(
+            allocation_review,
+            PORTFOLIO_FIT_STAGE_KEY,
+            PORTFOLIO_FIT_ENGINE,
+            response.content,
+        )
 
-        argument = f"{PORTFOLIO_FIT_ENGINE}: {response.content}"
-
-        new_risk_debate_state = {
-            "history": history + "\n" + argument,
-            "aggressive_history": risk_debate_state.get("aggressive_history", ""),
-            "conservative_history": risk_debate_state.get("conservative_history", ""),
-            "neutral_history": neutral_history + "\n" + argument,
-            "latest_speaker": PORTFOLIO_FIT_ENGINE,
-            "current_aggressive_response": risk_debate_state.get(
-                "current_aggressive_response", ""
-            ),
-            "current_conservative_response": risk_debate_state.get("current_conservative_response", ""),
-            "current_neutral_response": argument,
-            "count": risk_debate_state["count"] + 1,
+        result = {
+            "allocation_review": updated_review,
+            "risk_debate_state": build_legacy_risk_debate_state(updated_review),
         }
-
-        result = {"risk_debate_state": new_risk_debate_state}
         result.update(
             build_dossier_update(
                 state,

@@ -1,5 +1,5 @@
 from typing import Optional
-import datetime
+import datetime as dt
 import typer
 from pathlib import Path
 from functools import wraps
@@ -23,7 +23,7 @@ from rich import box
 from rich.align import Align
 from rich.rule import Rule
 
-from tradingagents.graph.trading_graph import TradingAgentsGraph
+from tradingagents.graph.trading_graph import FutureInvestGraph
 from tradingagents.default_config import DEFAULT_CONFIG
 from tradingagents.agents.utils.agent_utils import (
     ANALYST_DISPLAY_NAMES,
@@ -39,17 +39,33 @@ from tradingagents.agents.utils.agent_utils import (
     RESEARCH_TEAM_NAMES,
     THESIS_ENGINE,
     UPSIDE_CAPTURE_ENGINE,
+    normalize_selected_analysts,
+)
+from tradingagents.agents.utils.decision_protocol import (
+    CHALLENGE_STAGE_KEY,
+    DOWNSIDE_STAGE_KEY,
+    PORTFOLIO_FIT_STAGE_KEY,
+    THESIS_STAGE_KEY,
+    UPSIDE_STAGE_KEY,
+    get_review_output,
+    render_portfolio_context,
+    render_temporal_context,
 )
 from cli.models import AnalystType
 from cli.utils import *
-from cli.announcements import fetch_announcements, display_announcements
 from cli.stats_handler import StatsCallbackHandler
 
 console = Console()
 
+BRAND_NAME = "Future Invest"
+BRAND_MARK = "X"
+BRAND_TAGLINE = "AI-Native Investment Institution"
+BRAND_STYLELINE = "Cyberpunk Capital Interface"
+BRAND_REPORT_TITLE = "Future Invest Dossier"
+
 app = typer.Typer(
-    name="TradingAgents",
-    help="TradingAgents CLI: AI-Native Investment Institution Framework",
+    name="future-invest",
+    help="Future Invest CLI: AI-Native Investment Institution Framework",
     add_completion=True,  # Enable shell completion
 )
 
@@ -64,19 +80,223 @@ ANALYST_SECTION_TITLES = {
 }
 
 
+def format_provider_setting(selections: dict) -> str | None:
+    if selections.get("openai_reasoning_effort"):
+        return f"OpenAI reasoning: {selections['openai_reasoning_effort']}"
+    if selections.get("google_thinking_level"):
+        return f"Gemini thinking: {selections['google_thinking_level']}"
+    if selections.get("anthropic_effort"):
+        return f"Claude effort: {selections['anthropic_effort']}"
+    return None
+
+
+def format_position_importance(selections: dict) -> str:
+    return selections.get("position_importance_label") or POSITION_IMPORTANCE_LABELS.get(
+        selections.get("position_importance", ""),
+        str(selections.get("position_importance", "")).title(),
+    )
+
+
+def format_token_budget(selections: dict) -> str:
+    return selections.get("token_budget_label") or TOKEN_BUDGET_LABELS.get(
+        selections.get("token_budget", ""),
+        str(selections.get("token_budget", "")).title(),
+    )
+
+
+def create_launch_brief_panel(selections: dict) -> Panel:
+    summary = Table.grid(expand=True)
+    summary.add_column(style="bold cyan", ratio=1)
+    summary.add_column(style="white", ratio=3)
+    summary.add_row("Instrument", selections["ticker"])
+    summary.add_row("Market Date", selections["analysis_date"])
+    summary.add_row(
+        "Run Mode",
+        f"{selections['run_mode_label']} - {selections['run_mode_summary']}",
+    )
+    summary.add_row("Position Importance", format_position_importance(selections))
+    summary.add_row("Token Budget", format_token_budget(selections))
+    summary.add_row(
+        "Signal Stack",
+        ", ".join(
+            ANALYST_DISPLAY_NAMES[analyst.value] for analyst in selections["analysts"]
+        ),
+    )
+    summary.add_row(
+        "Review Intensity",
+        f"{selections['research_depth_label']} ({selections['research_depth']} cycles)",
+    )
+    summary.add_row("Model Backend", selections["llm_provider"].title())
+    summary.add_row(
+        "Model Pairing",
+        f"Scanning: {selections['shallow_thinker']} | Judgment: {selections['deep_thinker']}",
+    )
+    provider_setting = format_provider_setting(selections)
+    if provider_setting:
+        summary.add_row("Provider Setting", provider_setting)
+
+    return Panel(
+        summary,
+        title="Launch Brief",
+        subtitle="Mission Control Checkpoint",
+        border_style="cyan",
+        padding=(1, 2),
+    )
+
+
+def _clean_text(value) -> str:
+    return str(value).strip() if value else ""
+
+
+def _join_agent_entries(entries):
+    return "\n\n".join(
+        f"### {title}\n{content}"
+        for title, content in entries
+        if _clean_text(content)
+    )
+
+
+def get_thesis_review_entries(state: dict) -> list[tuple[str, str]]:
+    review = state.get("thesis_review") or {}
+    entries = [
+        (THESIS_ENGINE, get_review_output(review, THESIS_STAGE_KEY)),
+        (CHALLENGE_ENGINE, get_review_output(review, CHALLENGE_STAGE_KEY)),
+        (INVESTMENT_DIRECTOR, _clean_text(review.get("final_memo", ""))),
+    ]
+    if any(_clean_text(content) for _, content in entries):
+        return entries
+
+    legacy = state.get("investment_debate_state") or {}
+    return [
+        (THESIS_ENGINE, _clean_text(legacy.get("bull_history", ""))),
+        (CHALLENGE_ENGINE, _clean_text(legacy.get("bear_history", ""))),
+        (INVESTMENT_DIRECTOR, _clean_text(legacy.get("judge_decision", ""))),
+    ]
+
+
+def get_execution_state_entries(state: dict) -> list[tuple[str, str]]:
+    execution_state = state.get("execution_state") or {}
+    content = _clean_text(execution_state.get("full_blueprint")) or _clean_text(
+        state.get("trader_investment_plan")
+    )
+    return [(EXECUTION_ENGINE, content)]
+
+
+def get_allocation_review_entries(state: dict) -> list[tuple[str, str]]:
+    review = state.get("allocation_review") or {}
+    entries = [
+        (UPSIDE_CAPTURE_ENGINE, get_review_output(review, UPSIDE_STAGE_KEY)),
+        (DOWNSIDE_GUARDRAIL_ENGINE, get_review_output(review, DOWNSIDE_STAGE_KEY)),
+        (PORTFOLIO_FIT_ENGINE, get_review_output(review, PORTFOLIO_FIT_STAGE_KEY)),
+    ]
+    if any(_clean_text(content) for _, content in entries):
+        return entries
+
+    legacy = state.get("risk_debate_state") or {}
+    return [
+        (UPSIDE_CAPTURE_ENGINE, _clean_text(legacy.get("aggressive_history", ""))),
+        (
+            DOWNSIDE_GUARDRAIL_ENGINE,
+            _clean_text(legacy.get("conservative_history", "")),
+        ),
+        (PORTFOLIO_FIT_ENGINE, _clean_text(legacy.get("neutral_history", ""))),
+    ]
+
+
+def get_final_decision_entries(state: dict) -> list[tuple[str, str]]:
+    final_decision = state.get("final_decision") or {}
+    content = _clean_text(final_decision.get("full_decision")) or _clean_text(
+        state.get("final_trade_decision")
+    )
+    return [(CAPITAL_ALLOCATION_COMMITTEE, content)]
+
+
+def get_portfolio_mandate_content(state: dict) -> str:
+    portfolio_context = state.get("portfolio_context") or {}
+    content = _clean_text(portfolio_context.get("full_context"))
+    if content:
+        return content
+    return _clean_text(render_portfolio_context(portfolio_context))
+
+
+def get_time_horizon_split_content(state: dict) -> str:
+    temporal_context = state.get("temporal_context") or {}
+    content = _clean_text(temporal_context.get("full_context"))
+    if content:
+        return content
+    return _clean_text(render_temporal_context(temporal_context))
+
+
+def get_institutional_memory_content(state: dict) -> str:
+    return _clean_text(state.get("institution_memory_brief"))
+
+
+def build_report_sections_map(state: dict) -> dict[str, str]:
+    sections = {}
+
+    if _clean_text(state.get("analysis_plan")):
+        sections["analysis_plan"] = _clean_text(state["analysis_plan"])
+
+    portfolio_mandate = get_portfolio_mandate_content(state)
+    if portfolio_mandate:
+        sections["portfolio_context"] = portfolio_mandate
+
+    time_horizon_split = get_time_horizon_split_content(state)
+    if time_horizon_split:
+        sections["temporal_context"] = time_horizon_split
+
+    institutional_memory = get_institutional_memory_content(state)
+    if institutional_memory:
+        sections["institution_memory_brief"] = institutional_memory
+
+    for analyst_key in ANALYST_ORDER:
+        report_field = ANALYST_REPORT_FIELDS[analyst_key]
+        report = _clean_text(state.get(report_field))
+        if report:
+            sections[report_field] = report
+
+    thesis_review = _join_agent_entries(get_thesis_review_entries(state))
+    if thesis_review:
+        sections["thesis_review"] = thesis_review
+
+    execution_state = _join_agent_entries(get_execution_state_entries(state))
+    if execution_state:
+        sections["execution_state"] = execution_state
+
+    allocation_review = _join_agent_entries(get_allocation_review_entries(state))
+    if allocation_review:
+        sections["allocation_review"] = allocation_review
+
+    final_decision = _join_agent_entries(get_final_decision_entries(state))
+    if final_decision:
+        sections["final_decision"] = final_decision
+
+    if _clean_text(state.get("decision_dossier_markdown")):
+        sections["decision_dossier_markdown"] = _clean_text(
+            state["decision_dossier_markdown"]
+        )
+
+    return sections
+
+
+def sync_report_sections_from_state(buffer, state: dict):
+    for section_name, content in build_report_sections_map(state).items():
+        buffer.update_report_section(section_name, content)
+
+
 # Create a deque to store recent messages with a maximum length
 class MessageBuffer:
     # Fixed teams that always run (not user-selectable)
     FIXED_AGENTS = {
         "Investment Orchestration": ["Investment Orchestrator"],
-        "Institutional Debate": [THESIS_ENGINE, CHALLENGE_ENGINE, INVESTMENT_DIRECTOR],
+        "Decision Core": [THESIS_ENGINE, CHALLENGE_ENGINE, INVESTMENT_DIRECTOR],
         "Execution Stack": [EXECUTION_ENGINE],
-        "Capital Formation": [
+        "Capital Engines": [
             UPSIDE_CAPTURE_ENGINE,
             PORTFOLIO_FIT_ENGINE,
             DOWNSIDE_GUARDRAIL_ENGINE,
         ],
-        "Capital Allocation": [CAPITAL_ALLOCATION_COMMITTEE],
+        "Allocator": [CAPITAL_ALLOCATION_COMMITTEE],
     }
 
     # Capability name mapping
@@ -89,10 +309,14 @@ class MessageBuffer:
     # finalizing_agent: which agent must be "completed" for this report to count as done
     REPORT_SECTIONS = {
         "analysis_plan": (None, "Investment Orchestrator"),
+        "portfolio_context": (None, "Investment Orchestrator"),
+        "temporal_context": (None, "Investment Orchestrator"),
+        "institution_memory_brief": (None, "Investment Orchestrator"),
         **ANALYST_REPORT_SECTIONS,
-        "investment_plan": (None, INVESTMENT_DIRECTOR),
-        "trader_investment_plan": (None, EXECUTION_ENGINE),
-        "final_trade_decision": (None, CAPITAL_ALLOCATION_COMMITTEE),
+        "thesis_review": (None, INVESTMENT_DIRECTOR),
+        "execution_state": (None, EXECUTION_ENGINE),
+        "allocation_review": (None, CAPITAL_ALLOCATION_COMMITTEE),
+        "final_decision": (None, CAPITAL_ALLOCATION_COMMITTEE),
         "decision_dossier_markdown": (None, CAPITAL_ALLOCATION_COMMITTEE),
     }
 
@@ -142,6 +366,20 @@ class MessageBuffer:
         self.tool_calls.clear()
         self._last_message_id = None
 
+    def ensure_selected_analysts(self, selected_analysts):
+        normalized = [a.lower() for a in selected_analysts]
+        if normalized == self.selected_analysts:
+            return
+
+        for analyst_key in normalized:
+            if analyst_key not in self.selected_analysts and analyst_key in self.ANALYST_MAPPING:
+                self.agent_status[self.ANALYST_MAPPING[analyst_key]] = "pending"
+                report_field = ANALYST_REPORT_FIELDS[analyst_key]
+                if report_field not in self.report_sections:
+                    self.report_sections[report_field] = None
+
+        self.selected_analysts = normalized
+
     def get_completed_reports_count(self):
         """Count reports that are finalized (their finalizing agent is completed).
 
@@ -164,11 +402,11 @@ class MessageBuffer:
         return count
 
     def add_message(self, message_type, content):
-        timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+        timestamp = dt.datetime.now().strftime("%H:%M:%S")
         self.messages.append((timestamp, message_type, content))
 
     def add_tool_call(self, tool_name, args):
-        timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+        timestamp = dt.datetime.now().strftime("%H:%M:%S")
         self.tool_calls.append((timestamp, tool_name, args))
 
     def update_agent_status(self, agent, status):
@@ -196,11 +434,15 @@ class MessageBuffer:
             # Format the current section for display
             section_titles = {
                 "analysis_plan": "Investment Orchestration",
+                "portfolio_context": "Portfolio Mandate",
+                "temporal_context": "Time Horizon Split",
+                "institution_memory_brief": "Institutional Memory",
                 **ANALYST_SECTION_TITLES,
-                "investment_plan": "Investment Director Memo",
-                "trader_investment_plan": "Execution Blueprint",
-                "final_trade_decision": "Capital Allocation Decision",
-                "decision_dossier_markdown": "AI Investment Dossier",
+                "thesis_review": "Thesis Review",
+                "execution_state": "Execution State",
+                "allocation_review": "Allocation Review",
+                "final_decision": "Final Decision",
+                "decision_dossier_markdown": BRAND_REPORT_TITLE,
             }
             self.current_report = (
                 f"### {section_titles[latest_section]}\n{latest_content}"
@@ -216,6 +458,18 @@ class MessageBuffer:
             report_parts.append("## Investment Orchestration")
             report_parts.append(f"{self.report_sections['analysis_plan']}")
 
+        if self.report_sections.get("portfolio_context"):
+            report_parts.append("## Portfolio Mandate")
+            report_parts.append(f"{self.report_sections['portfolio_context']}")
+
+        if self.report_sections.get("temporal_context"):
+            report_parts.append("## Time Horizon Split")
+            report_parts.append(f"{self.report_sections['temporal_context']}")
+
+        if self.report_sections.get("institution_memory_brief"):
+            report_parts.append("## Institutional Memory")
+            report_parts.append(f"{self.report_sections['institution_memory_brief']}")
+
         analyst_sections = [
             ANALYST_REPORT_FIELDS[analyst_key] for analyst_key in ANALYST_ORDER
         ]
@@ -229,23 +483,24 @@ class MessageBuffer:
                         f"### {ANALYST_REPORT_TITLES[analyst_key]}\n{report}"
                     )
 
-        # Institutional debate outputs
-        if self.report_sections.get("investment_plan"):
-            report_parts.append("## Investment Director Memo")
-            report_parts.append(f"{self.report_sections['investment_plan']}")
+        if self.report_sections.get("thesis_review"):
+            report_parts.append("## Thesis Review")
+            report_parts.append(f"{self.report_sections['thesis_review']}")
 
-        # Execution outputs
-        if self.report_sections.get("trader_investment_plan"):
-            report_parts.append("## Execution Blueprint")
-            report_parts.append(f"{self.report_sections['trader_investment_plan']}")
+        if self.report_sections.get("execution_state"):
+            report_parts.append("## Execution State")
+            report_parts.append(f"{self.report_sections['execution_state']}")
 
-        # Capital allocation decision
-        if self.report_sections.get("final_trade_decision"):
-            report_parts.append("## Capital Allocation Decision")
-            report_parts.append(f"{self.report_sections['final_trade_decision']}")
+        if self.report_sections.get("allocation_review"):
+            report_parts.append("## Allocation Review")
+            report_parts.append(f"{self.report_sections['allocation_review']}")
+
+        if self.report_sections.get("final_decision"):
+            report_parts.append("## Final Decision")
+            report_parts.append(f"{self.report_sections['final_decision']}")
 
         if self.report_sections.get("decision_dossier_markdown"):
-            report_parts.append("## AI Investment Dossier")
+            report_parts.append(f"## {BRAND_REPORT_TITLE}")
             report_parts.append(f"{self.report_sections['decision_dossier_markdown']}")
 
         self.final_report = "\n\n".join(report_parts) if report_parts else None
@@ -257,7 +512,7 @@ message_buffer = MessageBuffer()
 def create_layout():
     layout = Layout()
     layout.split_column(
-        Layout(name="header", size=3),
+        Layout(name="header", size=8),
         Layout(name="main"),
         Layout(name="footer", size=3),
     )
@@ -277,14 +532,44 @@ def format_tokens(n):
     return str(n)
 
 
-def update_display(layout, spinner_text=None, stats_handler=None, start_time=None):
+def update_display(
+    layout,
+    spinner_text=None,
+    stats_handler=None,
+    start_time=None,
+    session_context=None,
+):
     # Header with welcome message
+    header_lines = [
+        f"[bold bright_magenta]{BRAND_NAME}[/bold bright_magenta] [bold cyan]{BRAND_MARK}[/bold cyan]",
+        f"[bold cyan]{BRAND_STYLELINE}[/bold cyan]",
+        f"[dim]{BRAND_TAGLINE}[/dim]",
+    ]
+    if session_context:
+        header_lines.append(
+            f"[white]{session_context['ticker']}[/white] • {session_context['analysis_date']} • {session_context['run_mode_label']}"
+        )
+        header_lines.append(
+            "[dim]"
+            f"Importance: {format_position_importance(session_context)} | "
+            f"Budget: {format_token_budget(session_context)}"
+            "[/dim]"
+        )
+        header_lines.append(
+            "[dim]"
+            f"Backend: {session_context['llm_provider'].title()} | "
+            f"Scanning: {session_context['shallow_thinker']} | "
+            f"Judgment: {session_context['deep_thinker']}"
+            "[/dim]"
+        )
+    if spinner_text:
+        header_lines.append(f"[bold blue]Mission:[/bold blue] {spinner_text}")
+
     layout["header"].update(
         Panel(
-            "[bold green]Welcome to the TradingAgents Institution CLI[/bold green]\n"
-            "[dim]© [Tauric Research](https://github.com/TauricResearch)[/dim]",
-            title="TradingAgents Institution",
-            border_style="green",
+            "\n".join(header_lines),
+            title="Neon Command Center",
+            border_style="cyan",
             padding=(1, 2),
             expand=True,
         )
@@ -307,17 +592,17 @@ def update_display(layout, spinner_text=None, stats_handler=None, start_time=Non
     # Group agents by team - filter to only include agents in agent_status
     all_teams = {
         "Investment Orchestration": ["Investment Orchestrator"],
-        "Research Capabilities": [
+        "Signal Stack": [
             ANALYST_DISPLAY_NAMES[analyst_key] for analyst_key in ANALYST_ORDER
         ],
-        "Institutional Debate": [THESIS_ENGINE, CHALLENGE_ENGINE, INVESTMENT_DIRECTOR],
+        "Decision Core": [THESIS_ENGINE, CHALLENGE_ENGINE, INVESTMENT_DIRECTOR],
         "Execution Stack": [EXECUTION_ENGINE],
-        "Capital Formation": [
+        "Capital Engines": [
             UPSIDE_CAPTURE_ENGINE,
             PORTFOLIO_FIT_ENGINE,
             DOWNSIDE_GUARDRAIL_ENGINE,
         ],
-        "Capital Allocation": [CAPITAL_ALLOCATION_COMMITTEE],
+        "Allocator": [CAPITAL_ALLOCATION_COMMITTEE],
     }
 
     # Filter teams to only include agents that are in agent_status
@@ -366,7 +651,7 @@ def update_display(layout, spinner_text=None, stats_handler=None, start_time=Non
         progress_table.add_row("─" * 20, "─" * 20, "─" * 20, style="dim")
 
     layout["progress"].update(
-        Panel(progress_table, title="Progress", border_style="cyan", padding=(1, 2))
+        Panel(progress_table, title="Institution Map", border_style="cyan", padding=(1, 2))
     )
 
     # Messages panel showing recent messages and tool calls
@@ -418,7 +703,7 @@ def update_display(layout, spinner_text=None, stats_handler=None, start_time=Non
     layout["messages"].update(
         Panel(
             messages_table,
-            title="Messages & Tools",
+            title="Signal Feed",
             border_style="blue",
             padding=(1, 2),
         )
@@ -429,7 +714,7 @@ def update_display(layout, spinner_text=None, stats_handler=None, start_time=Non
         layout["analysis"].update(
             Panel(
                 Markdown(message_buffer.current_report),
-                title="Current Institutional Output",
+                title="Live Dossier",
                 border_style="green",
                 padding=(1, 2),
             )
@@ -437,8 +722,8 @@ def update_display(layout, spinner_text=None, stats_handler=None, start_time=Non
     else:
         layout["analysis"].update(
             Panel(
-                "[italic]Waiting for the next institutional output...[/italic]",
-                title="Current Institutional Output",
+                "[italic]Mission is warming up. Waiting for the first institutional output...[/italic]",
+                title="Live Dossier",
                 border_style="green",
                 padding=(1, 2),
             )
@@ -483,7 +768,9 @@ def update_display(layout, spinner_text=None, stats_handler=None, start_time=Non
     stats_table.add_column("Stats", justify="center")
     stats_table.add_row(" | ".join(stats_parts))
 
-    layout["footer"].update(Panel(stats_table, border_style="grey50"))
+    layout["footer"].update(
+        Panel(stats_table, title="Mission Status", border_style="grey50")
+    )
 
 
 def get_user_selections():
@@ -493,29 +780,27 @@ def get_user_selections():
         welcome_ascii = f.read()
 
     # Create welcome box content
-    welcome_content = f"{welcome_ascii}\n"
-    welcome_content += "[bold green]TradingAgents: AI-Native Investment Institution - CLI[/bold green]\n\n"
-    welcome_content += "[bold]Workflow Steps:[/bold]\n"
-    welcome_content += "I. Investment Orchestration → II. Research Capabilities → III. Institutional Debate → IV. Execution Blueprint → V. Capital Formation → VI. Capital Allocation\n\n"
-    welcome_content += (
-        "[dim]Built by [Tauric Research](https://github.com/TauricResearch)[/dim]"
-    )
+    welcome_content = f"[bold bright_magenta]{welcome_ascii}[/bold bright_magenta]\n"
+    welcome_content += f"[bold bright_magenta]{BRAND_NAME}[/bold bright_magenta] [bold cyan]{BRAND_MARK}[/bold cyan]\n"
+    welcome_content += f"[bold cyan]{BRAND_STYLELINE}[/bold cyan]\n"
+    welcome_content += f"[dim]{BRAND_TAGLINE}[/dim]\n\n"
+    welcome_content += "[bold]Future Invest Workflow:[/bold]\n"
+    welcome_content += "[bold cyan]Mandate Layer[/bold cyan]   Mission Setup → Portfolio Mandate → Time Horizon Split\n"
+    welcome_content += "[bold bright_magenta]Memory Layer[/bold bright_magenta]    Institutional Memory → Signal Stack\n"
+    welcome_content += "[bold yellow]Decision Layer[/bold yellow]  Thesis Review → Execution State → Allocation Review\n"
+    welcome_content += "[bold green]Capital Layer[/bold green]   Final Decision → Run Dossier → Company Memory Update\n\n"
 
     # Create and center the welcome box
     welcome_box = Panel(
         welcome_content,
-        border_style="green",
+        border_style="bright_magenta",
         padding=(1, 2),
-        title="Welcome to TradingAgents",
-        subtitle="AI-Native Investment Institution Framework",
+        title=f"Welcome to {BRAND_NAME} {BRAND_MARK}",
+        subtitle=BRAND_STYLELINE,
     )
     console.print(Align.center(welcome_box))
     console.print()
     console.print()  # Add vertical space before announcements
-
-    # Fetch and display announcements (silent on failure)
-    announcements = fetch_announcements()
-    display_announcements(console, announcements)
 
     # Create a boxed questionnaire for each step
     def create_question_box(title, prompt, default=None):
@@ -523,33 +808,78 @@ def get_user_selections():
         box_content += f"[dim]{prompt}[/dim]"
         if default:
             box_content += f"\n[dim]Default: {default}[/dim]"
-        return Panel(box_content, border_style="blue", padding=(1, 2))
+        return Panel(box_content, border_style="magenta", padding=(1, 2))
 
     # Step 1: Ticker symbol
     console.print(
         create_question_box(
-            "Step 1: Ticker Symbol",
-            "Enter the exact ticker symbol to analyze, including exchange suffix when needed (examples: SPY, CNC.TO, 7203.T, 0700.HK)",
+            "Step 1: Instrument",
+            "Choose the exact ticker symbol to analyze, including exchange suffix when needed (examples: SPY, CNC.TO, 7203.T, 0700.HK)",
             "SPY",
         )
     )
-    selected_ticker = get_ticker()
+    selected_ticker = get_ticker(default="SPY")
+    console.print(f"[green]Instrument armed:[/green] {selected_ticker}")
 
     # Step 2: Analysis date
-    default_date = datetime.datetime.now().strftime("%Y-%m-%d")
+    default_date = dt.datetime.now().strftime("%Y-%m-%d")
     console.print(
         create_question_box(
-            "Step 2: Analysis Date",
-            "Enter the analysis date (YYYY-MM-DD)",
+            "Step 2: Market Date",
+            "Lock the information set date in YYYY-MM-DD format",
             default_date,
         )
     )
-    analysis_date = get_analysis_date()
+    analysis_date = get_analysis_date(default=default_date)
+    console.print(f"[green]Market date locked:[/green] {analysis_date}")
 
-    # Step 3: Select research capabilities
+    # Step 3: Run mode
     console.print(
         create_question_box(
-            "Step 3: Research Capabilities", "Select the abstract research modules you want in the loop"
+            "Step 3: Run Mode",
+            "Choose how Future Invest should approach this session",
+        )
+    )
+    run_mode_key, run_mode_label, suggested_depth, run_mode_summary = select_run_mode()
+    console.print(f"[green]Run mode:[/green] {run_mode_label}")
+
+    run_mode_controls = RUN_MODE_CONTROL_PRESETS.get(run_mode_key, {})
+    recommended_position_importance = run_mode_controls.get(
+        "position_importance", "standard"
+    )
+    recommended_token_budget = run_mode_controls.get("token_budget", "balanced")
+
+    # Step 4: Position importance
+    console.print(
+        create_question_box(
+            "Step 4: Position Importance",
+            f"Set how important this seat is to the institution. Suggested for {run_mode_label}: {POSITION_IMPORTANCE_LABELS[recommended_position_importance]}",
+        )
+    )
+    selected_position_importance = select_position_importance(
+        recommended_position_importance
+    )
+    position_importance_label = POSITION_IMPORTANCE_LABELS[selected_position_importance]
+    console.print(
+        f"[green]Position importance:[/green] {position_importance_label}"
+    )
+
+    # Step 5: Token budget
+    console.print(
+        create_question_box(
+            "Step 5: Token Budget",
+            f"Set the institution's research spend posture. Suggested for {run_mode_label}: {TOKEN_BUDGET_LABELS[recommended_token_budget]}",
+        )
+    )
+    selected_token_budget = select_token_budget(recommended_token_budget)
+    token_budget_label = TOKEN_BUDGET_LABELS[selected_token_budget]
+    console.print(f"[green]Token budget:[/green] {token_budget_label}")
+
+    # Step 6: Select research capabilities
+    console.print(
+        create_question_box(
+            "Step 6: Signal Stack",
+            "Choose which research capabilities should join the signal stack",
         )
     )
     selected_analysts = select_analysts()
@@ -557,32 +887,41 @@ def get_user_selections():
         f"[green]Selected capabilities:[/green] {', '.join(ANALYST_DISPLAY_NAMES[analyst.value] for analyst in selected_analysts)}"
     )
 
-    # Step 4: Research depth
+    # Step 7: Research depth
     console.print(
         create_question_box(
-            "Step 4: Research Depth", "Select your research depth level"
+            "Step 7: Review Intensity",
+            f"Set how many institutional review cycles to run. Suggested for {run_mode_label}: {RESEARCH_DEPTH_LABELS[suggested_depth]}",
         )
     )
-    selected_research_depth = select_research_depth()
+    selected_research_depth = select_research_depth(suggested_depth)
+    research_depth_label = RESEARCH_DEPTH_LABELS.get(
+        selected_research_depth, str(selected_research_depth)
+    )
+    console.print(
+        f"[green]Review intensity:[/green] {research_depth_label} ({selected_research_depth} cycles)"
+    )
 
-    # Step 5: Model backend
+    # Step 8: Model backend
     console.print(
         create_question_box(
-            "Step 5: Model Backend", "Select which model provider powers the institution"
+            "Step 8: Model Backend",
+            "Select which model provider powers the institution",
         )
     )
     selected_llm_provider, backend_url = select_llm_provider()
     
-    # Step 6: Model pairing
+    # Step 9: Model pairing
     console.print(
         create_question_box(
-            "Step 6: Model Pairing", "Select the quick-thinking and deep-thinking models for the institution"
+            "Step 9: Model Pairing",
+            "Select the scanning engine and judgment engine for the institution",
         )
     )
     selected_shallow_thinker = select_shallow_thinking_agent(selected_llm_provider)
     selected_deep_thinker = select_deep_thinking_agent(selected_llm_provider)
 
-    # Step 7: Provider-specific thinking configuration
+    # Step 8: Provider-specific thinking configuration
     thinking_level = None
     reasoning_effort = None
     anthropic_effort = None
@@ -591,7 +930,7 @@ def get_user_selections():
     if provider_lower == "google":
         console.print(
             create_question_box(
-                "Step 7: Thinking Mode",
+                "Step 10: Thinking Mode",
                 "Configure Gemini thinking mode"
             )
         )
@@ -599,7 +938,7 @@ def get_user_selections():
     elif provider_lower == "openai":
         console.print(
             create_question_box(
-                "Step 7: Reasoning Effort",
+                "Step 10: Reasoning Effort",
                 "Configure OpenAI reasoning effort level"
             )
         )
@@ -607,17 +946,25 @@ def get_user_selections():
     elif provider_lower == "anthropic":
         console.print(
             create_question_box(
-                "Step 7: Effort Level",
+                "Step 10: Effort Level",
                 "Configure Claude effort level"
             )
         )
         anthropic_effort = ask_anthropic_effort()
 
-    return {
+    selections = {
         "ticker": selected_ticker,
         "analysis_date": analysis_date,
+        "run_mode": run_mode_key,
+        "run_mode_label": run_mode_label,
+        "run_mode_summary": run_mode_summary,
+        "position_importance": selected_position_importance,
+        "position_importance_label": position_importance_label,
+        "token_budget": selected_token_budget,
+        "token_budget_label": token_budget_label,
         "analysts": selected_analysts,
         "research_depth": selected_research_depth,
+        "research_depth_label": research_depth_label,
         "llm_provider": selected_llm_provider.lower(),
         "backend_url": backend_url,
         "shallow_thinker": selected_shallow_thinker,
@@ -627,32 +974,18 @@ def get_user_selections():
         "anthropic_effort": anthropic_effort,
     }
 
+    console.print()
+    console.print(create_launch_brief_panel(selections))
+    if not confirm_launch():
+        console.print("\n[yellow]Session cancelled before launch.[/yellow]")
+        raise typer.Exit()
 
-def get_ticker():
-    """Get ticker symbol from user input."""
-    return typer.prompt("", default="SPY")
-
-
-def get_analysis_date():
-    """Get the analysis date from user input."""
-    while True:
-        date_str = typer.prompt(
-            "", default=datetime.datetime.now().strftime("%Y-%m-%d")
-        )
-        try:
-            # Validate date format and ensure it's not in the future
-            analysis_date = datetime.datetime.strptime(date_str, "%Y-%m-%d")
-            if analysis_date.date() > datetime.datetime.now().date():
-                console.print("[red]Error: Analysis date cannot be in the future[/red]")
-                continue
-            return date_str
-        except ValueError:
-            console.print(
-                "[red]Error: Invalid date format. Please use YYYY-MM-DD[/red]"
-            )
+    return selections
 
 
-def save_report_to_disk(final_state, ticker: str, save_path: Path):
+def save_report_to_disk(
+    final_state, ticker: str, save_path: Path, session_context: Optional[dict] = None
+):
     """Save the complete institution run to disk with organized subfolders."""
     save_path.mkdir(parents=True, exist_ok=True)
     sections = []
@@ -663,6 +996,27 @@ def save_report_to_disk(final_state, ticker: str, save_path: Path):
         orchestration_dir.mkdir(exist_ok=True)
         (orchestration_dir / "plan.md").write_text(final_state["analysis_plan"])
         sections.append(f"## I. Investment Orchestration\n\n{final_state['analysis_plan']}")
+
+    portfolio_mandate = get_portfolio_mandate_content(final_state)
+    if portfolio_mandate:
+        orchestration_dir = save_path / "1_orchestration"
+        orchestration_dir.mkdir(exist_ok=True)
+        (orchestration_dir / "portfolio_mandate.md").write_text(portfolio_mandate)
+        sections.append(f"## II. Portfolio Mandate\n\n{portfolio_mandate}")
+
+    time_horizon_split = get_time_horizon_split_content(final_state)
+    if time_horizon_split:
+        orchestration_dir = save_path / "1_orchestration"
+        orchestration_dir.mkdir(exist_ok=True)
+        (orchestration_dir / "time_horizon_split.md").write_text(time_horizon_split)
+        sections.append(f"## III. Time Horizon Split\n\n{time_horizon_split}")
+
+    institutional_memory = get_institutional_memory_content(final_state)
+    if institutional_memory:
+        orchestration_dir = save_path / "1_orchestration"
+        orchestration_dir.mkdir(exist_ok=True)
+        (orchestration_dir / "institutional_memory.md").write_text(institutional_memory)
+        sections.append(f"## IV. Institutional Memory\n\n{institutional_memory}")
 
     # 2. Research capabilities
     analysts_dir = save_path / "2_capabilities"
@@ -678,76 +1032,94 @@ def save_report_to_disk(final_state, ticker: str, save_path: Path):
         analyst_content = "\n\n".join(
             f"### {name}\n{text}" for name, text in analyst_parts
         )
-        sections.append(f"## II. Research Capability Reports\n\n{analyst_content}")
+        sections.append(f"## V. Research Capability Reports\n\n{analyst_content}")
 
-    # 3. Institutional debate
-    if final_state.get("investment_debate_state"):
+    # 3. Thesis review
+    thesis_entries = [
+        (title, content)
+        for title, content in get_thesis_review_entries(final_state)
+        if _clean_text(content)
+    ]
+    if thesis_entries:
         research_dir = save_path / "3_research"
-        debate = final_state["investment_debate_state"]
-        research_parts = []
-        if debate.get("bull_history"):
-            research_dir.mkdir(exist_ok=True)
-            (research_dir / "bull.md").write_text(debate["bull_history"])
-            research_parts.append((THESIS_ENGINE, debate["bull_history"]))
-        if debate.get("bear_history"):
-            research_dir.mkdir(exist_ok=True)
-            (research_dir / "bear.md").write_text(debate["bear_history"])
-            research_parts.append((CHALLENGE_ENGINE, debate["bear_history"]))
-        if debate.get("judge_decision"):
-            research_dir.mkdir(exist_ok=True)
-            (research_dir / "manager.md").write_text(debate["judge_decision"])
-            research_parts.append((INVESTMENT_DIRECTOR, debate["judge_decision"]))
-        if research_parts:
-            content = "\n\n".join(f"### {name}\n{text}" for name, text in research_parts)
-            sections.append(f"## III. Institutional Debate\n\n{content}")
+        research_dir.mkdir(exist_ok=True)
+        for title, content in thesis_entries:
+            file_name = {
+                THESIS_ENGINE: "thesis_engine.md",
+                CHALLENGE_ENGINE: "challenge_engine.md",
+                INVESTMENT_DIRECTOR: "investment_director.md",
+            }[title]
+            (research_dir / file_name).write_text(content)
+        thesis_review_markdown = _join_agent_entries(thesis_entries)
+        (research_dir / "thesis_review.md").write_text(thesis_review_markdown)
+        sections.append(f"## VI. Thesis Review\n\n{thesis_review_markdown}")
 
-    # 4. Execution
-    if final_state.get("trader_investment_plan"):
+    # 4. Execution state
+    execution_entries = [
+        (title, content)
+        for title, content in get_execution_state_entries(final_state)
+        if _clean_text(content)
+    ]
+    if execution_entries:
         trading_dir = save_path / "4_trading"
         trading_dir.mkdir(exist_ok=True)
-        (trading_dir / "trader.md").write_text(final_state["trader_investment_plan"])
-        sections.append(
-            f"## IV. Execution Blueprint\n\n### {EXECUTION_ENGINE}\n{final_state['trader_investment_plan']}"
-        )
+        execution_markdown = _join_agent_entries(execution_entries)
+        (trading_dir / "execution_state.md").write_text(execution_markdown)
+        sections.append(f"## VII. Execution State\n\n{execution_markdown}")
 
-    # 5. Capital formation
-    if final_state.get("risk_debate_state"):
+    # 5. Allocation review
+    allocation_entries = [
+        (title, content)
+        for title, content in get_allocation_review_entries(final_state)
+        if _clean_text(content)
+    ]
+    if allocation_entries:
         risk_dir = save_path / "5_risk"
-        risk = final_state["risk_debate_state"]
-        risk_parts = []
-        if risk.get("aggressive_history"):
-            risk_dir.mkdir(exist_ok=True)
-            (risk_dir / "aggressive.md").write_text(risk["aggressive_history"])
-            risk_parts.append((UPSIDE_CAPTURE_ENGINE, risk["aggressive_history"]))
-        if risk.get("conservative_history"):
-            risk_dir.mkdir(exist_ok=True)
-            (risk_dir / "conservative.md").write_text(risk["conservative_history"])
-            risk_parts.append((DOWNSIDE_GUARDRAIL_ENGINE, risk["conservative_history"]))
-        if risk.get("neutral_history"):
-            risk_dir.mkdir(exist_ok=True)
-            (risk_dir / "neutral.md").write_text(risk["neutral_history"])
-            risk_parts.append((PORTFOLIO_FIT_ENGINE, risk["neutral_history"]))
-        if risk_parts:
-            content = "\n\n".join(f"### {name}\n{text}" for name, text in risk_parts)
-            sections.append(f"## V. Capital Formation\n\n{content}")
+        risk_dir.mkdir(exist_ok=True)
+        for title, content in allocation_entries:
+            file_name = {
+                UPSIDE_CAPTURE_ENGINE: "upside_capture.md",
+                DOWNSIDE_GUARDRAIL_ENGINE: "downside_guardrail.md",
+                PORTFOLIO_FIT_ENGINE: "portfolio_fit.md",
+            }[title]
+            (risk_dir / file_name).write_text(content)
+        allocation_markdown = _join_agent_entries(allocation_entries)
+        (risk_dir / "allocation_review.md").write_text(allocation_markdown)
+        sections.append(f"## VIII. Allocation Review\n\n{allocation_markdown}")
 
-        # 6. Capital Allocation
-        if risk.get("judge_decision"):
-            portfolio_dir = save_path / "6_portfolio"
-            portfolio_dir.mkdir(exist_ok=True)
-            (portfolio_dir / "decision.md").write_text(risk["judge_decision"])
-            sections.append(
-                f"## VI. Capital Allocation Decision\n\n### {CAPITAL_ALLOCATION_COMMITTEE}\n{risk['judge_decision']}"
-            )
+    # 6. Final decision
+    final_decision_entries = [
+        (title, content)
+        for title, content in get_final_decision_entries(final_state)
+        if _clean_text(content)
+    ]
+    if final_decision_entries:
+        portfolio_dir = save_path / "6_portfolio"
+        portfolio_dir.mkdir(exist_ok=True)
+        final_decision_markdown = _join_agent_entries(final_decision_entries)
+        (portfolio_dir / "final_decision.md").write_text(final_decision_markdown)
+        sections.append(f"## IX. Final Decision\n\n{final_decision_markdown}")
 
     if final_state.get("decision_dossier_markdown"):
         dossier_dir = save_path / "7_dossier"
         dossier_dir.mkdir(exist_ok=True)
         (dossier_dir / "dossier.md").write_text(final_state["decision_dossier_markdown"])
-        sections.append(f"## VII. AI Investment Dossier\n\n{final_state['decision_dossier_markdown']}")
+        sections.append(f"## X. {BRAND_REPORT_TITLE}\n\n{final_state['decision_dossier_markdown']}")
 
     # Write consolidated report
-    header = f"# AI Investment Institution Report: {ticker}\n\nGenerated: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+    header_lines = [
+        f"# {BRAND_NAME} Institution Report: {ticker}",
+        f"Generated: {dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+    ]
+    if session_context:
+        header_lines.append(f"Market Date: {session_context['analysis_date']}")
+        header_lines.append(f"Run Mode: {session_context['run_mode_label']}")
+        header_lines.append(
+            f"Position Importance: {format_position_importance(session_context)}"
+        )
+        header_lines.append(f"Token Budget: {format_token_budget(session_context)}")
+        header_lines.append(f"Model Backend: {session_context['llm_provider'].title()}")
+    header = "\n\n".join(header_lines) + "\n\n"
     (save_path / "complete_report.md").write_text(header + "\n\n".join(sections))
     return save_path / "complete_report.md"
 
@@ -755,7 +1127,7 @@ def save_report_to_disk(final_state, ticker: str, save_path: Path):
 def display_complete_report(final_state):
     """Display the complete institution report sequentially (avoids truncation)."""
     console.print()
-    console.print(Rule("Complete Institution Report", style="bold green"))
+    console.print(Rule(f"{BRAND_NAME} Institution Report", style="bold cyan"))
 
     if final_state.get("analysis_plan"):
         console.print(Panel("[bold]I. Investment Orchestration[/bold]", border_style="green"))
@@ -768,7 +1140,43 @@ def display_complete_report(final_state):
             )
         )
 
-    # II. Research Capability Reports
+    portfolio_mandate = get_portfolio_mandate_content(final_state)
+    if portfolio_mandate:
+        console.print(Panel("[bold]II. Portfolio Mandate[/bold]", border_style="cyan"))
+        console.print(
+            Panel(
+                Markdown(portfolio_mandate),
+                title="Portfolio Mandate",
+                border_style="blue",
+                padding=(1, 2),
+            )
+        )
+
+    time_horizon_split = get_time_horizon_split_content(final_state)
+    if time_horizon_split:
+        console.print(Panel("[bold]III. Time Horizon Split[/bold]", border_style="cyan"))
+        console.print(
+            Panel(
+                Markdown(time_horizon_split),
+                title="Time Horizon Split",
+                border_style="blue",
+                padding=(1, 2),
+            )
+        )
+
+    institutional_memory = get_institutional_memory_content(final_state)
+    if institutional_memory:
+        console.print(Panel("[bold]IV. Institutional Memory[/bold]", border_style="cyan"))
+        console.print(
+            Panel(
+                Markdown(institutional_memory),
+                title="Institutional Memory",
+                border_style="blue",
+                padding=(1, 2),
+            )
+        )
+
+    # V. Research Capability Reports
     analysts = []
     for analyst_key in ANALYST_ORDER:
         report_field = ANALYST_REPORT_FIELDS[analyst_key]
@@ -776,56 +1184,48 @@ def display_complete_report(final_state):
         if report:
             analysts.append((ANALYST_REPORT_TITLES[analyst_key], report))
     if analysts:
-        console.print(Panel("[bold]II. Research Capability Reports[/bold]", border_style="cyan"))
+        console.print(Panel("[bold]V. Research Capability Reports[/bold]", border_style="cyan"))
         for title, content in analysts:
             console.print(Panel(Markdown(content), title=title, border_style="blue", padding=(1, 2)))
 
-    # III. Institutional Debate
-    if final_state.get("investment_debate_state"):
-        debate = final_state["investment_debate_state"]
-        research = []
-        if debate.get("bull_history"):
-            research.append((THESIS_ENGINE, debate["bull_history"]))
-        if debate.get("bear_history"):
-            research.append((CHALLENGE_ENGINE, debate["bear_history"]))
-        if debate.get("judge_decision"):
-            research.append((INVESTMENT_DIRECTOR, debate["judge_decision"]))
-        if research:
-            console.print(Panel("[bold]III. Institutional Debate[/bold]", border_style="magenta"))
-            for title, content in research:
-                console.print(Panel(Markdown(content), title=title, border_style="blue", padding=(1, 2)))
+    thesis_entries = [
+        (title, content) for title, content in get_thesis_review_entries(final_state) if _clean_text(content)
+    ]
+    if thesis_entries:
+        console.print(Panel("[bold]VI. Thesis Review[/bold]", border_style="magenta"))
+        for title, content in thesis_entries:
+            console.print(Panel(Markdown(content), title=title, border_style="blue", padding=(1, 2)))
 
-    # IV. Execution Blueprint
-    if final_state.get("trader_investment_plan"):
-        console.print(Panel("[bold]IV. Execution Blueprint[/bold]", border_style="yellow"))
-        console.print(Panel(Markdown(final_state["trader_investment_plan"]), title=EXECUTION_ENGINE, border_style="blue", padding=(1, 2)))
+    execution_entries = [
+        (title, content) for title, content in get_execution_state_entries(final_state) if _clean_text(content)
+    ]
+    if execution_entries:
+        console.print(Panel("[bold]VII. Execution State[/bold]", border_style="yellow"))
+        for title, content in execution_entries:
+            console.print(Panel(Markdown(content), title=title, border_style="blue", padding=(1, 2)))
 
-    # V. Capital Formation
-    if final_state.get("risk_debate_state"):
-        risk = final_state["risk_debate_state"]
-        risk_reports = []
-        if risk.get("aggressive_history"):
-            risk_reports.append((UPSIDE_CAPTURE_ENGINE, risk["aggressive_history"]))
-        if risk.get("conservative_history"):
-            risk_reports.append((DOWNSIDE_GUARDRAIL_ENGINE, risk["conservative_history"]))
-        if risk.get("neutral_history"):
-            risk_reports.append((PORTFOLIO_FIT_ENGINE, risk["neutral_history"]))
-        if risk_reports:
-            console.print(Panel("[bold]V. Capital Formation[/bold]", border_style="red"))
-            for title, content in risk_reports:
-                console.print(Panel(Markdown(content), title=title, border_style="blue", padding=(1, 2)))
+    allocation_entries = [
+        (title, content) for title, content in get_allocation_review_entries(final_state) if _clean_text(content)
+    ]
+    if allocation_entries:
+        console.print(Panel("[bold]VIII. Allocation Review[/bold]", border_style="red"))
+        for title, content in allocation_entries:
+            console.print(Panel(Markdown(content), title=title, border_style="blue", padding=(1, 2)))
 
-        # VI. Capital Allocation Decision
-        if risk.get("judge_decision"):
-            console.print(Panel("[bold]VI. Capital Allocation Decision[/bold]", border_style="green"))
-            console.print(Panel(Markdown(risk["judge_decision"]), title=CAPITAL_ALLOCATION_COMMITTEE, border_style="blue", padding=(1, 2)))
+    final_decision_entries = [
+        (title, content) for title, content in get_final_decision_entries(final_state) if _clean_text(content)
+    ]
+    if final_decision_entries:
+        console.print(Panel("[bold]IX. Final Decision[/bold]", border_style="green"))
+        for title, content in final_decision_entries:
+            console.print(Panel(Markdown(content), title=title, border_style="blue", padding=(1, 2)))
 
     if final_state.get("decision_dossier_markdown"):
-        console.print(Panel("[bold]VII. AI Investment Dossier[/bold]", border_style="cyan"))
+        console.print(Panel(f"[bold]X. {BRAND_REPORT_TITLE}[/bold]", border_style="cyan"))
         console.print(
             Panel(
                 Markdown(final_state["decision_dossier_markdown"]),
-                title="AI Investment Dossier",
+                title=BRAND_REPORT_TITLE,
                 border_style="blue",
                 padding=(1, 2),
             )
@@ -855,6 +1255,10 @@ def update_analyst_statuses(message_buffer, chunk):
     - Remaining capabilities without reports = pending
     - When all capabilities finish, hand off to the institutional debate stack
     """
+    chunk_selected = normalize_selected_analysts(
+        chunk.get("selected_analysts", message_buffer.selected_analysts)
+    )
+    message_buffer.ensure_selected_analysts(chunk_selected)
     selected = message_buffer.selected_analysts
     active_key = chunk.get("current_analyst")
 
@@ -981,6 +1385,8 @@ def run_analysis():
     config["deep_think_llm"] = selections["deep_thinker"]
     config["backend_url"] = selections["backend_url"]
     config["llm_provider"] = selections["llm_provider"].lower()
+    config["orchestrator_position_importance"] = selections["position_importance"]
+    config["orchestrator_token_budget"] = selections["token_budget"]
     # Provider-specific thinking configuration
     config["google_thinking_level"] = selections.get("google_thinking_level")
     config["openai_reasoning_effort"] = selections.get("openai_reasoning_effort")
@@ -994,7 +1400,7 @@ def run_analysis():
     selected_analyst_keys = [a for a in ANALYST_ORDER if a in selected_set]
 
     # Initialize the graph with callbacks bound to LLMs
-    graph = TradingAgentsGraph(
+    graph = FutureInvestGraph(
         selected_analyst_keys,
         config=config,
         debug=True,
@@ -1060,29 +1466,66 @@ def run_analysis():
 
     with Live(layout, refresh_per_second=4) as live:
         # Initial display
-        update_display(layout, stats_handler=stats_handler, start_time=start_time)
+        update_display(
+            layout,
+            stats_handler=stats_handler,
+            start_time=start_time,
+            session_context=selections,
+        )
 
         # Add initial messages
         message_buffer.add_message("System", f"Selected ticker: {selections['ticker']}")
         message_buffer.add_message(
             "System", f"Analysis date: {selections['analysis_date']}"
         )
+        message_buffer.add_message("System", f"Run mode: {selections['run_mode_label']}")
+        message_buffer.add_message(
+            "System",
+            f"Position importance: {format_position_importance(selections)}",
+        )
+        message_buffer.add_message(
+            "System", f"Token budget: {format_token_budget(selections)}"
+        )
+        message_buffer.add_message(
+            "System",
+            f"Model backend: {selections['llm_provider'].title()}",
+        )
         message_buffer.add_message(
             "System",
             "Selected capabilities: "
             + ", ".join(ANALYST_DISPLAY_NAMES[analyst.value] for analyst in selections["analysts"]),
         )
-        update_display(layout, stats_handler=stats_handler, start_time=start_time)
+        message_buffer.add_message(
+            "System",
+            f"Model pairing: {selections['shallow_thinker']} / {selections['deep_thinker']}",
+        )
+        update_display(
+            layout,
+            stats_handler=stats_handler,
+            start_time=start_time,
+            session_context=selections,
+        )
 
         # Orchestration runs first and decides the capability path.
         message_buffer.update_agent_status("Investment Orchestrator", "in_progress")
-        update_display(layout, stats_handler=stats_handler, start_time=start_time)
+        update_display(
+            layout,
+            stats_handler=stats_handler,
+            start_time=start_time,
+            session_context=selections,
+        )
 
         # Create spinner text
         spinner_text = (
             f"Analyzing {selections['ticker']} on {selections['analysis_date']}..."
         )
-        update_display(layout, spinner_text, stats_handler=stats_handler, start_time=start_time)
+        update_display(
+            layout,
+            spinner_text,
+            stats_handler=stats_handler,
+            start_time=start_time,
+            session_context=selections,
+        )
 
         # Initialize state and get graph args with callbacks
         init_agent_state = graph.propagator.create_initial_state(
@@ -1121,90 +1564,97 @@ def run_analysis():
             # Update capability statuses based on report state (runs on every chunk)
             update_analyst_statuses(message_buffer, chunk)
 
-            # Institutional Debate - Handle Investment Debate State
-            if chunk.get("investment_debate_state"):
-                debate_state = chunk["investment_debate_state"]
-                bull_hist = debate_state.get("bull_history", "").strip()
-                bear_hist = debate_state.get("bear_history", "").strip()
-                judge = debate_state.get("judge_decision", "").strip()
+            sync_report_sections_from_state(message_buffer, chunk)
 
-                # Only update status when there's actual content
-                if bull_hist or bear_hist:
-                    update_research_team_status("in_progress")
-                if bull_hist:
-                    message_buffer.update_report_section(
-                        "investment_plan", f"### {THESIS_ENGINE}\n{bull_hist}"
-                    )
-                if bear_hist:
-                    message_buffer.update_report_section(
-                        "investment_plan", f"### {CHALLENGE_ENGINE}\n{bear_hist}"
-                    )
-                if judge:
-                    message_buffer.update_report_section(
-                        "investment_plan", f"### {INVESTMENT_DIRECTOR}\n{judge}"
-                    )
-                    update_research_team_status("completed")
+            thesis_stage_entries = get_thesis_review_entries(chunk)[:2]
+            if any(_clean_text(content) for _, content in thesis_stage_entries):
+                update_research_team_status("in_progress")
+
+            thesis_final_memo = _clean_text(
+                (chunk.get("thesis_review") or {}).get("final_memo")
+            )
+            if thesis_final_memo:
+                update_research_team_status("completed")
+                if message_buffer.agent_status.get(EXECUTION_ENGINE) == "pending":
                     message_buffer.update_agent_status(EXECUTION_ENGINE, "in_progress")
 
-            # Execution Blueprint
-            if chunk.get("trader_investment_plan"):
-                message_buffer.update_report_section(
-                    "trader_investment_plan", chunk["trader_investment_plan"]
-                )
+            execution_content = _clean_text(
+                (chunk.get("execution_state") or {}).get("full_blueprint")
+            )
+            if execution_content:
                 if message_buffer.agent_status.get(EXECUTION_ENGINE) != "completed":
                     message_buffer.update_agent_status(EXECUTION_ENGINE, "completed")
-                    message_buffer.update_agent_status(UPSIDE_CAPTURE_ENGINE, "in_progress")
-
-            # Capital Formation - Handle portfolio construction review
-            if chunk.get("risk_debate_state"):
-                risk_state = chunk["risk_debate_state"]
-                agg_hist = risk_state.get("aggressive_history", "").strip()
-                con_hist = risk_state.get("conservative_history", "").strip()
-                neu_hist = risk_state.get("neutral_history", "").strip()
-                judge = risk_state.get("judge_decision", "").strip()
-
-                if agg_hist:
-                    if message_buffer.agent_status.get(UPSIDE_CAPTURE_ENGINE) != "completed":
-                        message_buffer.update_agent_status(UPSIDE_CAPTURE_ENGINE, "in_progress")
-                    message_buffer.update_report_section(
-                        "final_trade_decision", f"### {UPSIDE_CAPTURE_ENGINE}\n{agg_hist}"
+                    message_buffer.update_agent_status(
+                        UPSIDE_CAPTURE_ENGINE, "in_progress"
                     )
-                if con_hist:
-                    if message_buffer.agent_status.get(DOWNSIDE_GUARDRAIL_ENGINE) != "completed":
-                        message_buffer.update_agent_status(DOWNSIDE_GUARDRAIL_ENGINE, "in_progress")
-                    message_buffer.update_report_section(
-                        "final_trade_decision", f"### {DOWNSIDE_GUARDRAIL_ENGINE}\n{con_hist}"
-                    )
-                if neu_hist:
-                    if message_buffer.agent_status.get(PORTFOLIO_FIT_ENGINE) != "completed":
-                        message_buffer.update_agent_status(PORTFOLIO_FIT_ENGINE, "in_progress")
-                    message_buffer.update_report_section(
-                        "final_trade_decision", f"### {PORTFOLIO_FIT_ENGINE}\n{neu_hist}"
-                    )
-                if judge:
-                    if message_buffer.agent_status.get(CAPITAL_ALLOCATION_COMMITTEE) != "completed":
-                        message_buffer.update_agent_status(CAPITAL_ALLOCATION_COMMITTEE, "in_progress")
-                        message_buffer.update_report_section(
-                            "final_trade_decision", f"### {CAPITAL_ALLOCATION_COMMITTEE}\n{judge}"
-                        )
-                        message_buffer.update_agent_status(UPSIDE_CAPTURE_ENGINE, "completed")
-                        message_buffer.update_agent_status(DOWNSIDE_GUARDRAIL_ENGINE, "completed")
-                        message_buffer.update_agent_status(PORTFOLIO_FIT_ENGINE, "completed")
-                        message_buffer.update_agent_status(CAPITAL_ALLOCATION_COMMITTEE, "completed")
 
-            if chunk.get("decision_dossier_markdown"):
-                message_buffer.update_report_section(
-                    "decision_dossier_markdown", chunk["decision_dossier_markdown"]
-                )
+            upside_content = get_review_output(
+                chunk.get("allocation_review"), UPSIDE_STAGE_KEY
+            )
+            downside_content = get_review_output(
+                chunk.get("allocation_review"), DOWNSIDE_STAGE_KEY
+            )
+            portfolio_fit_content = get_review_output(
+                chunk.get("allocation_review"), PORTFOLIO_FIT_STAGE_KEY
+            )
+
+            if _clean_text(upside_content):
+                if message_buffer.agent_status.get(UPSIDE_CAPTURE_ENGINE) != "completed":
+                    message_buffer.update_agent_status(
+                        UPSIDE_CAPTURE_ENGINE, "in_progress"
+                    )
+            if _clean_text(downside_content):
+                if (
+                    message_buffer.agent_status.get(DOWNSIDE_GUARDRAIL_ENGINE)
+                    != "completed"
+                ):
+                    message_buffer.update_agent_status(
+                        DOWNSIDE_GUARDRAIL_ENGINE, "in_progress"
+                    )
+            if _clean_text(portfolio_fit_content):
+                if message_buffer.agent_status.get(PORTFOLIO_FIT_ENGINE) != "completed":
+                    message_buffer.update_agent_status(
+                        PORTFOLIO_FIT_ENGINE, "in_progress"
+                    )
+
+            final_decision_content = _clean_text(
+                (chunk.get("final_decision") or {}).get("full_decision")
+            )
+            if final_decision_content:
+                if (
+                    message_buffer.agent_status.get(CAPITAL_ALLOCATION_COMMITTEE)
+                    != "completed"
+                ):
+                    message_buffer.update_agent_status(
+                        CAPITAL_ALLOCATION_COMMITTEE, "in_progress"
+                    )
+                    message_buffer.update_agent_status(
+                        UPSIDE_CAPTURE_ENGINE, "completed"
+                    )
+                    message_buffer.update_agent_status(
+                        DOWNSIDE_GUARDRAIL_ENGINE, "completed"
+                    )
+                    message_buffer.update_agent_status(PORTFOLIO_FIT_ENGINE, "completed")
+                    message_buffer.update_agent_status(
+                        CAPITAL_ALLOCATION_COMMITTEE, "completed"
+                    )
 
             # Update the display
-            update_display(layout, stats_handler=stats_handler, start_time=start_time)
+            update_display(
+                layout,
+                stats_handler=stats_handler,
+                start_time=start_time,
+                session_context=selections,
+            )
 
             trace.append(chunk)
 
         # Get final state and decision
         final_state = trace[-1]
-        decision = graph.process_signal(final_state["final_trade_decision"])
+        decision = graph.process_signal(
+            _clean_text((final_state.get("final_decision") or {}).get("full_decision"))
+            or final_state.get("final_trade_decision", "")
+        )
 
         # Update all agent statuses to completed
         for agent in message_buffer.agent_status:
@@ -1215,19 +1665,21 @@ def run_analysis():
         )
 
         # Update final report sections
-        for section in message_buffer.report_sections.keys():
-            if section in final_state:
-                message_buffer.update_report_section(section, final_state[section])
+        sync_report_sections_from_state(message_buffer, final_state)
 
-        update_display(layout, stats_handler=stats_handler, start_time=start_time)
+        update_display(
+            layout,
+            stats_handler=stats_handler,
+            start_time=start_time,
+            session_context=selections,
+        )
 
     # Post-analysis prompts (outside Live context for clean interaction)
-    console.print("\n[bold cyan]Institution Run Complete![/bold cyan]\n")
+    console.print(f"\n[bold cyan]{BRAND_NAME} run complete.[/bold cyan]\n")
+    next_action = select_post_run_action()
 
-    # Prompt to save report
-    save_choice = typer.prompt("Save report?", default="Y").strip().upper()
-    if save_choice in ("Y", "YES", ""):
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    if next_action in ("save", "save_display"):
+        timestamp = dt.datetime.now().strftime("%Y%m%d_%H%M%S")
         default_path = Path.cwd() / "reports" / f"{selections['ticker']}_{timestamp}"
         save_path_str = typer.prompt(
             "Save path (press Enter for default)",
@@ -1235,15 +1687,18 @@ def run_analysis():
         ).strip()
         save_path = Path(save_path_str)
         try:
-            report_file = save_report_to_disk(final_state, selections["ticker"], save_path)
+            report_file = save_report_to_disk(
+                final_state,
+                selections["ticker"],
+                save_path,
+                session_context=selections,
+            )
             console.print(f"\n[green]✓ Report saved to:[/green] {save_path.resolve()}")
             console.print(f"  [dim]Complete report:[/dim] {report_file.name}")
         except Exception as e:
             console.print(f"[red]Error saving report: {e}[/red]")
 
-    # Prompt to display full report
-    display_choice = typer.prompt("\nDisplay full report on screen?", default="Y").strip().upper()
-    if display_choice in ("Y", "YES", ""):
+    if next_action in ("display", "save_display"):
         display_complete_report(final_state)
 
 

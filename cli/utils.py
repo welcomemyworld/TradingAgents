@@ -1,5 +1,6 @@
 import questionary
 from typing import List, Optional, Tuple, Dict
+from datetime import datetime
 
 from rich.console import Console
 
@@ -17,11 +18,102 @@ CAPABILITY_CHOICES = [
     (ANALYST_SELECTION_LABELS[key], AnalystType(key)) for key in CAPABILITY_ORDER
 ]
 
+RUN_MODE_PRESETS: Dict[str, Dict[str, object]] = {
+    "scout": {
+        "label": "Scout",
+        "description": "Fast pass for idea triage and early signal detection",
+        "suggested_depth": 1,
+    },
+    "conviction": {
+        "label": "Conviction Build",
+        "description": "Balanced path for developing a real investment case",
+        "suggested_depth": 3,
+    },
+    "committee": {
+        "label": "Capital Committee",
+        "description": "Full institutional review for sizing and allocation decisions",
+        "suggested_depth": 5,
+    },
+}
 
-def get_ticker() -> str:
+RUN_MODE_CONTROL_PRESETS: Dict[str, Dict[str, str]] = {
+    "scout": {
+        "position_importance": "standard",
+        "token_budget": "tight",
+    },
+    "conviction": {
+        "position_importance": "high",
+        "token_budget": "balanced",
+    },
+    "committee": {
+        "position_importance": "critical",
+        "token_budget": "expansive",
+    },
+}
+
+POSITION_IMPORTANCE_OPTIONS = [
+    (
+        "Standard - Routine seat with balanced review and faster escalation thresholds",
+        "standard",
+    ),
+    (
+        "High - Meaningful seat that deserves broader evidence gathering before sizing",
+        "high",
+    ),
+    (
+        "Critical - Institution-defining seat; bias toward deeper challenge and confirmation",
+        "critical",
+    ),
+]
+
+POSITION_IMPORTANCE_LABELS = {
+    "standard": "Standard",
+    "high": "High",
+    "critical": "Critical",
+}
+
+TOKEN_BUDGET_OPTIONS = [
+    (
+        "Tight - Conserve tokens, stop once the edge is legible enough to act",
+        "tight",
+    ),
+    (
+        "Balanced - Default posture with room for challenge and selective escalation",
+        "balanced",
+    ),
+    (
+        "Expansive - Spend research budget freely for high-stakes institutional review",
+        "expansive",
+    ),
+]
+
+TOKEN_BUDGET_LABELS = {
+    "tight": "Tight",
+    "balanced": "Balanced",
+    "expansive": "Expansive",
+}
+
+RESEARCH_DEPTH_OPTIONS = [
+    (
+        "Shallow - Fast institution run, fewer debate and capital formation cycles",
+        1,
+    ),
+    ("Medium - Balanced depth with moderate institutional review", 3),
+    ("Deep - Full institutional pass with richer debate and risk formation", 5),
+]
+
+RESEARCH_DEPTH_LABELS = {
+    1: "Shallow",
+    3: "Medium",
+    5: "Deep",
+}
+
+
+def get_ticker(default: str = "SPY") -> str:
     """Prompt the user to enter a ticker symbol."""
     ticker = questionary.text(
         f"Enter the exact ticker symbol to analyze ({TICKER_INPUT_EXAMPLES}):",
+        default=default,
         validate=lambda x: len(x.strip()) > 0 or "Please enter a valid ticker symbol.",
         style=questionary.Style(
             [
@@ -43,24 +135,26 @@ def normalize_ticker_symbol(ticker: str) -> str:
     return ticker.strip().upper()
 
 
-def get_analysis_date() -> str:
+def get_analysis_date(default: Optional[str] = None, allow_future: bool = False) -> str:
     """Prompt the user to enter a date in YYYY-MM-DD format."""
     import re
-    from datetime import datetime
 
     def validate_date(date_str: str) -> bool:
         if not re.match(r"^\d{4}-\d{2}-\d{2}$", date_str):
             return False
         try:
-            datetime.strptime(date_str, "%Y-%m-%d")
+            parsed_date = datetime.strptime(date_str, "%Y-%m-%d")
+            if not allow_future and parsed_date.date() > datetime.now().date():
+                return False
             return True
         except ValueError:
             return False
 
     date = questionary.text(
         "Enter the analysis date (YYYY-MM-DD):",
+        default=default or datetime.now().strftime("%Y-%m-%d"),
         validate=lambda x: validate_date(x.strip())
-        or "Please enter a valid date in YYYY-MM-DD format.",
+        or "Please enter a valid date in YYYY-MM-DD format that is not in the future.",
         style=questionary.Style(
             [
                 ("text", "fg:green"),
@@ -76,15 +170,48 @@ def get_analysis_date() -> str:
     return date.strip()
 
 
+def select_run_mode() -> Tuple[str, str, int, str]:
+    """Select the institution run mode."""
+    choice = questionary.select(
+        "Select Your [Run Mode]:",
+        choices=[
+            questionary.Choice(
+                f"{preset['label']} - {preset['description']}",
+                value=(
+                    key,
+                    str(preset["label"]),
+                    int(preset["suggested_depth"]),
+                    str(preset["description"]),
+                ),
+            )
+            for key, preset in RUN_MODE_PRESETS.items()
+        ],
+        instruction="\n- Use arrow keys to navigate\n- Press Enter to select",
+        style=questionary.Style(
+            [
+                ("selected", "fg:cyan noinherit"),
+                ("highlighted", "fg:cyan noinherit"),
+                ("pointer", "fg:cyan noinherit"),
+            ]
+        ),
+    ).ask()
+
+    if choice is None:
+        console.print("\n[red]No run mode selected. Exiting...[/red]")
+        exit(1)
+
+    return choice
+
+
 def select_analysts() -> List[AnalystType]:
     """Select abstract research capabilities using an interactive checkbox."""
     choices = questionary.checkbox(
-        "Select Your [Research Capabilities]:",
+        "Select Your [Signal Stack]:",
         choices=[
             questionary.Choice(display, value=value)
             for display, value in CAPABILITY_CHOICES
         ],
-        instruction="\n- Press Space to select/unselect capabilities\n- Press 'a' to select/unselect all\n- Press Enter when done",
+        instruction="\n- Press Space to select/unselect capabilities\n- Press 'a' to select/unselect all\n- Press Enter when the stack looks right",
         validate=lambda x: len(x) > 0 or "You must select at least one capability.",
         style=questionary.Style(
             [
@@ -103,20 +230,20 @@ def select_analysts() -> List[AnalystType]:
     return choices
 
 
-def select_research_depth() -> int:
+def select_research_depth(recommended_depth: Optional[int] = None) -> int:
     """Select how many institutional review cycles to run."""
-
-    # Define research depth options with their corresponding values
-    DEPTH_OPTIONS = [
-        ("Shallow - Fast institution run, fewer debate and capital formation cycles", 1),
-        ("Medium - Balanced depth with moderate institutional review", 3),
-        ("Deep - Full institutional pass with richer debate and risk formation", 5),
-    ]
+    depth_options = list(RESEARCH_DEPTH_OPTIONS)
+    if recommended_depth in RESEARCH_DEPTH_LABELS:
+        depth_options.sort(key=lambda item: item[1] != recommended_depth)
 
     choice = questionary.select(
         "Select Your [Research Depth]:",
         choices=[
-            questionary.Choice(display, value=value) for display, value in DEPTH_OPTIONS
+            questionary.Choice(
+                f"{display} [Recommended]" if value == recommended_depth else display,
+                value=value,
+            )
+            for display, value in depth_options
         ],
         instruction="\n- Use arrow keys to navigate\n- Press Enter to select",
         style=questionary.Style(
@@ -130,6 +257,70 @@ def select_research_depth() -> int:
 
     if choice is None:
         console.print("\n[red]No research depth selected. Exiting...[/red]")
+        exit(1)
+
+    return choice
+
+
+def select_position_importance(recommended: Optional[str] = None) -> str:
+    """Select how important this seat is to the institution."""
+    options = list(POSITION_IMPORTANCE_OPTIONS)
+    if recommended in POSITION_IMPORTANCE_LABELS:
+        options.sort(key=lambda item: item[1] != recommended)
+
+    choice = questionary.select(
+        "Select Your [Position Importance]:",
+        choices=[
+            questionary.Choice(
+                f"{display} [Recommended]" if value == recommended else display,
+                value=value,
+            )
+            for display, value in options
+        ],
+        instruction="\n- Use arrow keys to navigate\n- Press Enter to select",
+        style=questionary.Style(
+            [
+                ("selected", "fg:yellow noinherit"),
+                ("highlighted", "fg:yellow noinherit"),
+                ("pointer", "fg:yellow noinherit"),
+            ]
+        ),
+    ).ask()
+
+    if choice is None:
+        console.print("\n[red]No position importance selected. Exiting...[/red]")
+        exit(1)
+
+    return choice
+
+
+def select_token_budget(recommended: Optional[str] = None) -> str:
+    """Select the research spend posture for the session."""
+    options = list(TOKEN_BUDGET_OPTIONS)
+    if recommended in TOKEN_BUDGET_LABELS:
+        options.sort(key=lambda item: item[1] != recommended)
+
+    choice = questionary.select(
+        "Select Your [Token Budget]:",
+        choices=[
+            questionary.Choice(
+                f"{display} [Recommended]" if value == recommended else display,
+                value=value,
+            )
+            for display, value in options
+        ],
+        instruction="\n- Use arrow keys to navigate\n- Press Enter to select",
+        style=questionary.Style(
+            [
+                ("selected", "fg:yellow noinherit"),
+                ("highlighted", "fg:yellow noinherit"),
+                ("pointer", "fg:yellow noinherit"),
+            ]
+        ),
+    ).ask()
+
+    if choice is None:
+        console.print("\n[red]No token budget selected. Exiting...[/red]")
         exit(1)
 
     return choice
@@ -176,7 +367,7 @@ def select_shallow_thinking_agent(provider) -> str:
     }
 
     choice = questionary.select(
-        "Select Your [Quick-Thinking LLM Engine]:",
+        "Select Your [Scanning Engine]:",
         choices=[
             questionary.Choice(display, value=value)
             for display, value in SHALLOW_AGENT_OPTIONS[provider.lower()]
@@ -243,7 +434,7 @@ def select_deep_thinking_agent(provider) -> str:
     }
 
     choice = questionary.select(
-        "Select Your [Deep-Thinking LLM Engine]:",
+        "Select Your [Judgment Engine]:",
         choices=[
             questionary.Choice(display, value=value)
             for display, value in DEEP_AGENT_OPTIONS[provider.lower()]
@@ -277,7 +468,7 @@ def select_llm_provider() -> tuple[str, str]:
     ]
     
     choice = questionary.select(
-        "Select your LLM Provider:",
+        "Select Your [Model Backend]:",
         choices=[
             questionary.Choice(display, value=(display, value))
             for display, value in BASE_URLS
@@ -291,14 +482,12 @@ def select_llm_provider() -> tuple[str, str]:
             ]
         ),
     ).ask()
-    
+
     if choice is None:
         console.print("\n[red]No model backend selected. Exiting...[/red]")
         exit(1)
     
     display_name, url = choice
-    print(f"You selected: {display_name}\tURL: {url}")
-
     return display_name, url
 
 
@@ -358,3 +547,44 @@ def ask_gemini_thinking_config() -> str | None:
             ("pointer", "fg:green noinherit"),
         ]),
     ).ask()
+
+
+def confirm_launch() -> bool:
+    """Ask whether to launch the configured session."""
+    choice = questionary.select(
+        "Launch this Future Invest session?",
+        choices=[
+            questionary.Choice("Launch session", value=True),
+            questionary.Choice("Cancel", value=False),
+        ],
+        style=questionary.Style(
+            [
+                ("selected", "fg:cyan noinherit"),
+                ("highlighted", "fg:cyan noinherit"),
+                ("pointer", "fg:cyan noinherit"),
+            ]
+        ),
+    ).ask()
+    return bool(choice)
+
+
+def select_post_run_action() -> str:
+    """Select the next action after a run completes."""
+    choice = questionary.select(
+        "Choose the next action:",
+        choices=[
+            questionary.Choice("Save dossier and display on screen", "save_display"),
+            questionary.Choice("Save dossier and finish", "save"),
+            questionary.Choice("Display dossier on screen", "display"),
+            questionary.Choice("Finish without extra actions", "finish"),
+        ],
+        style=questionary.Style(
+            [
+                ("selected", "fg:green noinherit"),
+                ("highlighted", "fg:green noinherit"),
+                ("pointer", "fg:green noinherit"),
+            ]
+        ),
+    ).ask()
+
+    return choice or "finish"

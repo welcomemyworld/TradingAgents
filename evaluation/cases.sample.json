@@ -1,0 +1,48 @@
+[
+  {
+    "case_id": "nvda_post_q1_2024",
+    "ticker": "NVDA",
+    "analysis_date": "2024-05-10",
+    "selected_analysts": [
+      "business_truth",
+      "market_expectations",
+      "why_now",
+      "catalyst_path"
+    ],
+    "notes": "Growth re-rating sample with full capability stack.",
+    "config_overrides": {
+      "orchestrator_position_importance": "critical",
+      "orchestrator_token_budget": "expansive"
+    }
+  },
+  {
+    "case_id": "xom_macro_energy_2024",
+    "ticker": "XOM",
+    "analysis_date": "2024-06-14",
+    "selected_analysts": [
+      "business_truth",
+      "market_expectations",
+      "catalyst_path"
+    ],
+    "notes": "Commodity-sensitive large cap with lighter timing emphasis.",
+    "config_overrides": {
+      "orchestrator_position_importance": "standard",
+      "orchestrator_token_budget": "balanced"
+    }
+  },
+  {
+    "case_id": "meta_ad_platform_2024",
+    "ticker": "META",
+    "analysis_date": "2024-07-26",
+    "selected_analysts": [
+      "business_truth",
+      "market_expectations",
+      "why_now"
+    ],
+    "notes": "Platform compounding sample for research-quality comparison.",
+    "config_overrides": {
+      "orchestrator_position_importance": "high",
+      "orchestrator_token_budget": "balanced"
+    }
+  }
+]

@@ -1,0 +1,34 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="cciNeon" x="0" y="0" width="512" height="512" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blurA"/>
+      <feColorMatrix in="blurA" type="matrix" values="0 0 0 0 0.658824 0 0 0 0 0.423529 0 0 0 0 1 0 0 0 0.52 0" result="glowA"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="blurB"/>
+      <feColorMatrix in="blurB" type="matrix" values="0 0 0 0 0.788235 0 0 0 0 0.545098 0 0 0 0 1 0 0 0 0.26 0" result="glowB"/>
+      <feMerge>
+        <feMergeNode in="glowB"/>
+        <feMergeNode in="glowA"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="120" fill="#0A0F1A"/>
+  <rect x="24" y="24" width="464" height="464" rx="96" stroke="#241C39" stroke-width="2"/>
+
+  <g filter="url(#cciNeon)" stroke-linecap="round" stroke-linejoin="round">
+    <path
+      d="M360 118C325 92 282 78 236 78C129 78 42 165 42 272C42 379 129 466 236 466C282 466 325 452 360 426"
+      stroke="#A86CFF"
+      stroke-width="24"
+    />
+    <path
+      d="M322 170C304 156 282 148 258 148C191 148 136 203 136 270C136 337 191 392 258 392C282 392 304 384 322 370"
+      stroke="#C98BFF"
+      stroke-width="18"
+    />
+    <path d="M278 132V380" stroke="#F3EAFF" stroke-width="18"/>
+    <path d="M278 112V150" stroke="#F3EAFF" stroke-width="10"/>
+    <path d="M278 362V400" stroke="#F3EAFF" stroke-width="10"/>
+  </g>
+</svg>

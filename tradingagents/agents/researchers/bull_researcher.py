@@ -3,18 +3,22 @@ from tradingagents.agents.utils.agent_utils import (
     build_research_context,
 )
 from tradingagents.agents.utils.decision_protocol import (
+    CHALLENGE_STAGE_KEY,
+    THESIS_STAGE_KEY,
     THESIS_ENGINE_SECTION_MAP,
+    append_review_stage_output,
+    build_legacy_investment_debate_state,
     build_dossier_update,
+    get_review_output,
+    render_review_transcript,
 )
 
 
 def create_bull_researcher(llm, memory):
     def bull_node(state) -> dict:
-        investment_debate_state = state["investment_debate_state"]
-        history = investment_debate_state.get("history", "")
-        bull_history = investment_debate_state.get("bull_history", "")
-
-        current_response = investment_debate_state.get("current_response", "")
+        thesis_review = state.get("thesis_review", {})
+        history = render_review_transcript(thesis_review)
+        current_response = get_review_output(thesis_review, CHALLENGE_STAGE_KEY)
         shared_research_context = build_research_context(
             state, state.get("selected_analysts")
         )
@@ -61,19 +65,19 @@ Relevant lessons from past situations:
 """
 
         response = llm.invoke(prompt)
+        updated_review = append_review_stage_output(
+            thesis_review,
+            THESIS_STAGE_KEY,
+            THESIS_ENGINE,
+            response.content,
+        )
 
-        argument = f"{THESIS_ENGINE}: {response.content}"
-
-        new_investment_debate_state = {
-            "history": history + "\n" + argument,
-            "bull_history": bull_history + "\n" + argument,
-            "bear_history": investment_debate_state.get("bear_history", ""),
-            "latest_speaker": THESIS_ENGINE,
-            "current_response": argument,
-            "count": investment_debate_state["count"] + 1,
+        result = {
+            "thesis_review": updated_review,
+            "investment_debate_state": build_legacy_investment_debate_state(
+                updated_review
+            ),
         }
-
-        result = {"investment_debate_state": new_investment_debate_state}
         result.update(
             build_dossier_update(
                 state,
