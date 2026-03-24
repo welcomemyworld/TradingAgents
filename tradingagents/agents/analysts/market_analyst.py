@@ -14,6 +14,7 @@ def create_market_analyst(llm):
     def market_analyst_node(state):
         current_date = state["trade_date"]
         instrument_context = build_instrument_context(state["company_of_interest"])
+        analysis_brief = state.get("analysis_brief", "")
 
         tools = [
             get_stock_data,
@@ -21,7 +22,15 @@ def create_market_analyst(llm):
         ]
 
         system_message = (
-            """You are a trading assistant tasked with analyzing financial markets. Your role is to select the **most relevant indicators** for a given market condition or trading strategy from the following list. The goal is to choose up to **8 indicators** that provide complementary insights without redundancy. Categories and each category's indicators are:
+            """You are the Market Expectations capability inside an AI-native investment institution. Your job is to infer what the tape, trend, and technical structure imply the market already expects.
+
+Write a report with these sections:
+- What The Tape Implies
+- What Seems Priced In
+- Positioning / Momentum Read
+- Implications For Timing
+
+Select the **most relevant indicators** for the current setup from the following list. The goal is to choose up to **8 indicators** that provide complementary insight without redundancy. Categories and each category's indicators are:
 
 Moving Averages:
 - close_50_sma: 50 SMA: A medium-term trend indicator. Usage: Identify trend direction and serve as dynamic support/resistance. Tips: It lags price; combine with faster indicators for timely signals.
@@ -45,7 +54,11 @@ Volatility Indicators:
 Volume-Based Indicators:
 - vwma: VWMA: A moving average weighted by volume. Usage: Confirm trends by integrating price action with volume data. Tips: Watch for skewed results from volume spikes; use in combination with other volume analyses.
 
-- Select indicators that provide diverse and complementary information. Avoid redundancy (e.g., do not select both rsi and stochrsi). Also briefly explain why they are suitable for the given market context. When you tool call, please use the exact name of the indicators provided above as they are defined parameters, otherwise your call will fail. Please make sure to call get_stock_data first to retrieve the CSV that is needed to generate indicators. Then use get_indicators with the specific indicator names. Write a very detailed and nuanced report of the trends you observe. Provide specific, actionable insights with supporting evidence to help traders make informed decisions."""
+- Select indicators that provide diverse and complementary information. Avoid redundancy (e.g., do not select both rsi and stochrsi).
+- Explain what the market seems to be discounting, not just what the chart looks like.
+- When you tool call, please use the exact indicator names provided above or the call will fail.
+- Please call get_stock_data first to retrieve the CSV needed to generate indicators, then use get_indicators with the specific indicator names.
+- Write a detailed report that helps the rest of the institution understand expectations, timing, and what is already embedded in price."""
             + """ Make sure to append a Markdown table at the end of the report to organize key points in the report, organized and easy to read."""
         )
 
@@ -60,7 +73,8 @@ Volume-Based Indicators:
                     " If you or any other assistant has the FINAL TRANSACTION PROPOSAL: **BUY/HOLD/SELL** or deliverable,"
                     " prefix your response with FINAL TRANSACTION PROPOSAL: **BUY/HOLD/SELL** so the team knows to stop."
                     " You have access to the following tools: {tool_names}.\n{system_message}"
-                    "For your reference, the current date is {current_date}. {instrument_context}",
+                    "For your reference, the current date is {current_date}. {instrument_context}\n"
+                    "Current investment brief:\n{analysis_brief}",
                 ),
                 MessagesPlaceholder(variable_name="messages"),
             ]
@@ -70,6 +84,7 @@ Volume-Based Indicators:
         prompt = prompt.partial(tool_names=", ".join([tool.name for tool in tools]))
         prompt = prompt.partial(current_date=current_date)
         prompt = prompt.partial(instrument_context=instrument_context)
+        prompt = prompt.partial(analysis_brief=analysis_brief)
 
         chain = prompt | llm.bind_tools(tools)
 
@@ -82,7 +97,7 @@ Volume-Based Indicators:
 
         return {
             "messages": [result],
-            "market_report": report,
+            "market_expectations_report": report,
         }
 
     return market_analyst_node

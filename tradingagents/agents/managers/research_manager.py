@@ -1,45 +1,63 @@
-import time
-import json
-
-from tradingagents.agents.utils.agent_utils import build_instrument_context
+from tradingagents.agents.utils.agent_utils import (
+    INVESTMENT_DIRECTOR,
+    build_instrument_context,
+    build_research_context,
+)
+from tradingagents.agents.utils.decision_protocol import (
+    INVESTMENT_DIRECTOR_SECTION_MAP,
+    build_dossier_update,
+)
 
 
 def create_research_manager(llm, memory):
     def research_manager_node(state) -> dict:
         instrument_context = build_instrument_context(state["company_of_interest"])
         history = state["investment_debate_state"].get("history", "")
-        market_research_report = state["market_report"]
-        sentiment_report = state["sentiment_report"]
-        news_report = state["news_report"]
-        fundamentals_report = state["fundamentals_report"]
+        shared_research_context = build_research_context(
+            state, state.get("selected_analysts")
+        )
 
         investment_debate_state = state["investment_debate_state"]
 
-        curr_situation = f"{market_research_report}\n\n{sentiment_report}\n\n{news_report}\n\n{fundamentals_report}"
+        curr_situation = shared_research_context
         past_memories = memory.get_memories(curr_situation, n_matches=2)
 
         past_memory_str = ""
         for i, rec in enumerate(past_memories, 1):
             past_memory_str += rec["recommendation"] + "\n\n"
 
-        prompt = f"""As the portfolio manager and debate facilitator, your role is to critically evaluate this round of debate and make a definitive decision: align with the bear analyst, the bull analyst, or choose Hold only if it is strongly justified based on the arguments presented.
+        prompt = f"""You are the Investment Director for an AI-native long/short platform.
 
-Summarize the key points from both sides concisely, focusing on the most compelling evidence or reasoning. Your recommendation—Buy, Sell, or Hold—must be clear and actionable. Avoid defaulting to Hold simply because both sides have valid points; commit to a stance grounded in the debate's strongest arguments.
+Your job is to synthesize the thesis and challenge engines into an investable research memo that can be handed to execution and capital allocation.
 
-Additionally, develop a detailed investment plan for the trader. This should include:
+Write the memo using exactly these markdown headings:
+## Recommended Stance
+## Mispricing Narrative
+## What The Market Is Missing
+## Evidence That Matters
+## Catalyst Path
+## Timing Triggers
+## Initial Sizing View
+## Kill Criteria
 
-Your Recommendation: A decisive stance supported by the most convincing arguments.
-Rationale: An explanation of why these arguments lead to your conclusion.
-Strategic Actions: Concrete steps for implementing the recommendation.
-Take into account your past mistakes on similar situations. Use these insights to refine your decision-making and ensure you are learning and improving. Present your analysis conversationally, as if speaking naturally, without special formatting. 
+Rules:
+- Take a stand. Do not hide behind balance.
+- Translate debate into a clear institutional recommendation.
+- Focus on what is both true and tradable.
+- Use past lessons where relevant.
 
-Here are your past reflections on mistakes:
+Past reflections:
 \"{past_memory_str}\"
 
 {instrument_context}
 
-Here is the debate:
-Debate History:
+Cross-functional research brief:
+{state.get("analysis_plan", "")}
+
+Completed capability intelligence:
+{shared_research_context}
+
+Structured debate history:
 {history}"""
         response = llm.invoke(prompt)
 
@@ -48,13 +66,21 @@ Debate History:
             "history": investment_debate_state.get("history", ""),
             "bear_history": investment_debate_state.get("bear_history", ""),
             "bull_history": investment_debate_state.get("bull_history", ""),
+            "latest_speaker": INVESTMENT_DIRECTOR,
             "current_response": response.content,
             "count": investment_debate_state["count"],
         }
 
-        return {
+        result = {
             "investment_debate_state": new_investment_debate_state,
             "investment_plan": response.content,
         }
-
+        result.update(
+            build_dossier_update(
+                state,
+                response.content,
+                INVESTMENT_DIRECTOR_SECTION_MAP,
+            )
+        )
+        return result
     return research_manager_node

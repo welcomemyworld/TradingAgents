@@ -18,6 +18,11 @@ from tradingagents.agents.utils.agent_states import (
     InvestDebateState,
     RiskDebateState,
 )
+from tradingagents.agents.utils.agent_utils import (
+    ANALYST_ORDER,
+    ANALYST_REPORT_FIELDS,
+    normalize_selected_analysts,
+)
 from tradingagents.dataflows.config import set_config
 
 # Import the new abstract tool methods from agent_utils
@@ -45,7 +50,7 @@ class TradingAgentsGraph:
 
     def __init__(
         self,
-        selected_analysts=["market", "social", "news", "fundamentals"],
+        selected_analysts=None,
         debug=False,
         config: Dict[str, Any] = None,
         callbacks: Optional[List] = None,
@@ -53,7 +58,7 @@ class TradingAgentsGraph:
         """Initialize the trading agents graph and components.
 
         Args:
-            selected_analysts: List of analyst types to include
+            selected_analysts: List of capability ids to include
             debug: Whether to run in debug mode
             config: Configuration dictionary. If None, uses default config
             callbacks: Optional list of callback handlers (e.g., for tracking LLM/tool stats)
@@ -61,6 +66,9 @@ class TradingAgentsGraph:
         self.debug = debug
         self.config = config or DEFAULT_CONFIG
         self.callbacks = callbacks or []
+        self.selected_analysts = normalize_selected_analysts(
+            selected_analysts or ANALYST_ORDER
+        )
 
         # Update the interface's config
         set_config(self.config)
@@ -119,9 +127,12 @@ class TradingAgentsGraph:
             self.invest_judge_memory,
             self.portfolio_manager_memory,
             self.conditional_logic,
+            self.config,
         )
 
-        self.propagator = Propagator()
+        self.propagator = Propagator(
+            max_recur_limit=self.config.get("max_recur_limit", 100)
+        )
         self.reflector = Reflector(self.quick_thinking_llm)
         self.signal_processor = SignalProcessor(self.quick_thinking_llm)
 
@@ -131,7 +142,7 @@ class TradingAgentsGraph:
         self.log_states_dict = {}  # date to full state dict
 
         # Set up the graph
-        self.graph = self.graph_setup.setup_graph(selected_analysts)
+        self.graph = self.graph_setup.setup_graph(self.selected_analysts)
 
     def _get_provider_kwargs(self) -> Dict[str, Any]:
         """Get provider-specific kwargs for LLM client creation."""
@@ -158,7 +169,7 @@ class TradingAgentsGraph:
     def _create_tool_nodes(self) -> Dict[str, ToolNode]:
         """Create tool nodes for different data sources using abstract methods."""
         return {
-            "market": ToolNode(
+            "market_expectations": ToolNode(
                 [
                     # Core stock data tools
                     get_stock_data,
@@ -166,13 +177,13 @@ class TradingAgentsGraph:
                     get_indicators,
                 ]
             ),
-            "social": ToolNode(
+            "why_now": ToolNode(
                 [
-                    # News tools for social media analysis
+                    # News tools for timing and narrative analysis
                     get_news,
                 ]
             ),
-            "news": ToolNode(
+            "catalyst_path": ToolNode(
                 [
                     # News and insider information
                     get_news,
@@ -180,7 +191,7 @@ class TradingAgentsGraph:
                     get_insider_transactions,
                 ]
             ),
-            "fundamentals": ToolNode(
+            "business_truth": ToolNode(
                 [
                     # Fundamental analysis tools
                     get_fundamentals,
@@ -198,7 +209,7 @@ class TradingAgentsGraph:
 
         # Initialize state
         init_agent_state = self.propagator.create_initial_state(
-            company_name, trade_date
+            company_name, trade_date, self.selected_analysts
         )
         args = self.propagator.get_graph_args()
 
@@ -228,17 +239,25 @@ class TradingAgentsGraph:
 
     def _log_state(self, trade_date, final_state):
         """Log the final state to a JSON file."""
-        self.log_states_dict[str(trade_date)] = {
+        log_entry = {
             "company_of_interest": final_state["company_of_interest"],
             "trade_date": final_state["trade_date"],
-            "market_report": final_state["market_report"],
-            "sentiment_report": final_state["sentiment_report"],
-            "news_report": final_state["news_report"],
-            "fundamentals_report": final_state["fundamentals_report"],
+            "selected_analysts": final_state.get("selected_analysts", []),
+            "analysis_plan": final_state.get("analysis_plan", ""),
+            "analysis_brief": final_state.get("analysis_brief", ""),
+            "analysis_artifacts": final_state.get("analysis_artifacts", {}),
+            "orchestration_journal": final_state.get("orchestration_journal", []),
+            "decision_dossier": final_state.get("decision_dossier", {}),
+            "decision_dossier_markdown": final_state.get(
+                "decision_dossier_markdown", ""
+            ),
             "investment_debate_state": {
                 "bull_history": final_state["investment_debate_state"]["bull_history"],
                 "bear_history": final_state["investment_debate_state"]["bear_history"],
                 "history": final_state["investment_debate_state"]["history"],
+                "latest_speaker": final_state["investment_debate_state"].get(
+                    "latest_speaker", ""
+                ),
                 "current_response": final_state["investment_debate_state"][
                     "current_response"
                 ],
@@ -257,6 +276,9 @@ class TradingAgentsGraph:
             "investment_plan": final_state["investment_plan"],
             "final_trade_decision": final_state["final_trade_decision"],
         }
+        for report_field in ANALYST_REPORT_FIELDS.values():
+            log_entry[report_field] = final_state[report_field]
+        self.log_states_dict[str(trade_date)] = log_entry
 
         # Save to file
         directory = Path(f"eval_results/{self.ticker}/TradingAgentsStrategy_logs/")

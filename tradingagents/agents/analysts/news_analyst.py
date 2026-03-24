@@ -13,6 +13,7 @@ def create_news_analyst(llm):
     def news_analyst_node(state):
         current_date = state["trade_date"]
         instrument_context = build_instrument_context(state["company_of_interest"])
+        analysis_brief = state.get("analysis_brief", "")
 
         tools = [
             get_news,
@@ -20,7 +21,9 @@ def create_news_analyst(llm):
         ]
 
         system_message = (
-            "You are a news researcher tasked with analyzing recent news and trends over the past week. Please write a comprehensive report of the current state of the world that is relevant for trading and macroeconomics. Use the available tools: get_news(query, start_date, end_date) for company-specific or targeted news searches, and get_global_news(curr_date, look_back_days, limit) for broader macroeconomic news. Provide specific, actionable insights with supporting evidence to help traders make informed decisions."
+            "You are the Catalyst Path capability inside an AI-native investment institution. Your job is to map the event chain that can move expectations, compress uncertainty, or force a re-rating. Use get_news(query, start_date, end_date) for company-specific searches and get_global_news(curr_date, look_back_days, limit) for broader macro and industry event flow."
+            + " Write a report with these sections: Event Map, Catalyst Tree, Timeline, and Market-Relevance."
+            + " Focus on what can change the stock, not just what happened."
             + """ Make sure to append a Markdown table at the end of the report to organize key points in the report, organized and easy to read."""
         )
 
@@ -35,7 +38,8 @@ def create_news_analyst(llm):
                     " If you or any other assistant has the FINAL TRANSACTION PROPOSAL: **BUY/HOLD/SELL** or deliverable,"
                     " prefix your response with FINAL TRANSACTION PROPOSAL: **BUY/HOLD/SELL** so the team knows to stop."
                     " You have access to the following tools: {tool_names}.\n{system_message}"
-                    "For your reference, the current date is {current_date}. {instrument_context}",
+                    "For your reference, the current date is {current_date}. {instrument_context}\n"
+                    "Current investment brief:\n{analysis_brief}",
                 ),
                 MessagesPlaceholder(variable_name="messages"),
             ]
@@ -45,6 +49,7 @@ def create_news_analyst(llm):
         prompt = prompt.partial(tool_names=", ".join([tool.name for tool in tools]))
         prompt = prompt.partial(current_date=current_date)
         prompt = prompt.partial(instrument_context=instrument_context)
+        prompt = prompt.partial(analysis_brief=analysis_brief)
 
         chain = prompt | llm.bind_tools(tools)
         result = chain.invoke(state["messages"])
@@ -56,7 +61,7 @@ def create_news_analyst(llm):
 
         return {
             "messages": [result],
-            "news_report": report,
+            "catalyst_path_report": report,
         }
 
     return news_analyst_node

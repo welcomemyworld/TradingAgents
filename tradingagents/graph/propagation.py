@@ -6,6 +6,7 @@ from tradingagents.agents.utils.agent_states import (
     InvestDebateState,
     RiskDebateState,
 )
+from tradingagents.agents.utils.agent_utils import normalize_selected_analysts
 
 
 class Propagator:
@@ -16,18 +17,30 @@ class Propagator:
         self.max_recur_limit = max_recur_limit
 
     def create_initial_state(
-        self, company_name: str, trade_date: str
+        self, company_name: str, trade_date: str, selected_analysts: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         """Create the initial state for the agent graph."""
+        normalized_analysts = normalize_selected_analysts(selected_analysts)
         return {
             "messages": [("human", company_name)],
             "company_of_interest": company_name,
             "trade_date": str(trade_date),
+            "selected_analysts": normalized_analysts,
+            "analysis_queue": normalized_analysts.copy(),
+            "completed_analysts": [],
+            "current_analyst": "",
+            "analysis_plan": "",
+            "analysis_brief": "",
+            "analysis_artifacts": {},
+            "orchestration_journal": [],
+            "decision_dossier": {},
+            "decision_dossier_markdown": "",
             "investment_debate_state": InvestDebateState(
                 {
                     "bull_history": "",
                     "bear_history": "",
                     "history": "",
+                    "latest_speaker": "",
                     "current_response": "",
                     "judge_decision": "",
                     "count": 0,
@@ -47,10 +60,13 @@ class Propagator:
                     "count": 0,
                 }
             ),
-            "market_report": "",
-            "fundamentals_report": "",
-            "sentiment_report": "",
-            "news_report": "",
+            "market_expectations_report": "",
+            "business_truth_report": "",
+            "why_now_report": "",
+            "catalyst_path_report": "",
+            "investment_plan": "",
+            "trader_investment_plan": "",
+            "final_trade_decision": "",
         }
 
     def get_graph_args(self, callbacks: Optional[List] = None) -> Dict[str, Any]:

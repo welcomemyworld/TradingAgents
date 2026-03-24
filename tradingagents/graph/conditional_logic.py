@@ -1,6 +1,18 @@
 # TradingAgents/graph/conditional_logic.py
 
 from tradingagents.agents.utils.agent_states import AgentState
+from tradingagents.agents.utils.agent_utils import (
+    CAPITAL_ALLOCATION_COMMITTEE,
+    CHALLENGE_ENGINE,
+    DOWNSIDE_GUARDRAIL_ENGINE,
+    INVESTMENT_DIRECTOR,
+    PORTFOLIO_FIT_ENGINE,
+    THESIS_ENGINE,
+    UPSIDE_CAPTURE_ENGINE,
+    get_analyst_clear_node_name,
+    get_analyst_node_name,
+    get_analyst_tool_node_name,
+)
 
 
 class ConditionalLogic:
@@ -11,37 +23,24 @@ class ConditionalLogic:
         self.max_debate_rounds = max_debate_rounds
         self.max_risk_discuss_rounds = max_risk_discuss_rounds
 
-    def should_continue_market(self, state: AgentState):
-        """Determine if market analysis should continue."""
-        messages = state["messages"]
-        last_message = messages[-1]
-        if last_message.tool_calls:
-            return "tools_market"
-        return "Msg Clear Market"
+    def route_analyst_tools(self, analyst_key: str):
+        """Build a router that decides whether a capability should use tools again."""
 
-    def should_continue_social(self, state: AgentState):
-        """Determine if social media analysis should continue."""
-        messages = state["messages"]
-        last_message = messages[-1]
-        if last_message.tool_calls:
-            return "tools_social"
-        return "Msg Clear Social"
+        def _router(state: AgentState):
+            messages = state["messages"]
+            last_message = messages[-1]
+            if last_message.tool_calls:
+                return get_analyst_tool_node_name(analyst_key)
+            return get_analyst_clear_node_name(analyst_key)
 
-    def should_continue_news(self, state: AgentState):
-        """Determine if news analysis should continue."""
-        messages = state["messages"]
-        last_message = messages[-1]
-        if last_message.tool_calls:
-            return "tools_news"
-        return "Msg Clear News"
+        return _router
 
-    def should_continue_fundamentals(self, state: AgentState):
-        """Determine if fundamentals analysis should continue."""
-        messages = state["messages"]
-        last_message = messages[-1]
-        if last_message.tool_calls:
-            return "tools_fundamentals"
-        return "Msg Clear Fundamentals"
+    def route_next_analyst(self, state: AgentState) -> str:
+        """Route from the orchestrator to the next analyst or research team."""
+        current_analyst = state.get("current_analyst", "")
+        if current_analyst:
+            return get_analyst_node_name(current_analyst)
+        return THESIS_ENGINE
 
     def should_continue_debate(self, state: AgentState) -> str:
         """Determine if debate should continue."""
@@ -49,19 +48,19 @@ class ConditionalLogic:
         if (
             state["investment_debate_state"]["count"] >= 2 * self.max_debate_rounds
         ):  # 3 rounds of back-and-forth between 2 agents
-            return "Research Manager"
-        if state["investment_debate_state"]["current_response"].startswith("Bull"):
-            return "Bear Researcher"
-        return "Bull Researcher"
+            return INVESTMENT_DIRECTOR
+        if state["investment_debate_state"].get("latest_speaker") == THESIS_ENGINE:
+            return CHALLENGE_ENGINE
+        return THESIS_ENGINE
 
     def should_continue_risk_analysis(self, state: AgentState) -> str:
         """Determine if risk analysis should continue."""
         if (
             state["risk_debate_state"]["count"] >= 3 * self.max_risk_discuss_rounds
         ):  # 3 rounds of back-and-forth between 3 agents
-            return "Portfolio Manager"
-        if state["risk_debate_state"]["latest_speaker"].startswith("Aggressive"):
-            return "Conservative Analyst"
-        if state["risk_debate_state"]["latest_speaker"].startswith("Conservative"):
-            return "Neutral Analyst"
-        return "Aggressive Analyst"
+            return CAPITAL_ALLOCATION_COMMITTEE
+        if state["risk_debate_state"]["latest_speaker"] == UPSIDE_CAPTURE_ENGINE:
+            return DOWNSIDE_GUARDRAIL_ENGINE
+        if state["risk_debate_state"]["latest_speaker"] == DOWNSIDE_GUARDRAIL_ENGINE:
+            return PORTFOLIO_FIT_ENGINE
+        return UPSIDE_CAPTURE_ENGINE

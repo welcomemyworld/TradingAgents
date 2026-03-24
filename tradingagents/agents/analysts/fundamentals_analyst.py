@@ -16,6 +16,7 @@ def create_fundamentals_analyst(llm):
     def fundamentals_analyst_node(state):
         current_date = state["trade_date"]
         instrument_context = build_instrument_context(state["company_of_interest"])
+        analysis_brief = state.get("analysis_brief", "")
 
         tools = [
             get_fundamentals,
@@ -25,7 +26,9 @@ def create_fundamentals_analyst(llm):
         ]
 
         system_message = (
-            "You are a researcher tasked with analyzing fundamental information over the past week about a company. Please write a comprehensive report of the company's fundamental information such as financial documents, company profile, basic company financials, and company financial history to gain a full view of the company's fundamental information to inform traders. Make sure to include as much detail as possible. Provide specific, actionable insights with supporting evidence to help traders make informed decisions."
+            "You are the Business Truth capability inside an AI-native investment institution. Your job is to determine the underlying business reality of the company: earnings power, balance-sheet strength, unit economics, resilience, and structural quality."
+            + " Write a report with these sections: Business Reality, Earnings Power, Balance Sheet / Resilience, and What Must Be True."
+            + " Go beyond generic fundamentals and explain what is economically real about the company."
             + " Make sure to append a Markdown table at the end of the report to organize key points in the report, organized and easy to read."
             + " Use the available tools: `get_fundamentals` for comprehensive company analysis, `get_balance_sheet`, `get_cashflow`, and `get_income_statement` for specific financial statements.",
         )
@@ -41,7 +44,8 @@ def create_fundamentals_analyst(llm):
                     " If you or any other assistant has the FINAL TRANSACTION PROPOSAL: **BUY/HOLD/SELL** or deliverable,"
                     " prefix your response with FINAL TRANSACTION PROPOSAL: **BUY/HOLD/SELL** so the team knows to stop."
                     " You have access to the following tools: {tool_names}.\n{system_message}"
-                    "For your reference, the current date is {current_date}. {instrument_context}",
+                    "For your reference, the current date is {current_date}. {instrument_context}\n"
+                    "Current investment brief:\n{analysis_brief}",
                 ),
                 MessagesPlaceholder(variable_name="messages"),
             ]
@@ -51,6 +55,7 @@ def create_fundamentals_analyst(llm):
         prompt = prompt.partial(tool_names=", ".join([tool.name for tool in tools]))
         prompt = prompt.partial(current_date=current_date)
         prompt = prompt.partial(instrument_context=instrument_context)
+        prompt = prompt.partial(analysis_brief=analysis_brief)
 
         chain = prompt | llm.bind_tools(tools)
 
@@ -63,7 +68,7 @@ def create_fundamentals_analyst(llm):
 
         return {
             "messages": [result],
-            "fundamentals_report": report,
+            "business_truth_report": report,
         }
 
     return fundamentals_analyst_node

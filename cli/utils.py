@@ -4,16 +4,17 @@ from typing import List, Optional, Tuple, Dict
 from rich.console import Console
 
 from cli.models import AnalystType
+from tradingagents.agents.utils.agent_utils import (
+    ANALYST_ORDER as CAPABILITY_ORDER,
+    ANALYST_SELECTION_LABELS,
+)
 
 console = Console()
 
 TICKER_INPUT_EXAMPLES = "Examples: SPY, CNC.TO, 7203.T, 0700.HK"
 
-ANALYST_ORDER = [
-    ("Market Analyst", AnalystType.MARKET),
-    ("Social Media Analyst", AnalystType.SOCIAL),
-    ("News Analyst", AnalystType.NEWS),
-    ("Fundamentals Analyst", AnalystType.FUNDAMENTALS),
+CAPABILITY_CHOICES = [
+    (ANALYST_SELECTION_LABELS[key], AnalystType(key)) for key in CAPABILITY_ORDER
 ]
 
 
@@ -76,14 +77,15 @@ def get_analysis_date() -> str:
 
 
 def select_analysts() -> List[AnalystType]:
-    """Select analysts using an interactive checkbox."""
+    """Select abstract research capabilities using an interactive checkbox."""
     choices = questionary.checkbox(
-        "Select Your [Analysts Team]:",
+        "Select Your [Research Capabilities]:",
         choices=[
-            questionary.Choice(display, value=value) for display, value in ANALYST_ORDER
+            questionary.Choice(display, value=value)
+            for display, value in CAPABILITY_CHOICES
         ],
-        instruction="\n- Press Space to select/unselect analysts\n- Press 'a' to select/unselect all\n- Press Enter when done",
-        validate=lambda x: len(x) > 0 or "You must select at least one analyst.",
+        instruction="\n- Press Space to select/unselect capabilities\n- Press 'a' to select/unselect all\n- Press Enter when done",
+        validate=lambda x: len(x) > 0 or "You must select at least one capability.",
         style=questionary.Style(
             [
                 ("checkbox-selected", "fg:green"),
@@ -95,7 +97,7 @@ def select_analysts() -> List[AnalystType]:
     ).ask()
 
     if not choices:
-        console.print("\n[red]No analysts selected. Exiting...[/red]")
+        console.print("\n[red]No capabilities selected. Exiting...[/red]")
         exit(1)
 
     return choices
