@@ -4,7 +4,9 @@ from tradingagents.agents.utils.agent_utils import (
 )
 from tradingagents.agents.utils.decision_protocol import (
     DOWNSIDE_GUARDRAIL_SECTION_MAP,
+    RISK_DOSSIER_BRIEF_KEYS,
     build_dossier_update,
+    render_dossier_brief,
 )
 
 
@@ -20,6 +22,10 @@ def create_conservative_debator(llm):
         shared_research_context = build_research_context(
             state, state.get("selected_analysts")
         )
+        dossier_snapshot = render_dossier_brief(
+            state.get("decision_dossier"),
+            RISK_DOSSIER_BRIEF_KEYS,
+        )
 
         trader_decision = state["trader_investment_plan"]
 
@@ -31,11 +37,13 @@ Write exactly these markdown headings:
 ## Downside Map
 ## Hard Limits
 ## Kill Criteria
+## Scenario Map
 
 Inputs:
 - Execution blueprint: {trader_decision}
 - Research orchestration plan: {state.get("analysis_plan", "")}
-- Analyst intelligence: {shared_research_context}
+- Capability intelligence: {shared_research_context}
+- Structured dossier snapshot: {dossier_snapshot}
 - Risk review history: {history}
 - Latest upside capture memo: {current_aggressive_response}
 - Latest portfolio fit memo: {current_neutral_response}

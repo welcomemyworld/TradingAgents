@@ -49,7 +49,7 @@ console = Console()
 
 app = typer.Typer(
     name="TradingAgents",
-    help="TradingAgents CLI: Multi-Agents LLM Financial Trading Framework",
+    help="TradingAgents CLI: AI-Native Investment Institution Framework",
     add_completion=True,  # Enable shell completion
 )
 
@@ -69,9 +69,9 @@ class MessageBuffer:
     # Fixed teams that always run (not user-selectable)
     FIXED_AGENTS = {
         "Investment Orchestration": ["Investment Orchestrator"],
-        "Research Team": [THESIS_ENGINE, CHALLENGE_ENGINE, INVESTMENT_DIRECTOR],
-        "Execution": [EXECUTION_ENGINE],
-        "Risk Engines": [
+        "Institutional Debate": [THESIS_ENGINE, CHALLENGE_ENGINE, INVESTMENT_DIRECTOR],
+        "Execution Stack": [EXECUTION_ENGINE],
+        "Capital Formation": [
             UPSIDE_CAPTURE_ENGINE,
             PORTFOLIO_FIT_ENGINE,
             DOWNSIDE_GUARDRAIL_ENGINE,
@@ -79,13 +79,13 @@ class MessageBuffer:
         "Capital Allocation": [CAPITAL_ALLOCATION_COMMITTEE],
     }
 
-    # Analyst name mapping
+    # Capability name mapping
     ANALYST_MAPPING = {
         analyst_key: ANALYST_DISPLAY_NAMES[analyst_key] for analyst_key in ANALYST_ORDER
     }
 
-    # Report section mapping: section -> (analyst_key for filtering, finalizing_agent)
-    # analyst_key: which analyst selection controls this section (None = always included)
+    # Report section mapping: section -> (capability_key for filtering, finalizing_agent)
+    # capability_key: which capability selection controls this section (None = always included)
     # finalizing_agent: which agent must be "completed" for this report to count as done
     REPORT_SECTIONS = {
         "analysis_plan": (None, "Investment Orchestrator"),
@@ -108,7 +108,7 @@ class MessageBuffer:
         self._last_message_id = None
 
     def init_for_analysis(self, selected_analysts):
-        """Initialize agent status and report sections based on selected analysts.
+        """Initialize agent status and report sections based on selected capabilities.
 
         Args:
             selected_analysts: List of capability ids (e.g., ["market_expectations", "catalyst_path"])
@@ -118,7 +118,7 @@ class MessageBuffer:
         # Build agent_status dynamically
         self.agent_status = {}
 
-        # Add selected analysts
+        # Add selected capabilities
         for analyst_key in self.selected_analysts:
             if analyst_key in self.ANALYST_MAPPING:
                 self.agent_status[self.ANALYST_MAPPING[analyst_key]] = "pending"
@@ -229,17 +229,17 @@ class MessageBuffer:
                         f"### {ANALYST_REPORT_TITLES[analyst_key]}\n{report}"
                     )
 
-        # Research Team Reports
+        # Institutional debate outputs
         if self.report_sections.get("investment_plan"):
             report_parts.append("## Investment Director Memo")
             report_parts.append(f"{self.report_sections['investment_plan']}")
 
-        # Trading Team Reports
+        # Execution outputs
         if self.report_sections.get("trader_investment_plan"):
             report_parts.append("## Execution Blueprint")
             report_parts.append(f"{self.report_sections['trader_investment_plan']}")
 
-        # Portfolio Management Decision
+        # Capital allocation decision
         if self.report_sections.get("final_trade_decision"):
             report_parts.append("## Capital Allocation Decision")
             report_parts.append(f"{self.report_sections['final_trade_decision']}")
@@ -281,9 +281,9 @@ def update_display(layout, spinner_text=None, stats_handler=None, start_time=Non
     # Header with welcome message
     layout["header"].update(
         Panel(
-            "[bold green]Welcome to TradingAgents CLI[/bold green]\n"
+            "[bold green]Welcome to the TradingAgents Institution CLI[/bold green]\n"
             "[dim]© [Tauric Research](https://github.com/TauricResearch)[/dim]",
-            title="Welcome to TradingAgents",
+            title="TradingAgents Institution",
             border_style="green",
             padding=(1, 2),
             expand=True,
@@ -301,7 +301,7 @@ def update_display(layout, spinner_text=None, stats_handler=None, start_time=Non
         expand=True,  # Make table expand to fill available space
     )
     progress_table.add_column("Team", style="cyan", justify="center", width=20)
-    progress_table.add_column("Agent", style="green", justify="center", width=20)
+    progress_table.add_column("Engine", style="green", justify="center", width=20)
     progress_table.add_column("Status", style="yellow", justify="center", width=20)
 
     # Group agents by team - filter to only include agents in agent_status
@@ -310,9 +310,9 @@ def update_display(layout, spinner_text=None, stats_handler=None, start_time=Non
         "Research Capabilities": [
             ANALYST_DISPLAY_NAMES[analyst_key] for analyst_key in ANALYST_ORDER
         ],
-        "Research Team": [THESIS_ENGINE, CHALLENGE_ENGINE, INVESTMENT_DIRECTOR],
-        "Execution": [EXECUTION_ENGINE],
-        "Risk Engines": [
+        "Institutional Debate": [THESIS_ENGINE, CHALLENGE_ENGINE, INVESTMENT_DIRECTOR],
+        "Execution Stack": [EXECUTION_ENGINE],
+        "Capital Formation": [
             UPSIDE_CAPTURE_ENGINE,
             PORTFOLIO_FIT_ENGINE,
             DOWNSIDE_GUARDRAIL_ENGINE,
@@ -429,7 +429,7 @@ def update_display(layout, spinner_text=None, stats_handler=None, start_time=Non
         layout["analysis"].update(
             Panel(
                 Markdown(message_buffer.current_report),
-                title="Current Report",
+                title="Current Institutional Output",
                 border_style="green",
                 padding=(1, 2),
             )
@@ -437,8 +437,8 @@ def update_display(layout, spinner_text=None, stats_handler=None, start_time=Non
     else:
         layout["analysis"].update(
             Panel(
-                "[italic]Waiting for analysis report...[/italic]",
-                title="Current Report",
+                "[italic]Waiting for the next institutional output...[/italic]",
+                title="Current Institutional Output",
                 border_style="green",
                 padding=(1, 2),
             )
@@ -494,9 +494,9 @@ def get_user_selections():
 
     # Create welcome box content
     welcome_content = f"{welcome_ascii}\n"
-    welcome_content += "[bold green]TradingAgents: Multi-Agents LLM Financial Trading Framework - CLI[/bold green]\n\n"
+    welcome_content += "[bold green]TradingAgents: AI-Native Investment Institution - CLI[/bold green]\n\n"
     welcome_content += "[bold]Workflow Steps:[/bold]\n"
-    welcome_content += "I. Investment Orchestration → II. Analyst Team → III. Thesis Review → IV. Execution Blueprint → V. Risk Engines → VI. Capital Allocation\n\n"
+    welcome_content += "I. Investment Orchestration → II. Research Capabilities → III. Institutional Debate → IV. Execution Blueprint → V. Capital Formation → VI. Capital Allocation\n\n"
     welcome_content += (
         "[dim]Built by [Tauric Research](https://github.com/TauricResearch)[/dim]"
     )
@@ -507,7 +507,7 @@ def get_user_selections():
         border_style="green",
         padding=(1, 2),
         title="Welcome to TradingAgents",
-        subtitle="Multi-Agents LLM Financial Trading Framework",
+        subtitle="AI-Native Investment Institution Framework",
     )
     console.print(Align.center(welcome_box))
     console.print()
@@ -565,18 +565,18 @@ def get_user_selections():
     )
     selected_research_depth = select_research_depth()
 
-    # Step 5: OpenAI backend
+    # Step 5: Model backend
     console.print(
         create_question_box(
-            "Step 5: OpenAI backend", "Select which service to talk to"
+            "Step 5: Model Backend", "Select which model provider powers the institution"
         )
     )
     selected_llm_provider, backend_url = select_llm_provider()
     
-    # Step 6: Thinking agents
+    # Step 6: Model pairing
     console.print(
         create_question_box(
-            "Step 6: Thinking Agents", "Select your thinking agents for analysis"
+            "Step 6: Model Pairing", "Select the quick-thinking and deep-thinking models for the institution"
         )
     )
     selected_shallow_thinker = select_shallow_thinking_agent(selected_llm_provider)
@@ -653,7 +653,7 @@ def get_analysis_date():
 
 
 def save_report_to_disk(final_state, ticker: str, save_path: Path):
-    """Save complete analysis report to disk with organized subfolders."""
+    """Save the complete institution run to disk with organized subfolders."""
     save_path.mkdir(parents=True, exist_ok=True)
     sections = []
 
@@ -680,7 +680,7 @@ def save_report_to_disk(final_state, ticker: str, save_path: Path):
         )
         sections.append(f"## II. Research Capability Reports\n\n{analyst_content}")
 
-    # 3. Research
+    # 3. Institutional debate
     if final_state.get("investment_debate_state"):
         research_dir = save_path / "3_research"
         debate = final_state["investment_debate_state"]
@@ -699,9 +699,9 @@ def save_report_to_disk(final_state, ticker: str, save_path: Path):
             research_parts.append((INVESTMENT_DIRECTOR, debate["judge_decision"]))
         if research_parts:
             content = "\n\n".join(f"### {name}\n{text}" for name, text in research_parts)
-            sections.append(f"## III. Thesis Review\n\n{content}")
+            sections.append(f"## III. Institutional Debate\n\n{content}")
 
-    # 4. Trading
+    # 4. Execution
     if final_state.get("trader_investment_plan"):
         trading_dir = save_path / "4_trading"
         trading_dir.mkdir(exist_ok=True)
@@ -710,7 +710,7 @@ def save_report_to_disk(final_state, ticker: str, save_path: Path):
             f"## IV. Execution Blueprint\n\n### {EXECUTION_ENGINE}\n{final_state['trader_investment_plan']}"
         )
 
-    # 5. Risk Management
+    # 5. Capital formation
     if final_state.get("risk_debate_state"):
         risk_dir = save_path / "5_risk"
         risk = final_state["risk_debate_state"]
@@ -729,7 +729,7 @@ def save_report_to_disk(final_state, ticker: str, save_path: Path):
             risk_parts.append((PORTFOLIO_FIT_ENGINE, risk["neutral_history"]))
         if risk_parts:
             content = "\n\n".join(f"### {name}\n{text}" for name, text in risk_parts)
-            sections.append(f"## V. Risk Engines\n\n{content}")
+            sections.append(f"## V. Capital Formation\n\n{content}")
 
         # 6. Capital Allocation
         if risk.get("judge_decision"):
@@ -747,15 +747,15 @@ def save_report_to_disk(final_state, ticker: str, save_path: Path):
         sections.append(f"## VII. AI Investment Dossier\n\n{final_state['decision_dossier_markdown']}")
 
     # Write consolidated report
-    header = f"# Trading Analysis Report: {ticker}\n\nGenerated: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+    header = f"# AI Investment Institution Report: {ticker}\n\nGenerated: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
     (save_path / "complete_report.md").write_text(header + "\n\n".join(sections))
     return save_path / "complete_report.md"
 
 
 def display_complete_report(final_state):
-    """Display the complete analysis report sequentially (avoids truncation)."""
+    """Display the complete institution report sequentially (avoids truncation)."""
     console.print()
-    console.print(Rule("Complete Analysis Report", style="bold green"))
+    console.print(Rule("Complete Institution Report", style="bold green"))
 
     if final_state.get("analysis_plan"):
         console.print(Panel("[bold]I. Investment Orchestration[/bold]", border_style="green"))
@@ -780,7 +780,7 @@ def display_complete_report(final_state):
         for title, content in analysts:
             console.print(Panel(Markdown(content), title=title, border_style="blue", padding=(1, 2)))
 
-    # III. Research Team Reports
+    # III. Institutional Debate
     if final_state.get("investment_debate_state"):
         debate = final_state["investment_debate_state"]
         research = []
@@ -791,7 +791,7 @@ def display_complete_report(final_state):
         if debate.get("judge_decision"):
             research.append((INVESTMENT_DIRECTOR, debate["judge_decision"]))
         if research:
-            console.print(Panel("[bold]III. Thesis Review[/bold]", border_style="magenta"))
+            console.print(Panel("[bold]III. Institutional Debate[/bold]", border_style="magenta"))
             for title, content in research:
                 console.print(Panel(Markdown(content), title=title, border_style="blue", padding=(1, 2)))
 
@@ -800,7 +800,7 @@ def display_complete_report(final_state):
         console.print(Panel("[bold]IV. Execution Blueprint[/bold]", border_style="yellow"))
         console.print(Panel(Markdown(final_state["trader_investment_plan"]), title=EXECUTION_ENGINE, border_style="blue", padding=(1, 2)))
 
-    # V. Risk Engines
+    # V. Capital Formation
     if final_state.get("risk_debate_state"):
         risk = final_state["risk_debate_state"]
         risk_reports = []
@@ -811,7 +811,7 @@ def display_complete_report(final_state):
         if risk.get("neutral_history"):
             risk_reports.append((PORTFOLIO_FIT_ENGINE, risk["neutral_history"]))
         if risk_reports:
-            console.print(Panel("[bold]V. Risk Engines[/bold]", border_style="red"))
+            console.print(Panel("[bold]V. Capital Formation[/bold]", border_style="red"))
             for title, content in risk_reports:
                 console.print(Panel(Markdown(content), title=title, border_style="blue", padding=(1, 2)))
 
@@ -833,27 +833,27 @@ def display_complete_report(final_state):
 
 
 def update_research_team_status(status):
-    """Update status for the thesis review stack."""
+    """Update status for the institutional debate stack."""
     research_team = RESEARCH_TEAM_NAMES
     for agent in research_team:
         message_buffer.update_agent_status(agent, status)
 
 
-# Ordered list of analysts for status transitions
+# Ordered list of capabilities for status transitions
 ANALYST_AGENT_NAMES = ANALYST_DISPLAY_NAMES
 ANALYST_REPORT_MAP = ANALYST_REPORT_FIELDS
 
 
 def update_analyst_statuses(message_buffer, chunk):
-    """Update analyst statuses based on accumulated report state.
+    """Update capability statuses based on accumulated report state.
 
     Logic:
     - Store new report content from the current chunk if present
     - Check accumulated report_sections (not just current chunk) for status
-    - Analysts with reports = completed
-    - First analyst without report = in_progress
-    - Remaining analysts without reports = pending
-    - When all analysts finish, hand off to the thesis review stack
+    - Capabilities with reports = completed
+    - First capability without report = in_progress
+    - Remaining capabilities without reports = pending
+    - When all capabilities finish, hand off to the institutional debate stack
     """
     selected = message_buffer.selected_analysts
     active_key = chunk.get("current_analyst")
@@ -889,7 +889,7 @@ def update_analyst_statuses(message_buffer, chunk):
         else:
             message_buffer.update_agent_status(agent_name, "pending")
 
-    # When all analysts complete, transition research team to in_progress
+    # When all capabilities complete, transition the debate stack to in_progress
     if not found_active and selected:
         if message_buffer.agent_status.get(THESIS_ENGINE) == "pending":
             message_buffer.update_agent_status(THESIS_ENGINE, "in_progress")
@@ -989,7 +989,7 @@ def run_analysis():
     # Create stats callback handler for tracking LLM/tool calls
     stats_handler = StatsCallbackHandler()
 
-    # Normalize analyst selection to predefined order (selection is a 'set', order is fixed)
+    # Normalize capability selection to predefined order (selection is a 'set', order is fixed)
     selected_set = {analyst.value for analyst in selections["analysts"]}
     selected_analyst_keys = [a for a in ANALYST_ORDER if a in selected_set]
 
@@ -1001,7 +1001,7 @@ def run_analysis():
         callbacks=[stats_handler],
     )
 
-    # Initialize message buffer with selected analysts
+    # Initialize message buffer with selected capabilities
     message_buffer.init_for_analysis(selected_analyst_keys)
 
     # Track start time for elapsed display
@@ -1074,7 +1074,7 @@ def run_analysis():
         )
         update_display(layout, stats_handler=stats_handler, start_time=start_time)
 
-        # Orchestration runs first and decides the analyst path.
+        # Orchestration runs first and decides the capability path.
         message_buffer.update_agent_status("Investment Orchestrator", "in_progress")
         update_display(layout, stats_handler=stats_handler, start_time=start_time)
 
@@ -1118,10 +1118,10 @@ def run_analysis():
                             else:
                                 message_buffer.add_tool_call(tool_call.name, tool_call.args)
 
-            # Update analyst statuses based on report state (runs on every chunk)
+            # Update capability statuses based on report state (runs on every chunk)
             update_analyst_statuses(message_buffer, chunk)
 
-            # Research Team - Handle Investment Debate State
+            # Institutional Debate - Handle Investment Debate State
             if chunk.get("investment_debate_state"):
                 debate_state = chunk["investment_debate_state"]
                 bull_hist = debate_state.get("bull_history", "").strip()
@@ -1155,7 +1155,7 @@ def run_analysis():
                     message_buffer.update_agent_status(EXECUTION_ENGINE, "completed")
                     message_buffer.update_agent_status(UPSIDE_CAPTURE_ENGINE, "in_progress")
 
-            # Risk Engines - Handle capital formation review
+            # Capital Formation - Handle portfolio construction review
             if chunk.get("risk_debate_state"):
                 risk_state = chunk["risk_debate_state"]
                 agg_hist = risk_state.get("aggressive_history", "").strip()
@@ -1222,7 +1222,7 @@ def run_analysis():
         update_display(layout, stats_handler=stats_handler, start_time=start_time)
 
     # Post-analysis prompts (outside Live context for clean interaction)
-    console.print("\n[bold cyan]Analysis Complete![/bold cyan]\n")
+    console.print("\n[bold cyan]Institution Run Complete![/bold cyan]\n")
 
     # Prompt to save report
     save_choice = typer.prompt("Save report?", default="Y").strip().upper()

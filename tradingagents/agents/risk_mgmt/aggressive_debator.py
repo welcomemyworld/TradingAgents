@@ -3,8 +3,10 @@ from tradingagents.agents.utils.agent_utils import (
     build_research_context,
 )
 from tradingagents.agents.utils.decision_protocol import (
+    RISK_DOSSIER_BRIEF_KEYS,
     UPSIDE_CAPTURE_SECTION_MAP,
     build_dossier_update,
+    render_dossier_brief,
 )
 
 
@@ -19,6 +21,10 @@ def create_aggressive_debator(llm):
 
         shared_research_context = build_research_context(
             state, state.get("selected_analysts")
+        )
+        dossier_snapshot = render_dossier_brief(
+            state.get("decision_dossier"),
+            RISK_DOSSIER_BRIEF_KEYS,
         )
 
         trader_decision = state["trader_investment_plan"]
@@ -35,7 +41,8 @@ Write exactly these markdown headings:
 Inputs:
 - Execution blueprint: {trader_decision}
 - Research orchestration plan: {state.get("analysis_plan", "")}
-- Analyst intelligence: {shared_research_context}
+- Capability intelligence: {shared_research_context}
+- Structured dossier snapshot: {dossier_snapshot}
 - Risk review history: {history}
 - Latest downside guardrail memo: {current_conservative_response}
 - Latest portfolio fit memo: {current_neutral_response}

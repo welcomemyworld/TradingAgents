@@ -104,13 +104,13 @@ def select_analysts() -> List[AnalystType]:
 
 
 def select_research_depth() -> int:
-    """Select research depth using an interactive selection."""
+    """Select how many institutional review cycles to run."""
 
     # Define research depth options with their corresponding values
     DEPTH_OPTIONS = [
-        ("Shallow - Quick research, few debate and strategy discussion rounds", 1),
-        ("Medium - Middle ground, moderate debate rounds and strategy discussion", 3),
-        ("Deep - Comprehensive research, in depth debate and strategy discussion", 5),
+        ("Shallow - Fast institution run, fewer debate and capital formation cycles", 1),
+        ("Medium - Balanced depth with moderate institutional review", 3),
+        ("Deep - Full institutional pass with richer debate and risk formation", 5),
     ]
 
     choice = questionary.select(
@@ -293,7 +293,7 @@ def select_llm_provider() -> tuple[str, str]:
     ).ask()
     
     if choice is None:
-        console.print("\n[red]no OpenAI backend selected. Exiting...[/red]")
+        console.print("\n[red]No model backend selected. Exiting...[/red]")
         exit(1)
     
     display_name, url = choice

@@ -9,6 +9,10 @@ from tradingagents.agents.utils.agent_utils import (
     get_income_statement,
     get_insider_transactions,
 )
+from tradingagents.agents.utils.decision_protocol import (
+    BUSINESS_TRUTH_SECTION_MAP,
+    build_dossier_update,
+)
 from tradingagents.dataflows.config import get_config
 
 
@@ -66,9 +70,17 @@ def create_fundamentals_analyst(llm):
         if len(result.tool_calls) == 0:
             report = result.content
 
-        return {
+        output = {
             "messages": [result],
             "business_truth_report": report,
         }
+        output.update(
+            build_dossier_update(
+                state,
+                report,
+                BUSINESS_TRUTH_SECTION_MAP,
+            )
+        )
+        return output
 
     return fundamentals_analyst_node

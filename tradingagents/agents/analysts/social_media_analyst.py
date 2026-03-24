@@ -2,6 +2,10 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 import time
 import json
 from tradingagents.agents.utils.agent_utils import build_instrument_context, get_news
+from tradingagents.agents.utils.decision_protocol import (
+    WHY_NOW_SECTION_MAP,
+    build_dossier_update,
+)
 from tradingagents.dataflows.config import get_config
 
 
@@ -55,9 +59,17 @@ def create_social_media_analyst(llm):
         if len(result.tool_calls) == 0:
             report = result.content
 
-        return {
+        output = {
             "messages": [result],
             "why_now_report": report,
         }
+        output.update(
+            build_dossier_update(
+                state,
+                report,
+                WHY_NOW_SECTION_MAP,
+            )
+        )
+        return output
 
     return social_media_analyst_node

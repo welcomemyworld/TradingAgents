@@ -5,7 +5,9 @@ from tradingagents.agents.utils.agent_utils import (
 )
 from tradingagents.agents.utils.decision_protocol import (
     CAPITAL_ALLOCATION_SECTION_MAP,
+    CAPITAL_ALLOCATION_DOSSIER_BRIEF_KEYS,
     build_dossier_update,
+    render_dossier_brief,
 )
 
 
@@ -20,6 +22,10 @@ def create_portfolio_manager(llm, memory):
             state, state.get("selected_analysts")
         )
         trader_plan = state["trader_investment_plan"] or state["investment_plan"]
+        dossier_snapshot = render_dossier_brief(
+            state.get("decision_dossier"),
+            CAPITAL_ALLOCATION_DOSSIER_BRIEF_KEYS,
+        )
 
         curr_situation = shared_research_context
         past_memories = memory.get_memories(curr_situation, n_matches=2)
@@ -38,6 +44,7 @@ Your job is to convert the accumulated dossier into a final capital allocation d
 
 Write exactly these markdown headings:
 ## Rating
+## Portfolio Mandate
 ## Position Size
 ## Entry / Exit
 ## Kill Criteria
@@ -50,7 +57,8 @@ Context:
 - Execution blueprint: {trader_plan}
 - Lessons from past decisions: {past_memory_str}
 - Research orchestration plan: {state.get("analysis_plan", "")}
-- Analyst intelligence: {shared_research_context}
+- Capability intelligence: {shared_research_context}
+- Structured dossier snapshot: {dossier_snapshot}
 - Risk review history: {history}
 
 Be decisive and tie every allocation choice to specific evidence."""

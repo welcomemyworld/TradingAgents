@@ -6,6 +6,8 @@ from tradingagents.agents.utils.agent_utils import (
 from tradingagents.agents.utils.decision_protocol import (
     INVESTMENT_DIRECTOR_SECTION_MAP,
     build_dossier_update,
+    render_dossier_brief,
+    RESEARCH_DOSSIER_BRIEF_KEYS,
 )
 
 
@@ -18,6 +20,10 @@ def create_research_manager(llm, memory):
         )
 
         investment_debate_state = state["investment_debate_state"]
+        dossier_snapshot = render_dossier_brief(
+            state.get("decision_dossier"),
+            RESEARCH_DOSSIER_BRIEF_KEYS,
+        )
 
         curr_situation = shared_research_context
         past_memories = memory.get_memories(curr_situation, n_matches=2)
@@ -31,12 +37,14 @@ def create_research_manager(llm, memory):
 Your job is to synthesize the thesis and challenge engines into an investable research memo that can be handed to execution and capital allocation.
 
 Write the memo using exactly these markdown headings:
+## World Model
 ## Recommended Stance
 ## Mispricing Narrative
 ## What The Market Is Missing
 ## Evidence That Matters
 ## Catalyst Path
-## Timing Triggers
+## Time Horizon
+## Portfolio Role
 ## Initial Sizing View
 ## Kill Criteria
 
@@ -56,6 +64,9 @@ Cross-functional research brief:
 
 Completed capability intelligence:
 {shared_research_context}
+
+Structured dossier snapshot:
+{dossier_snapshot}
 
 Structured debate history:
 {history}"""

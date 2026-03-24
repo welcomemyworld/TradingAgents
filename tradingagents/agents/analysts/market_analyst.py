@@ -6,6 +6,10 @@ from tradingagents.agents.utils.agent_utils import (
     get_indicators,
     get_stock_data,
 )
+from tradingagents.agents.utils.decision_protocol import (
+    MARKET_EXPECTATIONS_SECTION_MAP,
+    build_dossier_update,
+)
 from tradingagents.dataflows.config import get_config
 
 
@@ -95,9 +99,17 @@ Volume-Based Indicators:
         if len(result.tool_calls) == 0:
             report = result.content
 
-        return {
+        output = {
             "messages": [result],
             "market_expectations_report": report,
         }
+        output.update(
+            build_dossier_update(
+                state,
+                report,
+                MARKET_EXPECTATIONS_SECTION_MAP,
+            )
+        )
+        return output
 
     return market_analyst_node

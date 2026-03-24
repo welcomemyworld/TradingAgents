@@ -3,7 +3,18 @@ from typing import Dict, Iterable
 
 
 DECISION_DOSSIER_ORDER = [
+    ("world_model", "World Model"),
     ("final_recommendation", "Final Recommendation"),
+    ("business_truth", "Business Truth"),
+    ("earnings_power", "Earnings Power"),
+    ("balance_sheet_resilience", "Balance Sheet / Resilience"),
+    ("critical_assumptions", "Critical Assumptions"),
+    ("market_expectations_view", "Market Expectations"),
+    ("positioning_signal", "Positioning / Momentum"),
+    ("attention_regime", "Attention Regime"),
+    ("narrative_momentum", "Narrative Momentum"),
+    ("sentiment_inflection", "Sentiment Inflection"),
+    ("event_map", "Event Map"),
     ("core_thesis", "Core Thesis"),
     ("variant_perception", "Variant Perception"),
     ("supporting_evidence", "Supporting Evidence"),
@@ -11,16 +22,48 @@ DECISION_DOSSIER_ORDER = [
     ("counterevidence", "Counterevidence"),
     ("failure_modes", "Failure Modes"),
     ("catalyst_path", "Catalyst Path"),
+    ("time_horizon", "Time Horizon"),
     ("timing_triggers", "Timing Triggers"),
     ("execution_plan", "Execution Plan"),
     ("entry_framework", "Entry Framework"),
+    ("liquidity_plan", "Liquidity Plan"),
     ("position_sizing", "Position Sizing"),
+    ("capital_budget", "Capital Budget"),
+    ("scenario_map", "Scenario Map"),
+    ("portfolio_role", "Portfolio Role"),
     ("portfolio_fit", "Portfolio Fit"),
     ("risk_guardrails", "Risk Guardrails"),
     ("kill_criteria", "Kill Criteria"),
     ("monitoring_triggers", "Monitoring Triggers"),
     ("capital_allocation_rationale", "Capital Allocation Rationale"),
 ]
+
+BUSINESS_TRUTH_SECTION_MAP = {
+    "business_truth": ["Business Reality"],
+    "earnings_power": ["Earnings Power"],
+    "balance_sheet_resilience": ["Balance Sheet / Resilience"],
+    "critical_assumptions": ["What Must Be True"],
+}
+
+MARKET_EXPECTATIONS_SECTION_MAP = {
+    "market_expectations_view": ["What Seems Priced In"],
+    "positioning_signal": ["Positioning / Momentum Read"],
+    "timing_triggers": ["Implications For Timing"],
+}
+
+WHY_NOW_SECTION_MAP = {
+    "attention_regime": ["Attention Shift"],
+    "narrative_momentum": ["Narrative Momentum"],
+    "sentiment_inflection": ["Sentiment Inflection"],
+    "time_horizon": ["Why This Matters Now"],
+}
+
+CATALYST_PATH_SECTION_MAP = {
+    "event_map": ["Event Map"],
+    "catalyst_path": ["Catalyst Tree"],
+    "time_horizon": ["Timeline"],
+    "timing_triggers": ["Market-Relevance"],
+}
 
 THESIS_ENGINE_SECTION_MAP = {
     "core_thesis": ["Core Thesis"],
@@ -37,12 +80,14 @@ CHALLENGE_ENGINE_SECTION_MAP = {
 }
 
 INVESTMENT_DIRECTOR_SECTION_MAP = {
+    "world_model": ["World Model"],
     "final_recommendation": ["Recommended Stance"],
     "core_thesis": ["Mispricing Narrative"],
     "variant_perception": ["What The Market Is Missing"],
     "supporting_evidence": ["Evidence That Matters"],
     "catalyst_path": ["Catalyst Path"],
-    "timing_triggers": ["Timing Triggers"],
+    "time_horizon": ["Time Horizon"],
+    "portfolio_role": ["Portfolio Role"],
     "position_sizing": ["Initial Sizing View"],
     "kill_criteria": ["Kill Criteria"],
 }
@@ -51,6 +96,7 @@ EXECUTION_ENGINE_SECTION_MAP = {
     "execution_plan": ["Execution Plan"],
     "entry_framework": ["Entry Framework"],
     "position_sizing": ["Position Construction"],
+    "liquidity_plan": ["Liquidity Plan"],
     "monitoring_triggers": ["Monitoring Plan"],
 }
 
@@ -64,22 +110,75 @@ DOWNSIDE_GUARDRAIL_SECTION_MAP = {
     "failure_modes": ["Downside Map"],
     "risk_guardrails": ["Hard Limits"],
     "kill_criteria": ["Kill Criteria"],
+    "scenario_map": ["Scenario Map"],
 }
 
 PORTFOLIO_FIT_SECTION_MAP = {
+    "portfolio_role": ["Portfolio Role"],
     "portfolio_fit": ["Portfolio Fit"],
     "risk_guardrails": ["Correlation / Crowding"],
-    "position_sizing": ["Capital Budget"],
+    "capital_budget": ["Capital Budget"],
+    "scenario_map": ["Scenario Map"],
 }
 
 CAPITAL_ALLOCATION_SECTION_MAP = {
     "final_recommendation": ["Rating"],
+    "portfolio_role": ["Portfolio Mandate"],
     "position_sizing": ["Position Size"],
     "entry_framework": ["Entry / Exit"],
     "kill_criteria": ["Kill Criteria"],
     "monitoring_triggers": ["Monitoring Triggers"],
     "capital_allocation_rationale": ["Capital Allocation Rationale"],
 }
+
+RESEARCH_DOSSIER_BRIEF_KEYS = [
+    "business_truth",
+    "earnings_power",
+    "balance_sheet_resilience",
+    "market_expectations_view",
+    "positioning_signal",
+    "attention_regime",
+    "narrative_momentum",
+    "event_map",
+    "catalyst_path",
+    "time_horizon",
+]
+
+EXECUTION_DOSSIER_BRIEF_KEYS = [
+    "world_model",
+    "core_thesis",
+    "variant_perception",
+    "catalyst_path",
+    "time_horizon",
+    "position_sizing",
+    "portfolio_role",
+]
+
+RISK_DOSSIER_BRIEF_KEYS = [
+    "world_model",
+    "core_thesis",
+    "variant_perception",
+    "failure_modes",
+    "catalyst_path",
+    "time_horizon",
+    "position_sizing",
+    "portfolio_role",
+    "liquidity_plan",
+]
+
+CAPITAL_ALLOCATION_DOSSIER_BRIEF_KEYS = [
+    "world_model",
+    "core_thesis",
+    "variant_perception",
+    "failure_modes",
+    "catalyst_path",
+    "time_horizon",
+    "portfolio_role",
+    "capital_budget",
+    "risk_guardrails",
+    "kill_criteria",
+    "monitoring_triggers",
+]
 
 
 def normalize_heading_key(heading: str) -> str:
@@ -143,6 +242,27 @@ def render_decision_dossier(dossier: Dict[str, str] | None) -> str:
         value = dossier.get(dossier_key, "").strip()
         if value:
             parts.append(f"### {title}\n{value}")
+
+    return "\n\n".join(parts)
+
+
+def render_dossier_brief(
+    dossier: Dict[str, str] | None,
+    keys: Iterable[str],
+    heading: str = "## Institutional Dossier Snapshot",
+) -> str:
+    """Render a filtered dossier view for downstream prompts."""
+    dossier = dossier or {}
+    parts = [heading]
+
+    for dossier_key in keys:
+        value = dossier.get(dossier_key, "").strip()
+        if value:
+            title = dict(DECISION_DOSSIER_ORDER).get(dossier_key, dossier_key)
+            parts.append(f"### {title}\n{value}")
+
+    if len(parts) == 1:
+        parts.append("No structured dossier fields have been populated yet.")
 
     return "\n\n".join(parts)
 

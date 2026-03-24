@@ -6,6 +6,10 @@ from tradingagents.agents.utils.agent_utils import (
     get_global_news,
     get_news,
 )
+from tradingagents.agents.utils.decision_protocol import (
+    CATALYST_PATH_SECTION_MAP,
+    build_dossier_update,
+)
 from tradingagents.dataflows.config import get_config
 
 
@@ -59,9 +63,17 @@ def create_news_analyst(llm):
         if len(result.tool_calls) == 0:
             report = result.content
 
-        return {
+        output = {
             "messages": [result],
             "catalyst_path_report": report,
         }
+        output.update(
+            build_dossier_update(
+                state,
+                report,
+                CATALYST_PATH_SECTION_MAP,
+            )
+        )
+        return output
 
     return news_analyst_node

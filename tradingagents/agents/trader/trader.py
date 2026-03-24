@@ -7,7 +7,9 @@ from tradingagents.agents.utils.agent_utils import (
 )
 from tradingagents.agents.utils.decision_protocol import (
     EXECUTION_ENGINE_SECTION_MAP,
+    EXECUTION_DOSSIER_BRIEF_KEYS,
     build_dossier_update,
+    render_dossier_brief,
 )
 
 
@@ -18,6 +20,10 @@ def create_trader(llm, memory):
         investment_plan = state["investment_plan"]
         shared_research_context = build_research_context(
             state, state.get("selected_analysts")
+        )
+        dossier_snapshot = render_dossier_brief(
+            state.get("decision_dossier"),
+            EXECUTION_DOSSIER_BRIEF_KEYS,
         )
 
         curr_situation = shared_research_context
@@ -44,11 +50,15 @@ Turn the research memo into a practical execution blueprint. Use exactly these m
 ## Execution Plan
 ## Entry Framework
 ## Position Construction
+## Liquidity Plan
 ## Monitoring Plan
 
 End the memo with a single line in the form: FINAL TRANSACTION PROPOSAL: **BUY/HOLD/SELL**
 
-Apply lessons from past decisions to strengthen your analysis. Relevant reflections: {past_memory_str}""",
+Apply lessons from past decisions to strengthen your analysis. Relevant reflections: {past_memory_str}
+
+Structured dossier snapshot:
+{dossier_snapshot}""",
             },
             context,
         ]

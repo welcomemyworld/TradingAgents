@@ -25,7 +25,7 @@
 
 ---
 
-# TradingAgents: Multi-Agents LLM Financial Trading Framework
+# TradingAgents: AI-Native Investment Institution Framework
 
 ## News
 - [2026-03] **TradingAgents v0.2.2** released with GPT-5.4/Gemini 3.1/Claude 4.6 model coverage, five-tier rating scale, OpenAI Responses API, Anthropic effort control, and cross-platform stability.
@@ -54,43 +54,52 @@
 
 ## TradingAgents Framework
 
-TradingAgents is a multi-agent trading framework that mirrors the dynamics of real-world trading firms. By deploying specialized LLM-powered agents: from fundamental analysts, sentiment experts, and technical analysts, to trader, risk management team, the platform collaboratively evaluates market conditions and informs trading decisions. Moreover, these agents engage in dynamic discussions to pinpoint the optimal strategy.
+TradingAgents is an AI-native investment institution framework for long/short equity research and capital allocation. Instead of treating LLMs as isolated analysts, the system organizes them as a coordinated institutional stack: an investment orchestrator plans the research path, capability modules build a shared world model, thesis and challenge engines debate variant perception, execution turns that view into a tradable expression, and capital-allocation engines decide how the idea belongs inside a portfolio.
 
 <p align="center">
   <img src="assets/schema.png" style="width: 100%; height: auto;">
 </p>
 
-> TradingAgents framework is designed for research purposes. Trading performance may vary based on many factors, including the chosen backbone language models, model temperature, trading periods, the quality of data, and other non-deterministic factors. [It is not intended as financial, investment, or trading advice.](https://tauric.ai/disclaimer/)
+> TradingAgents is designed for research purposes. Trading performance may vary based on many factors, including model choice, temperature, market regime, data quality, and other non-deterministic inputs. [It is not intended as financial, investment, or trading advice.](https://tauric.ai/disclaimer/)
 
-Our framework decomposes complex trading tasks into specialized roles. This ensures the system achieves a robust, scalable approach to market analysis and decision-making.
+The current architecture is aimed at teams that want to blend:
+- deep business understanding and long-horizon variant perception
+- catalyst awareness, timing, and faster alpha capture
+- explicit portfolio constraints, kill criteria, and capital budgeting
 
-### Analyst Team
-- Fundamentals Analyst: Evaluates company financials and performance metrics, identifying intrinsic values and potential red flags.
-- Sentiment Analyst: Analyzes social media and public sentiment using sentiment scoring algorithms to gauge short-term market mood.
-- News Analyst: Monitors global news and macroeconomic indicators, interpreting the impact of events on market conditions.
-- Technical Analyst: Utilizes technical indicators (like MACD and RSI) to detect trading patterns and forecast price movements.
+The framework decomposes investment work into capabilities and institutional protocols instead of a simple human-role replica. That makes the system easier to route, audit, and evolve.
+
+### Research Capability Stack
+- Business Truth: Establishes what is economically real about the company, including earnings power, balance-sheet resilience, and the assumptions that must hold.
+- Market Expectations: Infers what the tape, trend, momentum, and positioning imply the market already expects.
+- Why Now: Tracks attention, narrative momentum, and sentiment inflections to explain why the idea matters on this horizon.
+- Catalyst Path: Maps the event chain that can compress uncertainty, shift expectations, or force a re-rating.
 
 <p align="center">
   <img src="assets/analyst.png" width="100%" style="display: inline-block; margin: 0 2%;">
 </p>
 
-### Researcher Team
-- Comprises both bullish and bearish researchers who critically assess the insights provided by the Analyst Team. Through structured debates, they balance potential gains against inherent risks.
+### Institutional Debate Layer
+- Thesis Engine: Builds the strongest investable upside case and makes variant perception explicit.
+- Challenge Engine: Attacks weak assumptions, surfaces counterevidence, and defines failure modes.
+- Investment Director: Synthesizes the debate into a shared world model, portfolio role, time horizon, and initial sizing view.
 
 <p align="center">
   <img src="assets/researcher.png" width="70%" style="display: inline-block; margin: 0 2%;">
 </p>
 
-### Trader Agent
-- Composes reports from the analysts and researchers to make informed trading decisions. It determines the timing and magnitude of trades based on comprehensive market insights.
+### Execution Layer
+- Execution Engine: Converts the institutional view into an execution blueprint, including entry framework, position construction, liquidity plan, and monitoring triggers.
 
 <p align="center">
   <img src="assets/trader.png" width="70%" style="display: inline-block; margin: 0 2%;">
 </p>
 
-### Risk Management and Portfolio Manager
-- Continuously evaluates portfolio risk by assessing market volatility, liquidity, and other risk factors. The risk management team evaluates and adjusts trading strategies, providing assessment reports to the Portfolio Manager for final decision.
-- The Portfolio Manager approves/rejects the transaction proposal. If approved, the order will be sent to the simulated exchange and executed.
+### Capital Formation Layer
+- Upside Capture Engine: Protects the fund from under-sizing asymmetric opportunities.
+- Downside Guardrail Engine: Defines hard limits, scenario maps, and explicit kill criteria.
+- Portfolio Fit Engine: Judges correlation, crowding, capital budget, and the trade's role inside the book.
+- Capital Allocation Committee: Issues the final rating, position size, monitoring triggers, and capital-allocation rationale.
 
 <p align="center">
   <img src="assets/risk.png" width="70%" style="display: inline-block; margin: 0 2%;">
@@ -142,15 +151,15 @@ cp .env.example .env
 Launch the interactive CLI:
 ```bash
 tradingagents          # installed command
-python -m cli.main     # alternative: run directly from source
+python -m cli.main     # run directly from source
 ```
-You will see a screen where you can select your desired tickers, analysis date, LLM provider, research depth, and more.
+You will see a live interface where you can configure the research capability stack, orchestration depth, LLM provider, and model pairing for an institution run.
 
 <p align="center">
   <img src="assets/cli/cli_init.png" width="100%" style="display: inline-block; margin: 0 2%;">
 </p>
 
-An interface will appear showing results as they load, letting you track the agent's progress as it runs.
+As the run progresses, the CLI shows capability outputs, institutional debate, execution planning, capital formation, and the evolving AI Investment Dossier in real time.
 
 <p align="center">
   <img src="assets/cli/cli_news.png" width="100%" style="display: inline-block; margin: 0 2%;">
@@ -164,7 +173,7 @@ An interface will appear showing results as they load, letting you track the age
 
 ### Implementation Details
 
-We built TradingAgents with LangGraph to ensure flexibility and modularity. The framework supports multiple LLM providers: OpenAI, Google, Anthropic, xAI, OpenRouter, and Ollama.
+We built TradingAgents with LangGraph to keep the institution modular, inspectable, and easy to re-route. The framework supports multiple LLM providers: OpenAI, Google, Anthropic, xAI, OpenRouter, and Ollama.
 
 ### Python Usage
 
@@ -181,7 +190,7 @@ _, decision = ta.propagate("NVDA", "2026-01-15")
 print(decision)
 ```
 
-You can also adjust the default configuration to set your own choice of LLMs, debate rounds, etc.
+You can also adjust the default configuration to set your own capability stack, model pairing, orchestration depth, and debate intensity.
 
 ```python
 from tradingagents.graph.trading_graph import TradingAgentsGraph
