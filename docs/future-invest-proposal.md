@@ -136,7 +136,7 @@ Persistent institutional memory will improve cross-run consistency and reduce re
 
 ## 7. Evaluation Design
 
-The repository already contains a batch evaluation harness in [evaluation/run_eval.py](/Users/x/Desktop/my_aider_code/codex/TradingAgents/evaluation/run_eval.py). This makes the proposal empirically testable inside the codebase itself.
+The repository already contains a batch evaluation harness in [`evaluation/run_eval.py`](../evaluation/run_eval.py). This makes the proposal empirically testable inside the codebase itself.
 
 Evaluation should proceed on four layers.
 

@@ -117,7 +117,7 @@ This turns analysis into capital formation rather than stopping at narrative out
 
 ## Workflow
 
-The current workflow is visualized in [future-invest-workflow.svg](/Users/x/Desktop/my_aider_code/codex/TradingAgents/assets/future-invest-workflow.svg).
+The current workflow is visualized in [`assets/future-invest-workflow.svg`](../assets/future-invest-workflow.svg).
 
 ![Figure 1. Future Invest workflow.](../assets/future-invest-workflow.svg)
 

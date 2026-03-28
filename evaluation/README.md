@@ -13,7 +13,7 @@ This folder contains a minimal batch-evaluation scaffold for comparing Future In
 ## Quick start
 
 ```bash
-cd /Users/x/Desktop/my_aider_code/codex/TradingAgents
+cd <repo-root>
 source .venv/bin/activate
 future-invest-eval --cases evaluation/cases.sample.json --label baseline
 ```
