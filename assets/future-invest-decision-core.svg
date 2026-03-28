@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="860" viewBox="0 0 1600 860" role="img" aria-labelledby="title desc">
+  <title id="title">Future Invest decision core</title>
+  <desc id="desc">A custom diagram of thesis, challenge, and director logic producing a lean packet.</desc>
+  <defs>
+    <linearGradient id="dc-bg" x1="34" y1="28" x2="1552" y2="826" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#171e23"/>
+      <stop offset="100%" stop-color="#0d1011"/>
+    </linearGradient>
+    <linearGradient id="dc-panel" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#262f35"/>
+      <stop offset="100%" stop-color="#171d21"/>
+    </linearGradient>
+    <linearGradient id="dc-line" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f0aa6b"/>
+      <stop offset="55%" stop-color="#d8c07b"/>
+      <stop offset="100%" stop-color="#87c7b0"/>
+    </linearGradient>
+    <style>
+      .title { font: 700 40px Georgia, "Times New Roman", serif; fill: #f5efe5; }
+      .subtitle { font: 400 18px Arial, Helvetica, sans-serif; fill: #b7aa96; }
+      .label { font: 700 15px Arial, Helvetica, sans-serif; fill: #f0aa6b; letter-spacing: 2px; }
+      .heading { font: 700 28px Georgia, "Times New Roman", serif; fill: #f5efe5; }
+      .body { font: 400 18px Arial, Helvetica, sans-serif; fill: #e8dccb; }
+      .small { font: 400 15px Arial, Helvetica, sans-serif; fill: #b7aa96; }
+      .panel { fill: url(#dc-panel); stroke: #4d4030; stroke-width: 2; }
+      .line { fill: none; stroke: url(#dc-line); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+      .guide { fill: none; stroke: #3a3128; stroke-width: 2; stroke-dasharray: 10 10; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="860" fill="#0b0e10"/>
+  <rect x="24" y="24" width="1552" height="812" rx="34" fill="url(#dc-bg)"/>
+  <rect x="50" y="50" width="1500" height="760" rx="28" class="guide"/>
+
+  <text x="78" y="98" class="title">Decision Core</text>
+  <text x="78" y="130" class="subtitle">Debate and synthesis compress the run into hard decision objects.</text>
+
+  <rect x="122" y="248" width="340" height="240" rx="30" class="panel"/>
+  <text x="156" y="290" class="label">ENGINE A</text>
+  <text x="156" y="336" class="heading">Thesis Engine</text>
+  <text x="156" y="380" class="body">build the strongest upside case</text>
+  <text x="156" y="416" class="small">variant view</text>
+  <text x="156" y="444" class="small">why the market is wrong</text>
+
+  <rect x="502" y="248" width="340" height="240" rx="30" class="panel"/>
+  <text x="536" y="290" class="label">ENGINE B</text>
+  <text x="536" y="336" class="heading">Challenge Engine</text>
+  <text x="536" y="380" class="body">attack weak assumptions</text>
+  <text x="536" y="416" class="small">counterevidence</text>
+  <text x="536" y="444" class="small">failure modes and missing evidence</text>
+
+  <rect x="918" y="214" width="300" height="308" rx="30" class="panel"/>
+  <text x="952" y="256" class="label">SYNTHESIS</text>
+  <text x="952" y="302" class="heading">Investment Director</text>
+  <text x="952" y="346" class="body">world model</text>
+  <text x="952" y="378" class="body">portfolio role</text>
+  <text x="952" y="410" class="body">confidence and next step</text>
+
+  <rect x="1278" y="176" width="220" height="384" rx="30" class="panel"/>
+  <text x="1312" y="218" class="label">LEAN OUTPUT</text>
+  <text x="1312" y="264" class="heading">Position Packet</text>
+  <text x="1312" y="318" class="body">stance</text>
+  <text x="1312" y="352" class="body">size</text>
+  <text x="1312" y="386" class="body">entry framework</text>
+  <text x="1312" y="420" class="body">kill criteria</text>
+  <text x="1312" y="454" class="body">monitoring triggers</text>
+
+  <rect x="388" y="606" width="836" height="146" rx="30" class="panel"/>
+  <text x="422" y="648" class="label">WHY THIS MATTERS</text>
+  <text x="422" y="694" class="heading">The run ends in a packet, not a memo.</text>
+  <text x="422" y="730" class="body">That keeps Future Invest aimed at action, falsifiability, and capital discipline.</text>
+
+  <path d="M462 368H502" class="line"/>
+  <path d="M842 368H918" class="line"/>
+  <path d="M1218 368H1278" class="line"/>
+  <path d="M1068 522V606" class="line"/>
+</svg>

@@ -1,77 +1,71 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="920" viewBox="0 0 1200 920" role="img" aria-labelledby="title desc">
-  <title id="title">Institutional memory loop</title>
-  <desc id="desc">A circular diagram showing world model history, thesis history, prediction ledger, and agent reliability feeding an evaluation loop.</desc>
+  <title id="title">Future Invest memory loop</title>
+  <desc id="desc">A custom memory loop diagram with world model history, thesis history, prediction ledger, evaluation, and reliability feedback.</desc>
   <defs>
-    <linearGradient id="ring" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#f8c15c"/>
-      <stop offset="100%" stop-color="#7dd3fc"/>
+    <linearGradient id="mem-panel" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#262f35"/>
+      <stop offset="100%" stop-color="#171d21"/>
     </linearGradient>
-    <linearGradient id="card" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#12273b"/>
-      <stop offset="100%" stop-color="#0e2030"/>
+    <linearGradient id="mem-ring" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0aa6b"/>
+      <stop offset="55%" stop-color="#d8c07b"/>
+      <stop offset="100%" stop-color="#87c7b0"/>
     </linearGradient>
-    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="7" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
     <style>
-      .title { font: 700 36px Arial, Helvetica, sans-serif; fill: #f4f8fb; }
-      .subtitle { font: 400 18px Arial, Helvetica, sans-serif; fill: #a9bdce; }
-      .heading { font: 700 24px Arial, Helvetica, sans-serif; fill: #f4f8fb; }
-      .body { font: 400 17px Arial, Helvetica, sans-serif; fill: #dbe5ed; }
-      .small { font: 400 15px Arial, Helvetica, sans-serif; fill: #a9bdce; }
-      .kicker { font: 700 14px Arial, Helvetica, sans-serif; letter-spacing: 2px; fill: #7dd3fc; }
-      .card { fill: url(#card); stroke: #40617e; stroke-width: 2; }
-      .ring { stroke: url(#ring); stroke-width: 16; fill: none; filter: url(#glow); }
-      .guide { stroke: #35536d; stroke-width: 2; fill: none; stroke-dasharray: 8 8; }
-      .link { stroke: #557894; stroke-width: 4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .title { font: 700 38px Georgia, "Times New Roman", serif; fill: #f5efe5; }
+      .subtitle { font: 400 18px Arial, Helvetica, sans-serif; fill: #b7aa96; }
+      .kicker { font: 700 14px Arial, Helvetica, sans-serif; fill: #f0aa6b; letter-spacing: 2px; }
+      .heading { font: 700 24px Georgia, "Times New Roman", serif; fill: #f5efe5; }
+      .body { font: 400 17px Arial, Helvetica, sans-serif; fill: #e8dccb; }
+      .small { font: 400 15px Arial, Helvetica, sans-serif; fill: #b7aa96; }
+      .card { fill: url(#mem-panel); stroke: #4d4030; stroke-width: 2; }
+      .ring { fill: none; stroke: url(#mem-ring); stroke-width: 14; }
+      .guide { fill: none; stroke: #3a3128; stroke-width: 2; stroke-dasharray: 9 10; }
+      .link { fill: none; stroke: url(#mem-ring); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
     </style>
   </defs>
 
-  <text x="70" y="84" class="title">Institutional Memory And Evaluation Loop</text>
-  <text x="70" y="116" class="subtitle">Future Invest is designed to improve as an institution, not just as a single-run assistant.</text>
+  <text x="68" y="86" class="title">Institutional Memory + Evaluation</text>
+  <text x="68" y="118" class="subtitle">A self-generated loop showing how Future Invest keeps compounding across runs.</text>
 
-  <circle cx="600" cy="488" r="214" class="ring"/>
-  <circle cx="600" cy="488" r="282" class="guide"/>
+  <circle cx="600" cy="470" r="230" class="ring"/>
+  <circle cx="600" cy="470" r="296" class="guide"/>
 
-  <rect x="440" y="380" width="320" height="220" rx="28" class="card"/>
-  <text x="472" y="418" class="kicker">CORE MEMORY</text>
-  <text x="472" y="456" class="heading">Institutional Memory</text>
-  <text x="472" y="490" class="body">Persistent company context shared across runs</text>
-  <text x="472" y="528" class="small">Feeds orchestration, challenge, sizing, and post-hoc learning</text>
+  <rect x="430" y="346" width="340" height="244" rx="28" class="card"/>
+  <text x="464" y="386" class="kicker">CORE MEMORY</text>
+  <text x="464" y="430" class="heading">Institutional Context</text>
+  <text x="464" y="466" class="body">shared company memory, thesis residue,</text>
+  <text x="464" y="496" class="body">time horizon context, and missing evidence</text>
+  <text x="464" y="544" class="small">used by orchestration, challenge, and packet construction</text>
 
-  <rect x="128" y="220" width="250" height="122" rx="24" class="card"/>
-  <text x="160" y="258" class="heading">World Model History</text>
-  <text x="160" y="293" class="small">What was believed</text>
-  <text x="160" y="320" class="small">about the company over time</text>
+  <rect x="118" y="210" width="256" height="128" rx="24" class="card"/>
+  <text x="150" y="252" class="heading">World Model History</text>
+  <text x="150" y="288" class="small">what the institution believed</text>
+  <text x="150" y="314" class="small">and when it changed</text>
 
-  <rect x="822" y="220" width="250" height="122" rx="24" class="card"/>
-  <text x="854" y="258" class="heading">Thesis History</text>
-  <text x="854" y="293" class="small">How the investable case</text>
-  <text x="854" y="320" class="small">evolved across runs</text>
+  <rect x="826" y="210" width="256" height="128" rx="24" class="card"/>
+  <text x="858" y="252" class="heading">Thesis History</text>
+  <text x="858" y="288" class="small">how the investable case</text>
+  <text x="858" y="314" class="small">moved across runs</text>
 
-  <rect x="128" y="636" width="250" height="122" rx="24" class="card"/>
-  <text x="160" y="674" class="heading">Prediction Ledger</text>
-  <text x="160" y="709" class="small">Forecast records, realized</text>
-  <text x="160" y="736" class="small">outcomes, and error analysis</text>
+  <rect x="118" y="622" width="256" height="128" rx="24" class="card"/>
+  <text x="150" y="664" class="heading">Prediction Ledger</text>
+  <text x="150" y="700" class="small">forecast records, outcomes,</text>
+  <text x="150" y="726" class="small">and error analysis</text>
 
-  <rect x="822" y="636" width="250" height="122" rx="24" class="card"/>
-  <text x="854" y="674" class="heading">Agent Reliability</text>
-  <text x="854" y="709" class="small">Which engines perform</text>
-  <text x="854" y="736" class="small">well in which regimes</text>
+  <rect x="826" y="622" width="256" height="128" rx="24" class="card"/>
+  <text x="858" y="664" class="heading">Reliability Map</text>
+  <text x="858" y="700" class="small">which engines or prompts</text>
+  <text x="858" y="726" class="small">worked in which regime</text>
 
-  <path d="M378 281 C452 318, 490 350, 520 404" class="link"/>
-  <path d="M822 281 C748 318, 710 350, 680 404" class="link"/>
-  <path d="M378 697 C452 660, 490 628, 520 574" class="link"/>
-  <path d="M822 697 C748 660, 710 628, 680 574" class="link"/>
+  <rect x="430" y="676" width="340" height="128" rx="24" class="card"/>
+  <text x="464" y="716" class="kicker">EVALUATION</text>
+  <text x="464" y="760" class="heading">Compare, Audit, Refine</text>
+  <text x="464" y="792" class="small">engineering quality, decision quality, outcome quality</text>
 
-  <rect x="430" y="692" width="340" height="120" rx="24" class="card"/>
-  <text x="462" y="730" class="kicker">EVALUATION LOOP</text>
-  <text x="462" y="768" class="heading">Compare, Audit, Refine</text>
-  <text x="462" y="798" class="small">Engineering reliability, research quality, institution quality, outcome quality</text>
-
-  <path d="M600 600 V692" class="link"/>
+  <path d="M374 274C450 320 492 354 528 404" class="link"/>
+  <path d="M826 274C750 320 708 354 672 404" class="link"/>
+  <path d="M374 686C448 640 492 606 530 566" class="link"/>
+  <path d="M826 686C752 640 708 606 670 566" class="link"/>
+  <path d="M600 590V676" class="link"/>
 </svg>

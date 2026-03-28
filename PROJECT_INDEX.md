@@ -13,11 +13,11 @@ This file is the fastest way to find the important parts of the repository.
 - `futureinvest_web/static/index.html`
   - Main web dashboard layout.
 - `futureinvest_web/static/styles.css`
-  - Web brand system, neon styling, and layout.
+  - Web brand system, editorial-console styling, and layout.
 - `futureinvest_web/static/app.js`
   - Browser-side workflow and API calls.
 - `futureinvest_web/static/cci-monogram.svg`
-  - Current CCI monogram asset.
+  - Custom Future Invest monogram asset.
 
 ## Proposal and Narrative Docs
 
@@ -35,8 +35,18 @@ This file is the fastest way to find the important parts of the repository.
   - Visual guide for what should and should not be committed to GitHub.
 - `assets/future-invest-workflow.svg`
   - Reusable workflow figure for decks, documents, and proposal material.
+- `assets/future-invest-research-stack.svg`
+  - Original research capability diagram used on the README homepage.
+- `assets/future-invest-decision-core.svg`
+  - Original lean decision-core diagram used on the README homepage.
+- `assets/future-invest-full-loop.svg`
+  - Original full-loop extension diagram used on the README homepage.
+- `assets/future-invest-capital-committee.svg`
+  - Original capital-committee diagram used on the README homepage.
 - `assets/github-upload-workflow.svg`
   - Visual workflow for deciding what belongs in a GitHub commit.
+- `assets/github-cover.svg`
+  - Custom GitHub cover asset for the README hero.
 
 ## 2. Runtime Entry
 

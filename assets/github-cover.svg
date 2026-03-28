@@ -1,96 +1,88 @@
-<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="1600" height="900" fill="#08111C"/>
-  <rect x="24" y="24" width="1552" height="852" rx="32" fill="url(#bg)"/>
-
-  <circle cx="1248" cy="186" r="214" fill="url(#glowA)" opacity="0.34"/>
-  <circle cx="1358" cy="654" r="252" fill="url(#glowB)" opacity="0.2"/>
-  <circle cx="1174" cy="524" r="112" stroke="#7FD1B9" stroke-opacity="0.22" stroke-width="2"/>
-  <circle cx="1174" cy="524" r="172" stroke="#7FD1B9" stroke-opacity="0.14" stroke-width="2"/>
-  <circle cx="1174" cy="524" r="236" stroke="#7FD1B9" stroke-opacity="0.08" stroke-width="2"/>
-
-  <text x="92" y="160" fill="#F7F3EA" font-family="Helvetica, Arial, sans-serif" font-size="84" font-weight="700">
-    Future Invest
-  </text>
-  <text x="96" y="224" fill="#E1B96A" font-family="Helvetica, Arial, sans-serif" font-size="28" font-weight="700" letter-spacing="2">
-    INVESTMENT INSTITUTION OPERATING SYSTEM
-  </text>
-
-  <text x="92" y="312" fill="#D9E2EF" font-family="Helvetica, Arial, sans-serif" font-size="36" font-weight="500">
-    Turn research into position construction,
-  </text>
-  <text x="92" y="358" fill="#D9E2EF" font-family="Helvetica, Arial, sans-serif" font-size="36" font-weight="500">
-    kill criteria, and monitoring.
-  </text>
-
-  <text x="92" y="430" fill="#8EA3BB" font-family="Helvetica, Arial, sans-serif" font-size="24">
-    Not a stock picker. Not a memo generator.
-  </text>
-  <text x="92" y="466" fill="#8EA3BB" font-family="Helvetica, Arial, sans-serif" font-size="24">
-    A lean decision loop for portfolio-aware investing.
-  </text>
-
-  <rect x="92" y="536" width="332" height="136" rx="24" fill="#13283D" stroke="#3A6EA5" stroke-width="2"/>
-  <text x="124" y="586" fill="#F7F3EA" font-family="Helvetica, Arial, sans-serif" font-size="26" font-weight="700">
-    Lean Loop
-  </text>
-  <text x="124" y="622" fill="#B5C6D8" font-family="Helvetica, Arial, sans-serif" font-size="20">
-    mandate -> research -> thesis
-  </text>
-  <text x="124" y="650" fill="#B5C6D8" font-family="Helvetica, Arial, sans-serif" font-size="20">
-    vs challenge -> position packet
-  </text>
-
-  <rect x="450" y="536" width="332" height="136" rx="24" fill="#162F28" stroke="#4FBF8E" stroke-width="2"/>
-  <text x="482" y="586" fill="#F7F3EA" font-family="Helvetica, Arial, sans-serif" font-size="26" font-weight="700">
-    Position Packet
-  </text>
-  <text x="482" y="622" fill="#C9EBDD" font-family="Helvetica, Arial, sans-serif" font-size="20">
-    stance, size, entry framework,
-  </text>
-  <text x="482" y="650" fill="#C9EBDD" font-family="Helvetica, Arial, sans-serif" font-size="20">
-    kill criteria, monitoring
-  </text>
-
-  <rect x="808" y="536" width="332" height="136" rx="24" fill="#34261A" stroke="#E1B96A" stroke-width="2"/>
-  <text x="840" y="586" fill="#F7F3EA" font-family="Helvetica, Arial, sans-serif" font-size="26" font-weight="700">
-    Institutional Memory
-  </text>
-  <text x="840" y="622" fill="#F2DEB2" font-family="Helvetica, Arial, sans-serif" font-size="20">
-    repeatable workflow,
-  </text>
-  <text x="840" y="650" fill="#F2DEB2" font-family="Helvetica, Arial, sans-serif" font-size="20">
-    evaluation, cross-run learning
-  </text>
-
-  <rect x="1180" y="512" width="298" height="182" rx="28" fill="#0F1D2C" stroke="#263C57" stroke-width="2"/>
-  <text x="1214" y="560" fill="#E8EEF6" font-family="Helvetica, Arial, sans-serif" font-size="22" font-weight="700">
-    Default Outputs
-  </text>
-  <text x="1216" y="606" fill="#D2DCE8" font-family="Helvetica, Arial, sans-serif" font-size="19">
-    • variant view
-  </text>
-  <text x="1216" y="640" fill="#D2DCE8" font-family="Helvetica, Arial, sans-serif" font-size="19">
-    • portfolio role
-  </text>
-  <text x="1216" y="674" fill="#D2DCE8" font-family="Helvetica, Arial, sans-serif" font-size="19">
-    • position size
-  </text>
-  <text x="1216" y="708" fill="#D2DCE8" font-family="Helvetica, Arial, sans-serif" font-size="19">
-    • kill criteria
-  </text>
-
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Future Invest GitHub cover</title>
+  <desc id="desc">A custom cover showing three research engines converging into an institutional decision packet and committee extension.</desc>
   <defs>
-    <linearGradient id="bg" x1="64" y1="48" x2="1526" y2="850" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#0D1624"/>
-      <stop offset="1" stop-color="#112033"/>
+    <linearGradient id="cover-bg" x1="70" y1="40" x2="1520" y2="864" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#181f24"/>
+      <stop offset="100%" stop-color="#0a0d0f"/>
     </linearGradient>
-    <radialGradient id="glowA" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1248 186) rotate(90) scale(214)">
-      <stop stop-color="#E1B96A"/>
-      <stop offset="1" stop-color="#E1B96A" stop-opacity="0"/>
-    </radialGradient>
-    <radialGradient id="glowB" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1358 654) rotate(90) scale(252)">
-      <stop stop-color="#4FBF8E"/>
-      <stop offset="1" stop-color="#4FBF8E" stop-opacity="0"/>
-    </radialGradient>
+    <linearGradient id="cover-panel" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#242d33"/>
+      <stop offset="100%" stop-color="#171d22"/>
+    </linearGradient>
+    <linearGradient id="cover-line" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f0aa6b"/>
+      <stop offset="55%" stop-color="#d8c07b"/>
+      <stop offset="100%" stop-color="#87c7b0"/>
+    </linearGradient>
+    <style>
+      .title { font: 700 88px Georgia, "Times New Roman", serif; fill: #f5efe5; }
+      .subtitle { font: 700 25px Arial, Helvetica, sans-serif; fill: #f0aa6b; letter-spacing: 2px; }
+      .lede { font: 500 34px Arial, Helvetica, sans-serif; fill: #e8dccb; }
+      .body { font: 400 22px Arial, Helvetica, sans-serif; fill: #b7aa96; }
+      .section { font: 700 18px Arial, Helvetica, sans-serif; fill: #f0aa6b; letter-spacing: 1.6px; }
+      .heading { font: 700 30px Georgia, "Times New Roman", serif; fill: #f5efe5; }
+      .small { font: 400 19px Arial, Helvetica, sans-serif; fill: #d9ccbc; }
+      .tiny { font: 400 17px Arial, Helvetica, sans-serif; fill: #b7aa96; }
+      .card { fill: url(#cover-panel); stroke: #4d4030; stroke-width: 2; }
+      .frame { fill: none; stroke: #352d23; stroke-width: 2; }
+      .link { fill: none; stroke: url(#cover-line); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+      .ghost { fill: none; stroke: #40372c; stroke-width: 2; stroke-dasharray: 9 10; }
+    </style>
   </defs>
+
+  <rect width="1600" height="900" fill="#0a0d0f"/>
+  <rect x="24" y="24" width="1552" height="852" rx="34" fill="url(#cover-bg)"/>
+  <rect x="54" y="54" width="1492" height="792" rx="28" class="frame"/>
+
+  <circle cx="1240" cy="228" r="204" fill="none" stroke="#2f3c39" stroke-width="2"/>
+  <circle cx="1240" cy="228" r="142" fill="none" stroke="#473b2f" stroke-width="2"/>
+  <path d="M1040 164C1110 118 1180 94 1260 94C1380 94 1470 154 1498 274" class="ghost"/>
+
+  <text x="92" y="170" class="title">Future Invest</text>
+  <text x="96" y="222" class="subtitle">AI-NATIVE INSTITUTION OPERATING SYSTEM</text>
+  <text x="92" y="308" class="lede">Turn research into position construction,</text>
+  <text x="92" y="352" class="lede">kill criteria, and monitoring.</text>
+  <text x="92" y="432" class="body">Not a stock picker. Not a memo generator.</text>
+  <text x="92" y="468" class="body">A lean decision loop for portfolio-aware investing.</text>
+
+  <rect x="92" y="546" width="420" height="188" rx="28" class="card"/>
+  <text x="126" y="590" class="section">DEFAULT LOOP</text>
+  <text x="126" y="634" class="heading">Lean By Default</text>
+  <text x="126" y="678" class="small">Mandate -> parallel research -></text>
+  <text x="126" y="710" class="small">decision core -> position packet</text>
+
+  <rect x="546" y="546" width="350" height="188" rx="28" class="card"/>
+  <text x="580" y="590" class="section">OUTPUT</text>
+  <text x="580" y="634" class="heading">Position Packet</text>
+  <text x="580" y="678" class="small">stance, size, entry framework,</text>
+  <text x="580" y="710" class="small">kill criteria, monitoring</text>
+
+  <rect x="930" y="546" width="518" height="188" rx="28" class="card"/>
+  <text x="964" y="590" class="section">WHY IT COMPOUNDS</text>
+  <text x="964" y="634" class="heading">Memory + Evaluation</text>
+  <text x="964" y="678" class="small">institutional traces, thesis history,</text>
+  <text x="964" y="710" class="small">prediction ledgers, workflow iteration</text>
+
+  <rect x="1014" y="206" width="154" height="114" rx="24" class="card"/>
+  <text x="1042" y="246" class="section">ENGINE 1</text>
+  <text x="1042" y="290" class="heading">Truth</text>
+
+  <rect x="1184" y="150" width="170" height="114" rx="24" class="card"/>
+  <text x="1212" y="190" class="section">ENGINE 2</text>
+  <text x="1212" y="234" class="heading">Expectations</text>
+
+  <rect x="1370" y="230" width="138" height="114" rx="24" class="card"/>
+  <text x="1398" y="270" class="section">ENGINE 3</text>
+  <text x="1398" y="314" class="heading">Timing</text>
+
+  <rect x="1148" y="376" width="250" height="134" rx="28" class="card"/>
+  <text x="1178" y="418" class="section">SYNTHESIS</text>
+  <text x="1178" y="462" class="heading">Decision Core</text>
+  <text x="1178" y="496" class="tiny">thesis, challenge, investment director</text>
+
+  <path d="M1168 318C1202 344 1228 360 1254 376" class="link"/>
+  <path d="M1268 264C1268 304 1268 328 1268 376" class="link"/>
+  <path d="M1370 322C1336 346 1310 360 1286 376" class="link"/>
+  <path d="M1274 510V546" class="link"/>
 </svg>

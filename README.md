@@ -47,8 +47,8 @@ Most finance agents answer questions. Future Invest is trying to model an instit
 
 1. Clone and install:
    ```bash
-   git clone <your-repo-url> FutureInvest
-   cd FutureInvest
+   git clone https://github.com/welcomemyworld/TradingAgents.git
+   cd TradingAgents
    pip install -e .
    ```
 2. Set one API key:
@@ -115,7 +115,7 @@ Future Invest is an AI-native investment institution framework for long/short eq
 - Timing & Catalysts: Combines attention, narrative momentum, near-term catalysts, re-rating paths, and invalidation risks into one canonical research capability.
 
 <p align="center">
-  <img src="assets/analyst.png" width="100%" style="display: inline-block; margin: 0 2%;">
+  <img src="assets/future-invest-research-stack.svg" width="100%" style="display: inline-block; margin: 0 2%;" alt="Future Invest research capability stack" />
 </p>
 
 ### Lean Loop
@@ -125,14 +125,14 @@ Future Invest is an AI-native investment institution framework for long/short eq
 - Position Construction Packet: The default path compresses the run into stance, size, entry framework, kill criteria, monitoring triggers, and missing evidence.
 
 <p align="center">
-  <img src="assets/researcher.png" width="70%" style="display: inline-block; margin: 0 2%;">
+  <img src="assets/future-invest-decision-core.svg" width="100%" style="display: inline-block; margin: 0 2%;" alt="Future Invest decision core diagram" />
 </p>
 
 ### Full Loop Extension
 - Execution Engine: Converts the institutional view into an execution blueprint, including entry framework, position construction, liquidity plan, and monitoring triggers.
 
 <p align="center">
-  <img src="assets/trader.png" width="70%" style="display: inline-block; margin: 0 2%;">
+  <img src="assets/future-invest-full-loop.svg" width="100%" style="display: inline-block; margin: 0 2%;" alt="Future Invest full loop extension diagram" />
 </p>
 
 ### Committee and Capital Formation
@@ -142,7 +142,7 @@ Future Invest is an AI-native investment institution framework for long/short eq
 - Capital Allocation Committee: Issues the final rating, position size, monitoring triggers, and capital-allocation rationale when the full loop is enabled.
 
 <p align="center">
-  <img src="assets/risk.png" width="70%" style="display: inline-block; margin: 0 2%;">
+  <img src="assets/future-invest-capital-committee.svg" width="100%" style="display: inline-block; margin: 0 2%;" alt="Future Invest capital committee and governance diagram" />
 </p>
 
 ## Installation and CLI
@@ -151,8 +151,8 @@ Future Invest is an AI-native investment institution framework for long/short eq
 
 Clone your Future Invest repository:
 ```bash
-git clone <your-repo-url> FutureInvest
-cd FutureInvest
+git clone https://github.com/welcomemyworld/TradingAgents.git
+cd TradingAgents
 ```
 
 Create a virtual environment in any of your favorite environment managers:
