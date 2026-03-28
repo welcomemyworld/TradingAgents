@@ -27,9 +27,116 @@ function selectHtml(id, options, selectedValue = "") {
     .join("")}</select>`;
 }
 
+function setSelectOptions(select, values, selectedValue) {
+  const fallbackValue = values.includes(selectedValue) ? selectedValue : values[0];
+  select.innerHTML = values
+    .map(
+      (value) =>
+        `<option value="${value}" ${String(value) === String(fallbackValue) ? "selected" : ""}>${value}</option>`
+    )
+    .join("");
+}
+
 function setStatus(mode, text) {
   statusPill.className = `status-pill ${mode}`;
   statusPill.textContent = text;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function applyInlineFormatting(value) {
+  return escapeHtml(value)
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/`([^`]+)`/g, "<code>$1</code>");
+}
+
+function renderMarkdownish(content) {
+  const lines = String(content || "").replace(/\r/g, "").split("\n");
+  const html = [];
+  let paragraph = [];
+  let listMode = null;
+
+  function closeList() {
+    if (listMode === "ul") {
+      html.push("</ul>");
+    }
+    if (listMode === "ol") {
+      html.push("</ol>");
+    }
+    listMode = null;
+  }
+
+  function flushParagraph() {
+    if (!paragraph.length) {
+      return;
+    }
+    html.push(`<p>${applyInlineFormatting(paragraph.join(" "))}</p>`);
+    paragraph = [];
+  }
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+
+    if (!line) {
+      flushParagraph();
+      closeList();
+      continue;
+    }
+
+    if (/^#{1,4}\s+/.test(line)) {
+      flushParagraph();
+      closeList();
+      const title = line.replace(/^#{1,4}\s+/, "");
+      html.push(`<h4>${applyInlineFormatting(title)}</h4>`);
+      continue;
+    }
+
+    if (/^>\s+/.test(line)) {
+      flushParagraph();
+      closeList();
+      html.push(`<blockquote>${applyInlineFormatting(line.replace(/^>\s+/, ""))}</blockquote>`);
+      continue;
+    }
+
+    if (/^[-*]\s+/.test(line)) {
+      flushParagraph();
+      if (listMode !== "ul") {
+        closeList();
+        html.push("<ul>");
+        listMode = "ul";
+      }
+      html.push(`<li>${applyInlineFormatting(line.replace(/^[-*]\s+/, ""))}</li>`);
+      continue;
+    }
+
+    if (/^\d+\.\s+/.test(line)) {
+      flushParagraph();
+      if (listMode !== "ol") {
+        closeList();
+        html.push("<ol>");
+        listMode = "ol";
+      }
+      html.push(`<li>${applyInlineFormatting(line.replace(/^\d+\.\s+/, ""))}</li>`);
+      continue;
+    }
+
+    if (listMode) {
+      closeList();
+    }
+    paragraph.push(line);
+  }
+
+  flushParagraph();
+  closeList();
+
+  return html.join("");
 }
 
 function renderForm(meta) {
@@ -57,16 +164,24 @@ function renderForm(meta) {
 
   form.innerHTML = `
     ${fieldWrapper("Instrument", `<input id="ticker" name="ticker" value="${defaults.ticker}" />`, "span-3")}
-    ${fieldWrapper("Market Date", `<input id="analysis_date" name="analysis_date" type="date" value="${defaults.analysis_date}" />`, "span-3")}
+    ${fieldWrapper(
+      "Market Date",
+      `<input id="analysis_date" name="analysis_date" type="date" value="${defaults.analysis_date}" />`,
+      "span-3"
+    )}
     ${fieldWrapper("Run Mode", selectHtml("run_mode", runModeOptions, defaults.run_mode), "span-6")}
 
-    ${fieldWrapper("Position Importance", selectHtml("position_importance", positionOptions, defaults.position_importance), "span-4")}
+    ${fieldWrapper(
+      "Position Importance",
+      selectHtml("position_importance", positionOptions, defaults.position_importance),
+      "span-4"
+    )}
     ${fieldWrapper("Token Budget", selectHtml("token_budget", tokenOptions, defaults.token_budget), "span-4")}
     ${fieldWrapper("Review Intensity", selectHtml("research_depth", depthOptions, defaults.research_depth), "span-4")}
 
     ${fieldWrapper("Model Backend", selectHtml("llm_provider", providerOptions, defaults.llm_provider), "span-4")}
     ${fieldWrapper("Backend URL", `<input id="backend_url" name="backend_url" value="${defaults.backend_url}" />`, "span-4")}
-    ${fieldWrapper("Provider Setting", `<select id="provider_setting"></select>`, "span-4")}
+    ${fieldWrapper("Provider Setting", `<select id="provider_setting" name="provider_setting"></select>`, "span-4")}
 
     ${fieldWrapper("Scanning Engine", `<select id="quick_think_llm" name="quick_think_llm"></select>`, "span-6")}
     ${fieldWrapper("Judgment Engine", `<select id="deep_think_llm" name="deep_think_llm"></select>`, "span-6")}
@@ -81,7 +196,7 @@ function renderForm(meta) {
                 <div class="capability-option-top">
                   <div class="capability-copy">
                     <h3>${capability.label}</h3>
-                    <span class="capability-tag">Signal Module</span>
+                    <span class="capability-tag">Research Engine</span>
                   </div>
                   <span class="capability-toggle">
                     <input
@@ -103,7 +218,7 @@ function renderForm(meta) {
 
     <div class="submit-row span-12">
       <div class="submit-hint">
-        Launches the same Future Invest graph as the CLI, but renders the dossier as a web control room.
+        Launches the same lean/full Future Invest graph as the CLI, then renders the run as an institutional dossier.
       </div>
       <button class="launch-btn" id="launch-btn" type="submit">Launch Analysis</button>
     </div>
@@ -112,7 +227,7 @@ function renderForm(meta) {
   bindDynamicControls(meta);
 }
 
-function updateProviderFields() {
+function updateProviderFields({ useDefaults = false } = {}) {
   const providerKey = document.getElementById("llm_provider").value;
   const provider = metadata.providers[providerKey];
   const backendUrl = document.getElementById("backend_url");
@@ -122,18 +237,33 @@ function updateProviderFields() {
 
   backendUrl.value = provider.backend_url;
 
-  quickSelect.innerHTML = provider.quick_models
-    .map((model, index) => `<option value="${model}" ${index === 0 ? "selected" : ""}>${model}</option>`)
-    .join("");
-  deepSelect.innerHTML = provider.deep_models
-    .map((model, index) => `<option value="${model}" ${index === 0 ? "selected" : ""}>${model}</option>`)
-    .join("");
+  const quickSelected =
+    useDefaults && metadata.defaults.llm_provider === providerKey
+      ? metadata.defaults.quick_think_llm
+      : quickSelect.value;
+  const deepSelected =
+    useDefaults && metadata.defaults.llm_provider === providerKey
+      ? metadata.defaults.deep_think_llm
+      : deepSelect.value;
+
+  setSelectOptions(quickSelect, provider.quick_models, quickSelected);
+  setSelectOptions(deepSelect, provider.deep_models, deepSelected);
 
   if (provider.setting_field) {
     providerSetting.disabled = false;
     providerSetting.dataset.field = provider.setting_field;
+    const selectedSetting =
+      useDefaults && metadata.defaults.llm_provider === providerKey
+        ? metadata.defaults[provider.setting_field]
+        : providerSetting.value;
+    const fallbackValue = provider.setting_options.includes(selectedSetting)
+      ? selectedSetting
+      : provider.setting_options[0];
     providerSetting.innerHTML = provider.setting_options
-      .map((option) => `<option value="${option}">${provider.setting_label}: ${option}</option>`)
+      .map(
+        (option) =>
+          `<option value="${option}" ${String(option) === String(fallbackValue) ? "selected" : ""}>${provider.setting_label}: ${option}</option>`
+      )
       .join("");
   } else {
     providerSetting.disabled = true;
@@ -151,13 +281,20 @@ function updateRunModeRecommendations() {
   document.getElementById("position_importance").value = runMode.recommended_position_importance;
   document.getElementById("token_budget").value = runMode.recommended_token_budget;
   document.getElementById("research_depth").value = String(runMode.suggested_depth);
+
+  const recommended = new Set(runMode.recommended_analysts || []);
+  document
+    .querySelectorAll('input[name="selected_analysts"]')
+    .forEach((node) => {
+      node.checked = recommended.has(node.value);
+    });
 }
 
 function bindDynamicControls(meta) {
   metadata = meta;
-  document.getElementById("llm_provider").addEventListener("change", updateProviderFields);
+  document.getElementById("llm_provider").addEventListener("change", () => updateProviderFields());
   document.getElementById("run_mode").addEventListener("change", updateRunModeRecommendations);
-  updateProviderFields();
+  updateProviderFields({ useDefaults: true });
   updateRunModeRecommendations();
 }
 
@@ -185,24 +322,27 @@ function gatherPayload() {
   return payload;
 }
 
-function renderResults(data) {
-  resultsGrid.innerHTML = data.sections
-    .map(
-      (section) => `
-        <article class="result-card">
-          <h3>${section.title}</h3>
-          <pre>${section.content}</pre>
-        </article>
-      `
-    )
-    .join("");
+function buildResultCard(section) {
+  return `
+    <article class="result-card key-${section.key}">
+      <div class="section-eyebrow">${section.key.replaceAll("_", " ")}</div>
+      <h3>${escapeHtml(section.title)}</h3>
+      <div class="dossier-body">${renderMarkdownish(section.content)}</div>
+    </article>
+  `;
+}
 
-  resultsEmpty.classList.add("hidden");
+function renderResults(data) {
+  const sections = Array.isArray(data.sections) ? data.sections : [];
+  resultsGrid.innerHTML = sections.map(buildResultCard).join("");
+  resultsEmpty.classList.toggle("hidden", sections.length > 0);
   runMeta.innerHTML = `
-    <span>${data.ticker}</span>
-    <span>${data.analysis_date}</span>
-    <span>Elapsed ${data.elapsed_seconds}s</span>
-    <span>Decision: ${data.decision}</span>
+    <span>${escapeHtml(data.ticker)}</span>
+    <span>${escapeHtml(data.analysis_date)}</span>
+    <span>${escapeHtml(data.institutional_loop_mode)} loop</span>
+    <span>${escapeHtml(data.selected_analysts.length)} modules</span>
+    <span>Elapsed ${escapeHtml(data.elapsed_seconds)}s</span>
+    <span>Decision: ${escapeHtml(data.decision)}</span>
   `;
 }
 
@@ -219,6 +359,7 @@ form.addEventListener("submit", async (event) => {
   resultsGrid.innerHTML = "";
   runMeta.innerHTML = "";
   setStatus("running", "Running");
+  resultsEmpty.classList.remove("hidden");
 
   const launchBtn = document.getElementById("launch-btn");
   launchBtn.disabled = true;
@@ -234,7 +375,7 @@ form.addEventListener("submit", async (event) => {
       throw new Error(data.error || "Run failed.");
     }
     renderResults(data);
-    setStatus("idle", "Complete");
+    setStatus("complete", "Complete");
   } catch (error) {
     setStatus("error", "Error");
     errorBox.textContent = error.message;

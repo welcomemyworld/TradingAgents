@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="920" viewBox="0 0 1280 920" role="img" aria-labelledby="title desc">
+  <title id="title">Future Invest institutional stack</title>
+  <desc id="desc">A layered diagram showing mission setup, institutional framing, three parallel research engines, a hard synthesis core, lean and full exits, and the learning loop.</desc>
+  <defs>
+    <linearGradient id="frame" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14324d"/>
+      <stop offset="100%" stop-color="#102538"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f8c15c"/>
+      <stop offset="100%" stop-color="#7dd3fc"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      .title { font: 700 38px Arial, Helvetica, sans-serif; fill: #f4f8fb; }
+      .subtitle { font: 400 18px Arial, Helvetica, sans-serif; fill: #a9bdce; }
+      .kicker { font: 700 14px Arial, Helvetica, sans-serif; letter-spacing: 2px; fill: #7dd3fc; }
+      .heading { font: 700 26px Arial, Helvetica, sans-serif; fill: #f4f8fb; }
+      .body { font: 400 17px Arial, Helvetica, sans-serif; fill: #dbe5ed; }
+      .small { font: 400 15px Arial, Helvetica, sans-serif; fill: #a9bdce; }
+      .module { fill: #102233; stroke: #395b78; stroke-width: 2; }
+      .panel { fill: url(#frame); stroke: #3d607d; stroke-width: 2; }
+      .chip { fill: #12273b; stroke: #456987; stroke-width: 2; }
+      .line { stroke: #4f728f; stroke-width: 4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .line-accent { stroke: url(#accent); stroke-width: 6; fill: none; stroke-linecap: round; stroke-linejoin: round; filter: url(#glow); }
+    </style>
+  </defs>
+
+  <rect x="24" y="24" width="1232" height="872" rx="34" fill="none" stroke="#20374c" stroke-width="2"/>
+
+  <text x="74" y="90" class="title">Future Invest Institutional Stack</text>
+  <text x="74" y="122" class="subtitle">Lean by default, full when needed</text>
+
+  <rect x="74" y="170" width="1132" height="108" rx="26" class="panel"/>
+  <text x="108" y="204" class="kicker">MISSION SETUP</text>
+  <text x="108" y="240" class="heading">Operator Defines The Problem</text>
+  <text x="108" y="271" class="body">Ticker, date, mandate intensity, model backend, budget posture</text>
+
+  <rect x="74" y="326" width="1132" height="132" rx="26" class="panel"/>
+  <text x="108" y="360" class="kicker">INSTITUTIONAL FRAMING</text>
+  <text x="108" y="396" class="heading">Portfolio Context Appears Before The Thesis</text>
+  <text x="108" y="427" class="body">Portfolio mandate, time-horizon split, institutional memory brief</text>
+
+  <rect x="74" y="506" width="1132" height="180" rx="26" class="panel"/>
+  <text x="108" y="540" class="kicker">CAPABILITY RESEARCH STACK</text>
+  <text x="108" y="576" class="heading">Three Parallel Engines Populate One Shared Bundle</text>
+
+  <rect x="108" y="608" width="220" height="52" rx="18" class="chip"/>
+  <text x="137" y="640" class="body">Business Truth</text>
+  <rect x="360" y="608" width="260" height="52" rx="18" class="chip"/>
+  <text x="388" y="640" class="body">Market Expectations</text>
+  <rect x="652" y="608" width="350" height="52" rx="18" class="chip"/>
+  <text x="748" y="640" class="body">Timing &amp; Catalysts</text>
+
+  <rect x="74" y="734" width="532" height="120" rx="26" class="panel"/>
+  <text x="108" y="768" class="kicker">DECISION CORE</text>
+  <text x="108" y="804" class="heading">Thesis Engine + Challenge Engine + Investment Director</text>
+  <text x="108" y="835" class="small">Converts shared research into an investable world model</text>
+
+  <rect x="674" y="734" width="532" height="120" rx="26" class="panel"/>
+  <text x="708" y="768" class="kicker">LEAN / FULL EXIT</text>
+  <text x="708" y="804" class="heading">Hard Packet By Default, Committee Review When Needed</text>
+  <text x="708" y="835" class="small">Lean mode produces hard outputs fast; full mode adds execution, fit, and allocation review</text>
+
+  <path d="M640 278 V326" class="line"/>
+  <path d="M640 458 V506" class="line"/>
+  <path d="M640 686 V734" class="line"/>
+  <path d="M606 794 H674" class="line"/>
+
+  <path d="M1110 794 C1170 794, 1210 758, 1210 704 C1210 632, 1170 592, 1114 592" class="line-accent"/>
+  <path d="M108 240 C48 240, 40 312, 40 462 C40 658, 78 794, 108 794" class="line-accent"/>
+  <text x="1128" y="574" class="small">Learning loop</text>
+</svg>

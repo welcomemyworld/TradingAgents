@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" role="img" aria-labelledby="title desc">
+  <title id="title">Future Invest Workflow</title>
+  <desc id="desc">A workflow diagram showing mission setup, institutional framing, three parallel research engines, a decision core, a lean and full exit path, and the institutional learning loop.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#07111f"/>
+      <stop offset="100%" stop-color="#10192d"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f1b32"/>
+      <stop offset="100%" stop-color="#132241"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#22d3ee"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      .title { font: 700 40px Arial, Helvetica, sans-serif; fill: #eef2ff; letter-spacing: 1px; }
+      .subtitle { font: 400 18px Arial, Helvetica, sans-serif; fill: #b7c3e3; }
+      .section-title { font: 700 24px Arial, Helvetica, sans-serif; fill: #f5f7ff; }
+      .section-body { font: 400 17px Arial, Helvetica, sans-serif; fill: #d8def0; }
+      .section-label { font: 700 15px Arial, Helvetica, sans-serif; fill: #7dd3fc; letter-spacing: 1.2px; }
+      .small { font: 400 15px Arial, Helvetica, sans-serif; fill: #c9d2ea; }
+      .memory { font: 600 16px Arial, Helvetica, sans-serif; fill: #f5f7ff; }
+      .arrow { stroke: #7c93c9; stroke-width: 4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .accent { stroke: url(#accent); stroke-width: 5; fill: none; stroke-linecap: round; stroke-linejoin: round; filter: url(#glow); }
+    </style>
+  </defs>
+
+  <rect width="1600" height="980" fill="url(#bg)"/>
+  <rect x="40" y="40" width="1520" height="900" rx="28" fill="none" stroke="#203052" stroke-width="2"/>
+
+  <text x="80" y="110" class="title">Future Invest Workflow</text>
+  <text x="80" y="145" class="subtitle">Three parallel research engines, one synthesis core, lean/full exits</text>
+
+  <rect x="80" y="190" width="280" height="160" rx="24" fill="url(#panel)" stroke="#35528f" stroke-width="2"/>
+  <text x="110" y="230" class="section-label">STAGE 1</text>
+  <text x="110" y="268" class="section-title">Mission Setup</text>
+  <text x="110" y="304" class="section-body">Instrument</text>
+  <text x="110" y="332" class="section-body">Date</text>
+  <text x="110" y="360" class="section-body">Mandate intensity</text>
+
+  <rect x="430" y="190" width="330" height="260" rx="24" fill="url(#panel)" stroke="#35528f" stroke-width="2"/>
+  <text x="460" y="230" class="section-label">STAGE 2</text>
+  <text x="460" y="268" class="section-title">Institutional Framing</text>
+  <text x="460" y="304" class="section-body">Investment Orchestrator</text>
+  <text x="460" y="338" class="small">Builds Portfolio Mandate</text>
+  <text x="460" y="364" class="small">Builds Time Horizon Split</text>
+  <text x="460" y="390" class="small">Loads Institutional Memory</text>
+  <text x="460" y="432" class="small">Controls token budget, uncertainty,</text>
+  <text x="460" y="458" class="small">counterevidence, and stop rules</text>
+
+  <rect x="830" y="190" width="690" height="260" rx="24" fill="url(#panel)" stroke="#35528f" stroke-width="2"/>
+  <text x="860" y="230" class="section-label">STAGE 3</text>
+  <text x="860" y="268" class="section-title">Parallel Research Engines</text>
+  <rect x="870" y="300" width="145" height="105" rx="18" fill="#12233f" stroke="#4867a9" stroke-width="2"/>
+  <text x="892" y="352" class="memory">Business Truth</text>
+  <rect x="1035" y="300" width="180" height="105" rx="18" fill="#12233f" stroke="#4867a9" stroke-width="2"/>
+  <text x="1056" y="352" class="memory">Market Expectations</text>
+  <rect x="1235" y="300" width="255" height="105" rx="18" fill="#12233f" stroke="#4867a9" stroke-width="2"/>
+  <text x="1272" y="352" class="memory">Timing &amp; Catalysts</text>
+  <text x="860" y="435" class="small">All three engines run in parallel, then merge into one shared research bundle.</text>
+
+  <rect x="160" y="520" width="350" height="230" rx="24" fill="url(#panel)" stroke="#35528f" stroke-width="2"/>
+  <text x="190" y="560" class="section-label">STAGE 4</text>
+  <text x="190" y="598" class="section-title">Decision Core</text>
+  <text x="190" y="634" class="section-body">Thesis Engine</text>
+  <text x="190" y="666" class="section-body">Challenge Engine</text>
+  <text x="190" y="698" class="section-body">Investment Director</text>
+  <text x="190" y="732" class="small">Converts reports into</text>
+  <text x="190" y="758" class="small">an investable world model</text>
+
+  <rect x="610" y="520" width="300" height="230" rx="24" fill="url(#panel)" stroke="#35528f" stroke-width="2"/>
+  <text x="640" y="560" class="section-label">STAGE 5A</text>
+  <text x="640" y="598" class="section-title">Lean Exit</text>
+  <text x="640" y="634" class="section-body">Institutional stance</text>
+  <text x="640" y="666" class="section-body">Timing window</text>
+  <text x="640" y="698" class="section-body">Position size / entry</text>
+  <text x="640" y="730" class="section-body">Kill criteria / monitoring</text>
+
+  <rect x="980" y="520" width="430" height="230" rx="24" fill="url(#panel)" stroke="#35528f" stroke-width="2"/>
+  <text x="1010" y="560" class="section-label">STAGE 5B</text>
+  <text x="1010" y="598" class="section-title">Full Committee Extension</text>
+  <text x="1010" y="634" class="section-body">Execution Engine</text>
+  <text x="1010" y="666" class="section-body">Allocation Review Stack</text>
+  <text x="1010" y="698" class="section-body">Capital Committee</text>
+  <text x="1010" y="732" class="small">Used only when deeper sizing and fit review are worth the cost</text>
+
+  <rect x="430" y="800" width="330" height="110" rx="24" fill="url(#panel)" stroke="#35528f" stroke-width="2"/>
+  <text x="460" y="840" class="section-label">STAGE 6</text>
+  <text x="460" y="878" class="section-title">Final Decision</text>
+  <text x="460" y="905" class="small">Rating, sizing, mandate, entry/exit, kill criteria</text>
+
+  <rect x="840" y="790" width="500" height="130" rx="24" fill="url(#panel)" stroke="#35528f" stroke-width="2"/>
+  <text x="870" y="830" class="section-label">LEARNING LOOP</text>
+  <text x="870" y="868" class="section-title">Institutional Memory + Evaluation</text>
+  <text x="870" y="900" class="small">World model history, thesis history, prediction ledger, agent reliability</text>
+
+  <path class="arrow" d="M360 270 H430"/>
+  <path class="arrow" d="M760 320 H830"/>
+  <path class="arrow" d="M675 450 V520"/>
+  <path class="arrow" d="M510 635 H610"/>
+  <path class="arrow" d="M910 635 H980"/>
+  <path class="arrow" d="M760 635 H980"/>
+  <path class="arrow" d="M760 750 V800"/>
+  <path class="arrow" d="M760 855 H840"/>
+  <path class="accent" d="M1090 790 C1140 720, 1190 670, 1240 635"/>
+  <path class="accent" d="M1090 790 C980 760, 890 735, 760 690"/>
+  <path class="accent" d="M840 855 C300 940, 180 860, 180 670 C180 520, 245 430, 430 340"/>
+</svg>

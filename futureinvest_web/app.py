@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import mimetypes
 import traceback
 from datetime import datetime
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Dict
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 from tradingagents.agents.utils.agent_utils import (
     ANALYST_CAPABILITY_SUMMARIES,
@@ -22,7 +23,9 @@ from tradingagents.graph.trading_graph import FutureInvestGraph
 from cli.utils import (
     POSITION_IMPORTANCE_LABELS,
     RESEARCH_DEPTH_LABELS,
+    RUN_MODE_ANALYST_PRESETS,
     RUN_MODE_CONTROL_PRESETS,
+    RUN_MODE_LOOP_PRESETS,
     RUN_MODE_PRESETS,
     TOKEN_BUDGET_LABELS,
 )
@@ -31,6 +34,7 @@ from .serializer import build_web_sections
 
 PACKAGE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = PACKAGE_DIR / "static"
+ASSET_DIR = PACKAGE_DIR.parent / "assets"
 
 PROVIDER_PRESETS: Dict[str, Dict[str, Any]] = {
     "openai": {
@@ -92,6 +96,7 @@ PROVIDER_PRESETS: Dict[str, Dict[str, Any]] = {
 
 def build_metadata() -> Dict[str, Any]:
     today = datetime.now().strftime("%Y-%m-%d")
+    default_run_mode = "hard_loop"
     return {
         "today": today,
         "run_modes": [
@@ -102,6 +107,8 @@ def build_metadata() -> Dict[str, Any]:
                 "suggested_depth": preset["suggested_depth"],
                 "recommended_position_importance": RUN_MODE_CONTROL_PRESETS[key]["position_importance"],
                 "recommended_token_budget": RUN_MODE_CONTROL_PRESETS[key]["token_budget"],
+                "loop_mode": RUN_MODE_LOOP_PRESETS[key],
+                "recommended_analysts": RUN_MODE_ANALYST_PRESETS[key],
             }
             for key, preset in RUN_MODE_PRESETS.items()
         ],
@@ -126,11 +133,11 @@ def build_metadata() -> Dict[str, Any]:
         "defaults": {
             "ticker": "SPY",
             "analysis_date": today,
-            "run_mode": "committee",
-            "position_importance": "critical",
-            "token_budget": "expansive",
-            "research_depth": 5,
-            "selected_analysts": ANALYST_ORDER,
+            "run_mode": default_run_mode,
+            "position_importance": RUN_MODE_CONTROL_PRESETS[default_run_mode]["position_importance"],
+            "token_budget": RUN_MODE_CONTROL_PRESETS[default_run_mode]["token_budget"],
+            "research_depth": RUN_MODE_PRESETS[default_run_mode]["suggested_depth"],
+            "selected_analysts": RUN_MODE_ANALYST_PRESETS[default_run_mode],
             "llm_provider": DEFAULT_CONFIG["llm_provider"],
             "backend_url": DEFAULT_CONFIG["backend_url"],
             "quick_think_llm": DEFAULT_CONFIG["quick_think_llm"],
@@ -138,20 +145,29 @@ def build_metadata() -> Dict[str, Any]:
             "openai_reasoning_effort": DEFAULT_CONFIG.get("openai_reasoning_effort") or "medium",
             "google_thinking_level": DEFAULT_CONFIG.get("google_thinking_level") or "high",
             "anthropic_effort": DEFAULT_CONFIG.get("anthropic_effort") or "high",
+            "institutional_loop_mode": RUN_MODE_LOOP_PRESETS[default_run_mode],
         },
     }
 
 
 def build_config(payload: Dict[str, Any]) -> Dict[str, Any]:
+    run_mode = str(payload.get("run_mode") or "hard_loop")
+    loop_mode = RUN_MODE_LOOP_PRESETS.get(
+        run_mode, DEFAULT_CONFIG.get("institutional_loop_mode", "lean")
+    )
     config = DEFAULT_CONFIG.copy()
     config["max_debate_rounds"] = int(payload.get("research_depth", 1))
-    config["max_risk_discuss_rounds"] = int(payload.get("research_depth", 1))
+    config["max_risk_discuss_rounds"] = 0 if loop_mode == "lean" else int(
+        payload.get("research_depth", 1)
+    )
     config["quick_think_llm"] = payload.get("quick_think_llm") or DEFAULT_CONFIG["quick_think_llm"]
     config["deep_think_llm"] = payload.get("deep_think_llm") or DEFAULT_CONFIG["deep_think_llm"]
     config["backend_url"] = payload.get("backend_url") or DEFAULT_CONFIG["backend_url"]
     config["llm_provider"] = str(payload.get("llm_provider") or DEFAULT_CONFIG["llm_provider"]).lower()
     config["orchestrator_position_importance"] = payload.get("position_importance") or DEFAULT_CONFIG["orchestrator_position_importance"]
     config["orchestrator_token_budget"] = payload.get("token_budget") or DEFAULT_CONFIG["orchestrator_token_budget"]
+    config["institutional_loop_mode"] = loop_mode
+    config["enable_dynamic_capability_expansion"] = loop_mode != "lean"
     config["google_thinking_level"] = payload.get("google_thinking_level")
     config["openai_reasoning_effort"] = payload.get("openai_reasoning_effort")
     config["anthropic_effort"] = payload.get("anthropic_effort")
@@ -174,6 +190,7 @@ def run_analysis(payload: Dict[str, Any]) -> Dict[str, Any]:
         "ticker": ticker,
         "analysis_date": analysis_date,
         "selected_analysts": selected_analysts,
+        "institutional_loop_mode": config.get("institutional_loop_mode", "full"),
         "decision": decision,
         "elapsed_seconds": round(elapsed_seconds, 2),
         "sections": build_web_sections(final_state),
@@ -182,29 +199,33 @@ def run_analysis(payload: Dict[str, Any]) -> Dict[str, Any]:
             "temporal_context": final_state.get("temporal_context", {}),
             "institution_memory_snapshot": final_state.get("institution_memory_snapshot", {}),
             "final_decision": final_state.get("final_decision", {}),
+            "institutional_trace": final_state.get("institutional_trace", {}),
         },
     }
 
 
 class FutureInvestRequestHandler(BaseHTTPRequestHandler):
-    server_version = "FutureInvestWeb/0.1"
+    server_version = "FutureInvestWeb/0.2"
 
     def do_GET(self) -> None:
+        self._route_request(send_body=True)
+
+    def do_HEAD(self) -> None:
+        self._route_request(send_body=False)
+
+    def _route_request(self, send_body: bool) -> None:
         parsed = urlparse(self.path)
         if parsed.path in ("/", "/index.html"):
-            self._serve_static("index.html", "text/html; charset=utf-8")
-            return
-        if parsed.path == "/styles.css":
-            self._serve_static("styles.css", "text/css; charset=utf-8")
-            return
-        if parsed.path == "/app.js":
-            self._serve_static("app.js", "application/javascript; charset=utf-8")
-            return
-        if parsed.path == "/cci-monogram.svg":
-            self._serve_static("cci-monogram.svg", "image/svg+xml")
+            self._serve_from_directory(STATIC_DIR, "index.html", send_body=send_body)
             return
         if parsed.path == "/api/meta":
-            self._send_json(build_metadata())
+            self._send_json(build_metadata(), send_body=send_body)
+            return
+        if parsed.path.startswith("/assets/"):
+            self._serve_from_directory(ASSET_DIR, parsed.path.removeprefix("/assets/"), send_body=send_body)
+            return
+        if parsed.path.startswith("/"):
+            self._serve_from_directory(STATIC_DIR, parsed.path.removeprefix("/"), send_body=send_body)
             return
         self.send_error(HTTPStatus.NOT_FOUND, "Not Found")
 
@@ -239,25 +260,33 @@ class FutureInvestRequestHandler(BaseHTTPRequestHandler):
     def log_message(self, format: str, *args: Any) -> None:
         return
 
-    def _serve_static(self, filename: str, content_type: str) -> None:
-        path = STATIC_DIR / filename
-        if not path.exists():
+    def _serve_from_directory(self, base_dir: Path, relative_path: str, send_body: bool = True) -> None:
+        requested_path = (base_dir / unquote(relative_path)).resolve()
+        try:
+            requested_path.relative_to(base_dir.resolve())
+        except ValueError:
             self.send_error(HTTPStatus.NOT_FOUND, "Static asset not found")
             return
-        body = path.read_bytes()
+        if not requested_path.is_file():
+            self.send_error(HTTPStatus.NOT_FOUND, "Static asset not found")
+            return
+        content_type = mimetypes.guess_type(str(requested_path))[0] or "application/octet-stream"
+        body = requested_path.read_bytes()
         self.send_response(HTTPStatus.OK)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
-        self.wfile.write(body)
+        if send_body:
+            self.wfile.write(body)
 
-    def _send_json(self, payload: Dict[str, Any], status: HTTPStatus = HTTPStatus.OK) -> None:
+    def _send_json(self, payload: Dict[str, Any], status: HTTPStatus = HTTPStatus.OK, send_body: bool = True) -> None:
         body = json.dumps(payload).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
-        self.wfile.write(body)
+        if send_body:
+            self.wfile.write(body)
 
 
 def main() -> None:
