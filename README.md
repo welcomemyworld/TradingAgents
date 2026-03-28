@@ -47,8 +47,8 @@ Most finance agents answer questions. Future Invest is trying to model an instit
 
 1. Clone and install:
    ```bash
-   git clone https://github.com/welcomemyworld/TradingAgents.git
-   cd TradingAgents
+   git clone https://github.com/welcomemyworld/TradingAgents.git future-invest
+   cd future-invest
    pip install -e .
    ```
 2. Set one API key:
@@ -147,8 +147,8 @@ Future Invest is an AI-native investment institution framework for long/short eq
 
 Clone your Future Invest repository:
 ```bash
-git clone https://github.com/welcomemyworld/TradingAgents.git
-cd TradingAgents
+git clone https://github.com/welcomemyworld/TradingAgents.git future-invest
+cd future-invest
 ```
 
 Create a virtual environment in any of your favorite environment managers:
@@ -188,10 +188,9 @@ cp .env.example .env
 Launch the interactive CLI:
 ```bash
 future-invest          # primary installed command
-tradingagents          # legacy compatibility alias
 python -m cli.main     # run directly from source
 ```
-You will see a live interface where you can configure the research capability stack, lean or full institutional loop depth, LLM provider, and model pairing for an institution run.
+You will see a live interface where you can configure the research capability stack, lean or full institutional loop depth, LLM provider, and model pairing for an institution run. A legacy CLI alias is still available for backward compatibility.
 
 ### Web Interface
 
@@ -239,7 +238,7 @@ Future Invest uses LangGraph to keep the institution modular, inspectable, and e
 
 ### Python Usage
 
-The runtime currently keeps the legacy Python package path `tradingagents`, but the primary graph entrypoint is now `FutureInvestGraph()`. `TradingAgentsGraph()` remains available as a compatibility alias.
+The runtime currently keeps the legacy Python package path `tradingagents`, but the primary graph entrypoint is now `FutureInvestGraph()`. A legacy compatibility alias remains available for older integrations.
 
 You can run `main.py`, or use the runtime directly:
 
@@ -279,16 +278,14 @@ We welcome contributions that improve the institution design, research quality, 
 
 ## Citation
 
-If you build on this codebase, please cite:
+If you build on Future Invest, please cite the repository:
 
 ```
-@misc{xiao2025tradingagentsmultiagentsllmfinancial,
-      title={Future Invest: AI-Native Investment Institution Framework},
-      author={Yijia Xiao and Edward Sun and Di Luo and Wei Wang},
-      year={2025},
-      eprint={2412.20138},
-      archivePrefix={arXiv},
-      primaryClass={q-fin.TR},
-      url={https://arxiv.org/abs/2412.20138}, 
+@software{futureinvest2026,
+      author={{Future Invest Project}},
+      title={Future Invest: AI-Native Institution Operating System},
+      year={2026},
+      url={https://github.com/welcomemyworld/TradingAgents},
+      note={GitHub repository},
 }
 ```
