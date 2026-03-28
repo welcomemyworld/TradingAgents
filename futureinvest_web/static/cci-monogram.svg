@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Future Invest monogram</title>
+  <desc id="desc">A cyberpunk FI monogram built from neon rails, a clipped frame, and a signal orbit.</desc>
+  <defs>
+    <linearGradient id="fi-bg" x1="42" y1="34" x2="472" y2="486" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#090d1d"/>
+      <stop offset="100%" stop-color="#03050d"/>
+    </linearGradient>
+    <linearGradient id="fi-neon" x1="120" y1="110" x2="388" y2="402" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ff57c5"/>
+      <stop offset="55%" stop-color="#8a5cff"/>
+      <stop offset="100%" stop-color="#4ef2ff"/>
+    </linearGradient>
+    <filter id="fi-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="url(#fi-bg)"/>
+  <path d="M86 42H404L470 108V404L404 470H108L42 404V108L86 42Z" fill="none" stroke="#253666" stroke-width="2"/>
+  <path d="M116 82H370L430 142V370L370 430H142L82 370V142L116 82Z" fill="none" stroke="#152442" stroke-width="2"/>
+
+  <path d="M146 126C104 164 78 220 78 282C78 388 164 474 270 474C326 474 378 450 414 410" fill="none" stroke="url(#fi-neon)" stroke-width="18" stroke-linecap="round" filter="url(#fi-glow)"/>
+  <path d="M186 112H212V392H186Z" fill="#eef6ff"/>
+  <path d="M186 112H334V136H186Z" fill="#eef6ff"/>
+  <path d="M186 216H304V240H186Z" fill="#eef6ff"/>
+  <path d="M286 148H314V366H286Z" fill="#4ef2ff"/>
+  <circle cx="300" cy="132" r="11" fill="#ff57c5"/>
+  <circle cx="300" cy="382" r="11" fill="#8dff7a"/>
+  <path d="M344 108H386" stroke="#4ef2ff" stroke-width="8" stroke-linecap="round"/>
+  <path d="M344 404H386" stroke="#ff57c5" stroke-width="8" stroke-linecap="round"/>
+</svg>

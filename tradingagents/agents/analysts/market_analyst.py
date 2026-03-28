@@ -1,0 +1,125 @@
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+import time
+import json
+from tradingagents.agents.utils.agent_utils import (
+    build_instrument_context,
+    get_indicators,
+    get_stock_data,
+)
+from tradingagents.agents.utils.decision_protocol import (
+    MARKET_EXPECTATIONS_SECTION_MAP,
+    build_dossier_update,
+    build_temporal_context_update,
+)
+from tradingagents.dataflows.config import get_config
+
+
+def create_market_analyst(llm):
+
+    def market_analyst_node(state):
+        current_date = state["trade_date"]
+        instrument_context = build_instrument_context(state["company_of_interest"])
+        analysis_brief = state.get("analysis_brief", "")
+
+        tools = [
+            get_stock_data,
+            get_indicators,
+        ]
+
+        system_message = (
+            """You are the Market Expectations capability inside an AI-native investment institution. Your job is to infer what the tape, trend, and technical structure imply the market already expects.
+
+Write a report with these sections:
+- What The Tape Implies
+- What Seems Priced In
+- Positioning / Momentum Read
+- Implications For Timing
+- Execution Window Pressure
+
+Select the **most relevant indicators** for the current setup from the following list. The goal is to choose up to **8 indicators** that provide complementary insight without redundancy. Categories and each category's indicators are:
+
+Moving Averages:
+- close_50_sma: 50 SMA: A medium-term trend indicator. Usage: Identify trend direction and serve as dynamic support/resistance. Tips: It lags price; combine with faster indicators for timely signals.
+- close_200_sma: 200 SMA: A long-term trend benchmark. Usage: Confirm overall market trend and identify golden/death cross setups. Tips: It reacts slowly; best for strategic trend confirmation rather than frequent trading entries.
+- close_10_ema: 10 EMA: A responsive short-term average. Usage: Capture quick shifts in momentum and potential entry points. Tips: Prone to noise in choppy markets; use alongside longer averages for filtering false signals.
+
+MACD Related:
+- macd: MACD: Computes momentum via differences of EMAs. Usage: Look for crossovers and divergence as signals of trend changes. Tips: Confirm with other indicators in low-volatility or sideways markets.
+- macds: MACD Signal: An EMA smoothing of the MACD line. Usage: Use crossovers with the MACD line to trigger trades. Tips: Should be part of a broader strategy to avoid false positives.
+- macdh: MACD Histogram: Shows the gap between the MACD line and its signal. Usage: Visualize momentum strength and spot divergence early. Tips: Can be volatile; complement with additional filters in fast-moving markets.
+
+Momentum Indicators:
+- rsi: RSI: Measures momentum to flag overbought/oversold conditions. Usage: Apply 70/30 thresholds and watch for divergence to signal reversals. Tips: In strong trends, RSI may remain extreme; always cross-check with trend analysis.
+
+Volatility Indicators:
+- boll: Bollinger Middle: A 20 SMA serving as the basis for Bollinger Bands. Usage: Acts as a dynamic benchmark for price movement. Tips: Combine with the upper and lower bands to effectively spot breakouts or reversals.
+- boll_ub: Bollinger Upper Band: Typically 2 standard deviations above the middle line. Usage: Signals potential overbought conditions and breakout zones. Tips: Confirm signals with other tools; prices may ride the band in strong trends.
+- boll_lb: Bollinger Lower Band: Typically 2 standard deviations below the middle line. Usage: Indicates potential oversold conditions. Tips: Use additional analysis to avoid false reversal signals.
+- atr: ATR: Averages true range to measure volatility. Usage: Set stop-loss levels and adjust position sizes based on current market volatility. Tips: It's a reactive measure, so use it as part of a broader risk management strategy.
+
+Volume-Based Indicators:
+- vwma: VWMA: A moving average weighted by volume. Usage: Confirm trends by integrating price action with volume data. Tips: Watch for skewed results from volume spikes; use in combination with other volume analyses.
+
+- Select indicators that provide diverse and complementary information. Avoid redundancy (e.g., do not select both rsi and stochrsi).
+- Explain what the market seems to be discounting, not just what the chart looks like.
+- Keep the focus on the short-cycle execution window: what the tape is forcing now, not whether the business is good over the long run.
+- When you tool call, please use the exact indicator names provided above or the call will fail.
+- Please call get_stock_data first to retrieve the CSV needed to generate indicators, then use get_indicators with the specific indicator names.
+- Write a detailed report that helps the rest of the institution understand expectations, timing, and what is already embedded in price."""
+            + """ Make sure to append a Markdown table at the end of the report to organize key points in the report, organized and easy to read."""
+        )
+
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    "You are a helpful AI assistant, collaborating with other assistants."
+                    " Use the provided tools to progress towards answering the question."
+                    " If you are unable to fully answer, that's OK; another assistant with different tools"
+                    " will help where you left off. Execute what you can to make progress."
+                    " If you or any other assistant has the FINAL TRANSACTION PROPOSAL: **BUY/HOLD/SELL** or deliverable,"
+                    " prefix your response with FINAL TRANSACTION PROPOSAL: **BUY/HOLD/SELL** so the team knows to stop."
+                    " You have access to the following tools: {tool_names}.\n{system_message}"
+                    "For your reference, the current date is {current_date}. {instrument_context}\n"
+                    "Current investment brief:\n{analysis_brief}",
+                ),
+                MessagesPlaceholder(variable_name="messages"),
+            ]
+        )
+
+        prompt = prompt.partial(system_message=system_message)
+        prompt = prompt.partial(tool_names=", ".join([tool.name for tool in tools]))
+        prompt = prompt.partial(current_date=current_date)
+        prompt = prompt.partial(instrument_context=instrument_context)
+        prompt = prompt.partial(analysis_brief=analysis_brief)
+
+        chain = prompt | llm.bind_tools(tools)
+
+        result = chain.invoke(state["messages"])
+
+        report = ""
+
+        if len(result.tool_calls) == 0:
+            report = result.content
+
+        output = {
+            "messages": [result],
+            "market_expectations_report": report,
+        }
+        output.update(
+            build_dossier_update(
+                state,
+                report,
+                MARKET_EXPECTATIONS_SECTION_MAP,
+            )
+        )
+        output.update(
+            build_temporal_context_update(
+                state,
+                report,
+                MARKET_EXPECTATIONS_SECTION_MAP,
+            )
+        )
+        return output
+
+    return market_analyst_node
