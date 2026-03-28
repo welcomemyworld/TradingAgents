@@ -1,67 +1,50 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="860" viewBox="0 0 1600 860" role="img" aria-labelledby="title desc">
   <title id="title">Future Invest capital committee</title>
-  <desc id="desc">A custom diagram of upside capture, downside guardrail, and portfolio fit feeding the capital committee.</desc>
+  <desc id="desc">A cyberpunk diagram of the three governance reviews feeding the capital allocation committee.</desc>
   <defs>
-    <linearGradient id="cc-bg" x1="34" y1="28" x2="1552" y2="826" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#171e23"/>
-      <stop offset="100%" stop-color="#0d1011"/>
+    <linearGradient id="cc-bg" x1="36" y1="30" x2="1560" y2="830" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#091022"/>
+      <stop offset="100%" stop-color="#03050d"/>
     </linearGradient>
     <linearGradient id="cc-panel" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#262f35"/>
-      <stop offset="100%" stop-color="#171d21"/>
+      <stop offset="0%" stop-color="#101835"/>
+      <stop offset="100%" stop-color="#0a1022"/>
     </linearGradient>
     <linearGradient id="cc-line" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#f0aa6b"/>
-      <stop offset="55%" stop-color="#d8c07b"/>
-      <stop offset="100%" stop-color="#87c7b0"/>
+      <stop offset="0%" stop-color="#ff57c5"/>
+      <stop offset="55%" stop-color="#8a5cff"/>
+      <stop offset="100%" stop-color="#4ef2ff"/>
     </linearGradient>
     <style>
-      .title { font: 700 40px Georgia, "Times New Roman", serif; fill: #f5efe5; }
-      .subtitle { font: 400 18px Arial, Helvetica, sans-serif; fill: #b7aa96; }
-      .label { font: 700 15px Arial, Helvetica, sans-serif; fill: #f0aa6b; letter-spacing: 2px; }
-      .heading { font: 700 28px Georgia, "Times New Roman", serif; fill: #f5efe5; }
-      .body { font: 400 18px Arial, Helvetica, sans-serif; fill: #e8dccb; }
-      .small { font: 400 15px Arial, Helvetica, sans-serif; fill: #b7aa96; }
-      .panel { fill: url(#cc-panel); stroke: #4d4030; stroke-width: 2; }
+      .title { font: 700 40px Arial, Helvetica, sans-serif; fill: #eef6ff; }
+      .subtitle { font: 400 18px Arial, Helvetica, sans-serif; fill: #91a2d4; }
+      .label { font: 700 15px "Courier New", monospace; fill: #4ef2ff; letter-spacing: 2.2px; }
+      .heading { font: 700 28px Arial, Helvetica, sans-serif; fill: #f4f7ff; }
+      .body { font: 400 18px Arial, Helvetica, sans-serif; fill: #c6d4ff; }
+      .panel { fill: url(#cc-panel); stroke: #2a4f97; stroke-width: 2; }
       .line { fill: none; stroke: url(#cc-line); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
-      .guide { fill: none; stroke: #3a3128; stroke-width: 2; stroke-dasharray: 10 10; }
     </style>
   </defs>
-
-  <rect width="1600" height="860" fill="#0b0e10"/>
-  <rect x="24" y="24" width="1552" height="812" rx="34" fill="url(#cc-bg)"/>
-  <rect x="50" y="50" width="1500" height="760" rx="28" class="guide"/>
-
+  <rect width="1600" height="860" fill="url(#cc-bg)"/>
   <text x="78" y="98" class="title">Committee + Capital Formation</text>
-  <text x="78" y="130" class="subtitle">Three governance views shape the final capital decision when full review is warranted.</text>
-
-  <rect x="102" y="236" width="380" height="250" rx="30" class="panel"/>
-  <text x="136" y="278" class="label">REVIEW 1</text>
-  <text x="136" y="324" class="heading">Upside Capture</text>
-  <text x="136" y="368" class="body">Are we under-sizing an asymmetric idea?</text>
-  <text x="136" y="408" class="small">reward to conviction</text>
-  <text x="136" y="436" class="small">what makes bigger size justifiable</text>
-
-  <rect x="610" y="236" width="380" height="250" rx="30" class="panel"/>
-  <text x="644" y="278" class="label">REVIEW 2</text>
-  <text x="644" y="324" class="heading">Downside Guardrail</text>
-  <text x="644" y="368" class="body">What breaks the trade?</text>
-  <text x="644" y="408" class="small">scenario map</text>
-  <text x="644" y="436" class="small">hard stop rules and kill criteria</text>
-
-  <rect x="1118" y="236" width="380" height="250" rx="30" class="panel"/>
-  <text x="1152" y="278" class="label">REVIEW 3</text>
-  <text x="1152" y="324" class="heading">Portfolio Fit</text>
-  <text x="1152" y="368" class="body">How does the seat change the book?</text>
-  <text x="1152" y="408" class="small">correlation and crowding</text>
-  <text x="1152" y="436" class="small">capital budget and role clarity</text>
-
-  <rect x="454" y="594" width="692" height="166" rx="30" class="panel"/>
-  <text x="488" y="636" class="label">FINAL GOVERNANCE</text>
-  <text x="488" y="682" class="heading">Capital Allocation Committee</text>
-  <text x="488" y="718" class="body">final rating, position size, entry discipline, kill criteria, monitoring, rationale</text>
-
-  <path d="M292 486C292 546 456 568 586 594" class="line"/>
-  <path d="M800 486V594" class="line"/>
-  <path d="M1308 486C1308 546 1144 568 1014 594" class="line"/>
+  <text x="78" y="130" class="subtitle">Three governance views shape the final capital decision.</text>
+  <rect x="100" y="236" width="382" height="252" rx="24" class="panel"/>
+  <text x="132" y="274" class="label">REVIEW 01</text>
+  <text x="132" y="316" class="heading">Upside Capture</text>
+  <text x="132" y="354" class="body">are we under-sizing an asymmetric seat?</text>
+  <rect x="610" y="236" width="382" height="252" rx="24" class="panel"/>
+  <text x="642" y="274" class="label">REVIEW 02</text>
+  <text x="642" y="316" class="heading">Downside Guardrail</text>
+  <text x="642" y="354" class="body">what breaks the trade and when?</text>
+  <rect x="1120" y="236" width="382" height="252" rx="24" class="panel"/>
+  <text x="1152" y="274" class="label">REVIEW 03</text>
+  <text x="1152" y="316" class="heading">Portfolio Fit</text>
+  <text x="1152" y="354" class="body">how does the seat change the book?</text>
+  <rect x="452" y="598" width="696" height="158" rx="24" class="panel"/>
+  <text x="484" y="636" class="label">FINAL GOVERNANCE</text>
+  <text x="484" y="678" class="heading">Capital Allocation Committee</text>
+  <text x="484" y="712" class="body">final rating, position size, entry path, kill criteria, monitoring</text>
+  <path d="M292 488C292 546 456 572 586 598" class="line"/>
+  <path d="M800 488V598" class="line"/>
+  <path d="M1308 488C1308 546 1144 572 1014 598" class="line"/>
 </svg>

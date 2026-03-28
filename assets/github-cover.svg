@@ -1,88 +1,97 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
   <title id="title">Future Invest GitHub cover</title>
-  <desc id="desc">A custom cover showing three research engines converging into an institutional decision packet and committee extension.</desc>
+  <desc id="desc">A cyberpunk cover showing parallel research rails converging into a position packet and a full committee extension.</desc>
   <defs>
-    <linearGradient id="cover-bg" x1="70" y1="40" x2="1520" y2="864" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#181f24"/>
-      <stop offset="100%" stop-color="#0a0d0f"/>
+    <linearGradient id="cover-bg" x1="48" y1="30" x2="1530" y2="870" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0a0f21"/>
+      <stop offset="100%" stop-color="#04060e"/>
     </linearGradient>
     <linearGradient id="cover-panel" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#242d33"/>
-      <stop offset="100%" stop-color="#171d22"/>
+      <stop offset="0%" stop-color="#0f1731"/>
+      <stop offset="100%" stop-color="#0a1021"/>
     </linearGradient>
     <linearGradient id="cover-line" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#f0aa6b"/>
-      <stop offset="55%" stop-color="#d8c07b"/>
-      <stop offset="100%" stop-color="#87c7b0"/>
+      <stop offset="0%" stop-color="#ff57c5"/>
+      <stop offset="55%" stop-color="#8a5cff"/>
+      <stop offset="100%" stop-color="#4ef2ff"/>
     </linearGradient>
+    <filter id="cover-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="9" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
     <style>
-      .title { font: 700 88px Georgia, "Times New Roman", serif; fill: #f5efe5; }
-      .subtitle { font: 700 25px Arial, Helvetica, sans-serif; fill: #f0aa6b; letter-spacing: 2px; }
-      .lede { font: 500 34px Arial, Helvetica, sans-serif; fill: #e8dccb; }
-      .body { font: 400 22px Arial, Helvetica, sans-serif; fill: #b7aa96; }
-      .section { font: 700 18px Arial, Helvetica, sans-serif; fill: #f0aa6b; letter-spacing: 1.6px; }
-      .heading { font: 700 30px Georgia, "Times New Roman", serif; fill: #f5efe5; }
-      .small { font: 400 19px Arial, Helvetica, sans-serif; fill: #d9ccbc; }
-      .tiny { font: 400 17px Arial, Helvetica, sans-serif; fill: #b7aa96; }
-      .card { fill: url(#cover-panel); stroke: #4d4030; stroke-width: 2; }
-      .frame { fill: none; stroke: #352d23; stroke-width: 2; }
-      .link { fill: none; stroke: url(#cover-line); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
-      .ghost { fill: none; stroke: #40372c; stroke-width: 2; stroke-dasharray: 9 10; }
+      .title { font: 700 88px Arial, Helvetica, sans-serif; fill: #eef6ff; letter-spacing: -2px; }
+      .subtitle { font: 700 25px "Courier New", monospace; fill: #4ef2ff; letter-spacing: 3px; }
+      .lede { font: 500 34px Arial, Helvetica, sans-serif; fill: #d8e5ff; }
+      .body { font: 400 22px Arial, Helvetica, sans-serif; fill: #91a2d4; }
+      .section { font: 700 16px "Courier New", monospace; fill: #4ef2ff; letter-spacing: 2.2px; }
+      .heading { font: 700 30px Arial, Helvetica, sans-serif; fill: #f4f7ff; letter-spacing: -0.5px; }
+      .small { font: 400 19px Arial, Helvetica, sans-serif; fill: #c6d4ff; }
+      .tiny { font: 400 17px Arial, Helvetica, sans-serif; fill: #91a2d4; }
+      .panel { fill: url(#cover-panel); stroke: #27427d; stroke-width: 2; }
+      .frame { fill: none; stroke: #1b2750; stroke-width: 2; }
+      .line { fill: none; stroke: url(#cover-line); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; filter: url(#cover-glow); }
+      .wire { fill: none; stroke: #22376f; stroke-width: 2; stroke-dasharray: 8 10; }
+      .hud { fill: none; stroke: #4ef2ff; stroke-width: 3; opacity: 0.42; }
     </style>
   </defs>
 
-  <rect width="1600" height="900" fill="#0a0d0f"/>
+  <rect width="1600" height="900" fill="#03050d"/>
   <rect x="24" y="24" width="1552" height="852" rx="34" fill="url(#cover-bg)"/>
-  <rect x="54" y="54" width="1492" height="792" rx="28" class="frame"/>
+  <path d="M68 54H1450L1536 140V760L1460 846H150L64 760V118L68 54Z" class="frame"/>
 
-  <circle cx="1240" cy="228" r="204" fill="none" stroke="#2f3c39" stroke-width="2"/>
-  <circle cx="1240" cy="228" r="142" fill="none" stroke="#473b2f" stroke-width="2"/>
-  <path d="M1040 164C1110 118 1180 94 1260 94C1380 94 1470 154 1498 274" class="ghost"/>
+  <path d="M90 736H680" class="wire"/>
+  <path d="M980 130H1484" class="wire"/>
+  <path d="M1048 98V210" class="wire"/>
+  <path d="M1346 510V750" class="wire"/>
 
   <text x="92" y="170" class="title">Future Invest</text>
-  <text x="96" y="222" class="subtitle">AI-NATIVE INSTITUTION OPERATING SYSTEM</text>
-  <text x="92" y="308" class="lede">Turn research into position construction,</text>
-  <text x="92" y="352" class="lede">kill criteria, and monitoring.</text>
-  <text x="92" y="432" class="body">Not a stock picker. Not a memo generator.</text>
-  <text x="92" y="468" class="body">A lean decision loop for portfolio-aware investing.</text>
+  <text x="96" y="218" class="subtitle">INSTITUTION_OS / PARALLEL_RESEARCH / POSITION_PACKET</text>
+  <text x="92" y="304" class="lede">Research, timing, and portfolio logic</text>
+  <text x="92" y="348" class="lede">compressed into one live packet.</text>
+  <text x="92" y="428" class="body">Not a finance chatbot.</text>
+  <text x="92" y="462" class="body">A cybernetic decision loop for real seats.</text>
 
-  <rect x="92" y="546" width="420" height="188" rx="28" class="card"/>
-  <text x="126" y="590" class="section">DEFAULT LOOP</text>
-  <text x="126" y="634" class="heading">Lean By Default</text>
-  <text x="126" y="678" class="small">Mandate -> parallel research -></text>
-  <text x="126" y="710" class="small">decision core -> position packet</text>
+  <rect x="92" y="550" width="372" height="174" rx="24" class="panel"/>
+  <text x="126" y="590" class="section">LEAN LOOP</text>
+  <text x="126" y="634" class="heading">Research -> Debate -> Packet</text>
+  <text x="126" y="674" class="small">fast institutional synthesis</text>
+  <text x="126" y="706" class="small">stance, size, entry, kill criteria</text>
 
-  <rect x="546" y="546" width="350" height="188" rx="28" class="card"/>
-  <text x="580" y="590" class="section">OUTPUT</text>
-  <text x="580" y="634" class="heading">Position Packet</text>
-  <text x="580" y="678" class="small">stance, size, entry framework,</text>
-  <text x="580" y="710" class="small">kill criteria, monitoring</text>
+  <rect x="510" y="550" width="314" height="174" rx="24" class="panel"/>
+  <text x="544" y="590" class="section">OUTPUT</text>
+  <text x="544" y="634" class="heading">Position Packet</text>
+  <text x="544" y="674" class="small">what to do</text>
+  <text x="544" y="706" class="small">why it breaks</text>
 
-  <rect x="930" y="546" width="518" height="188" rx="28" class="card"/>
-  <text x="964" y="590" class="section">WHY IT COMPOUNDS</text>
-  <text x="964" y="634" class="heading">Memory + Evaluation</text>
-  <text x="964" y="678" class="small">institutional traces, thesis history,</text>
-  <text x="964" y="710" class="small">prediction ledgers, workflow iteration</text>
+  <rect x="872" y="550" width="566" height="174" rx="24" class="panel"/>
+  <text x="906" y="590" class="section">COMPOUNDING LAYER</text>
+  <text x="906" y="634" class="heading">Memory + Evaluation + Trace</text>
+  <text x="906" y="674" class="small">cross-run learning, institutional residue, workflow iteration</text>
 
-  <rect x="1014" y="206" width="154" height="114" rx="24" class="card"/>
-  <text x="1042" y="246" class="section">ENGINE 1</text>
-  <text x="1042" y="290" class="heading">Truth</text>
+  <rect x="1018" y="152" width="146" height="106" rx="18" class="panel"/>
+  <text x="1042" y="188" class="section">R1</text>
+  <text x="1042" y="228" class="heading">Truth</text>
 
-  <rect x="1184" y="150" width="170" height="114" rx="24" class="card"/>
-  <text x="1212" y="190" class="section">ENGINE 2</text>
-  <text x="1212" y="234" class="heading">Expectations</text>
+  <rect x="1192" y="106" width="174" height="106" rx="18" class="panel"/>
+  <text x="1218" y="142" class="section">R2</text>
+  <text x="1218" y="182" class="heading">Expectations</text>
 
-  <rect x="1370" y="230" width="138" height="114" rx="24" class="card"/>
-  <text x="1398" y="270" class="section">ENGINE 3</text>
-  <text x="1398" y="314" class="heading">Timing</text>
+  <rect x="1390" y="188" width="128" height="106" rx="18" class="panel"/>
+  <text x="1414" y="224" class="section">R3</text>
+  <text x="1414" y="264" class="heading">Timing</text>
 
-  <rect x="1148" y="376" width="250" height="134" rx="28" class="card"/>
-  <text x="1178" y="418" class="section">SYNTHESIS</text>
-  <text x="1178" y="462" class="heading">Decision Core</text>
-  <text x="1178" y="496" class="tiny">thesis, challenge, investment director</text>
+  <rect x="1142" y="332" width="286" height="138" rx="24" class="panel"/>
+  <text x="1174" y="372" class="section">DECISION CORE</text>
+  <text x="1174" y="416" class="heading">Thesis + Challenge + Director</text>
+  <text x="1174" y="448" class="tiny">one synthesis layer for one institutional view</text>
 
-  <path d="M1168 318C1202 344 1228 360 1254 376" class="link"/>
-  <path d="M1268 264C1268 304 1268 328 1268 376" class="link"/>
-  <path d="M1370 322C1336 346 1310 360 1286 376" class="link"/>
-  <path d="M1274 510V546" class="link"/>
+  <path d="M1164 258C1198 284 1222 304 1252 332" class="line"/>
+  <path d="M1278 212C1278 250 1278 276 1278 332" class="line"/>
+  <path d="M1390 280C1352 298 1320 312 1298 332" class="line"/>
+  <path d="M1284 470V550" class="line"/>
+  <path d="M974 148C1082 90 1216 76 1338 108" class="hud"/>
 </svg>

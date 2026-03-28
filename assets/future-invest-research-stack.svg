@@ -1,70 +1,54 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="860" viewBox="0 0 1600 860" role="img" aria-labelledby="title desc">
   <title id="title">Future Invest research stack</title>
-  <desc id="desc">A custom diagram of the three research capabilities feeding a shared institutional bundle.</desc>
+  <desc id="desc">A cyberpunk diagram of the three research capabilities converging into one institutional bundle.</desc>
   <defs>
-    <linearGradient id="rs-bg" x1="42" y1="34" x2="1550" y2="824" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#171e23"/>
-      <stop offset="100%" stop-color="#0d1011"/>
+    <linearGradient id="rs-bg" x1="36" y1="30" x2="1560" y2="830" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#091022"/>
+      <stop offset="100%" stop-color="#03050d"/>
     </linearGradient>
     <linearGradient id="rs-panel" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#262f35"/>
-      <stop offset="100%" stop-color="#171d21"/>
+      <stop offset="0%" stop-color="#101835"/>
+      <stop offset="100%" stop-color="#0a1022"/>
     </linearGradient>
     <linearGradient id="rs-line" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#f0aa6b"/>
-      <stop offset="55%" stop-color="#d8c07b"/>
-      <stop offset="100%" stop-color="#87c7b0"/>
+      <stop offset="0%" stop-color="#ff57c5"/>
+      <stop offset="55%" stop-color="#8a5cff"/>
+      <stop offset="100%" stop-color="#4ef2ff"/>
     </linearGradient>
     <style>
-      .title { font: 700 40px Georgia, "Times New Roman", serif; fill: #f5efe5; }
-      .subtitle { font: 400 18px Arial, Helvetica, sans-serif; fill: #b7aa96; }
-      .label { font: 700 15px Arial, Helvetica, sans-serif; fill: #f0aa6b; letter-spacing: 2px; }
-      .heading { font: 700 28px Georgia, "Times New Roman", serif; fill: #f5efe5; }
-      .body { font: 400 18px Arial, Helvetica, sans-serif; fill: #e8dccb; }
-      .small { font: 400 15px Arial, Helvetica, sans-serif; fill: #b7aa96; }
-      .panel { fill: url(#rs-panel); stroke: #4d4030; stroke-width: 2; }
+      .title { font: 700 40px Arial, Helvetica, sans-serif; fill: #eef6ff; }
+      .subtitle { font: 400 18px Arial, Helvetica, sans-serif; fill: #91a2d4; }
+      .label { font: 700 15px "Courier New", monospace; fill: #4ef2ff; letter-spacing: 2.2px; }
+      .heading { font: 700 28px Arial, Helvetica, sans-serif; fill: #f4f7ff; }
+      .body { font: 400 18px Arial, Helvetica, sans-serif; fill: #c6d4ff; }
+      .small { font: 400 15px Arial, Helvetica, sans-serif; fill: #91a2d4; }
+      .panel { fill: url(#rs-panel); stroke: #2a4f97; stroke-width: 2; }
       .line { fill: none; stroke: url(#rs-line); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
-      .guide { fill: none; stroke: #3a3128; stroke-width: 2; stroke-dasharray: 10 10; }
     </style>
   </defs>
-
-  <rect width="1600" height="860" fill="#0b0e10"/>
-  <rect x="24" y="24" width="1552" height="812" rx="34" fill="url(#rs-bg)"/>
-  <rect x="50" y="50" width="1500" height="760" rx="28" class="guide"/>
-
+  <rect width="1600" height="860" fill="url(#rs-bg)"/>
   <text x="78" y="98" class="title">Research Capability Stack</text>
-  <text x="78" y="130" class="subtitle">Three original capability surfaces aimed at one shared world model.</text>
-
-  <rect x="90" y="198" width="420" height="310" rx="30" class="panel"/>
-  <text x="124" y="240" class="label">CAPABILITY 1</text>
-  <text x="124" y="286" class="heading">Business Truth</text>
-  <text x="124" y="330" class="body">What is economically real?</text>
-  <text x="124" y="372" class="small">earnings power</text>
-  <text x="124" y="400" class="small">balance-sheet resilience</text>
-  <text x="124" y="428" class="small">assumptions that must hold</text>
-
-  <rect x="590" y="198" width="420" height="310" rx="30" class="panel"/>
-  <text x="624" y="240" class="label">CAPABILITY 2</text>
-  <text x="624" y="286" class="heading">Market Expectations</text>
-  <text x="624" y="330" class="body">What is already priced in?</text>
-  <text x="624" y="372" class="small">tape and momentum</text>
-  <text x="624" y="400" class="small">positioning and sentiment</text>
-  <text x="624" y="428" class="small">variant perception baseline</text>
-
-  <rect x="1090" y="198" width="420" height="310" rx="30" class="panel"/>
-  <text x="1124" y="240" class="label">CAPABILITY 3</text>
-  <text x="1124" y="286" class="heading">Timing &amp; Catalysts</text>
-  <text x="1124" y="330" class="body">What makes the window actionable?</text>
-  <text x="1124" y="372" class="small">attention and narrative</text>
-  <text x="1124" y="400" class="small">near-term catalysts</text>
-  <text x="1124" y="428" class="small">re-rating path and invalidation</text>
-
-  <rect x="420" y="602" width="760" height="150" rx="30" class="panel"/>
-  <text x="454" y="644" class="label">CONVERGENCE</text>
-  <text x="454" y="690" class="heading">Shared Institutional Bundle</text>
-  <text x="454" y="728" class="body">One combined research object for thesis, challenge, and director logic.</text>
-
-  <path d="M300 508C300 568 430 586 548 602" class="line"/>
-  <path d="M800 508V602" class="line"/>
-  <path d="M1300 508C1300 568 1170 586 1052 602" class="line"/>
+  <text x="78" y="130" class="subtitle">Three specialized rails converge into one institutional bundle.</text>
+  <rect x="92" y="198" width="420" height="308" rx="24" class="panel"/>
+  <text x="124" y="236" class="label">RAIL 01</text>
+  <text x="124" y="278" class="heading">Business Truth</text>
+  <text x="124" y="320" class="body">what is economically real</text>
+  <text x="124" y="356" class="small">earnings power / resilience / assumptions</text>
+  <rect x="590" y="198" width="420" height="308" rx="24" class="panel"/>
+  <text x="622" y="236" class="label">RAIL 02</text>
+  <text x="622" y="278" class="heading">Market Expectations</text>
+  <text x="622" y="320" class="body">what the tape already expects</text>
+  <text x="622" y="356" class="small">positioning / momentum / implied consensus</text>
+  <rect x="1088" y="198" width="420" height="308" rx="24" class="panel"/>
+  <text x="1120" y="236" class="label">RAIL 03</text>
+  <text x="1120" y="278" class="heading">Timing &amp; Catalysts</text>
+  <text x="1120" y="320" class="body">what makes the window actionable</text>
+  <text x="1120" y="356" class="small">attention / catalysts / invalidation</text>
+  <rect x="420" y="608" width="760" height="148" rx="24" class="panel"/>
+  <text x="452" y="646" class="label">CONVERGENCE</text>
+  <text x="452" y="688" class="heading">Shared Institutional Bundle</text>
+  <text x="452" y="720" class="body">one object for thesis, challenge, and director logic</text>
+  <path d="M302 506C302 566 430 586 548 608" class="line"/>
+  <path d="M800 506V608" class="line"/>
+  <path d="M1298 506C1298 566 1170 586 1052 608" class="line"/>
 </svg>
