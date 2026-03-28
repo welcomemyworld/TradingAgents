@@ -26,6 +26,9 @@ DEFAULT_CONFIG = {
     "google_thinking_level": None,      # "high", "minimal", etc.
     "openai_reasoning_effort": None,    # "medium", "high", "low"
     "anthropic_effort": None,           # "high", "medium", "low"
+    "transient_retry_attempts": 3,
+    "retry_base_delay_seconds": 1.5,
+    "retry_max_delay_seconds": 8.0,
     # Orchestration settings
     "enable_investment_orchestrator": True,
     "analysis_routing_mode": "adaptive",  # Options: adaptive, sequential

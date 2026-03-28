@@ -364,6 +364,12 @@ def select_shallow_thinking_agent(provider) -> str:
             ("GPT-5.4 - Latest frontier, 1M context", "gpt-5.4"),
             ("GPT-4.1 - Smartest non-reasoning model", "gpt-4.1"),
         ],
+        "vectorengine": [
+            ("GPT-5.4 - Latest frontier via VectorEngine", "gpt-5.4"),
+            ("GPT-5 Mini - Balanced speed, cost, and capability", "gpt-5-mini"),
+            ("GPT-5 Nano - High-throughput, simple tasks", "gpt-5-nano"),
+            ("GPT-4.1 - Smartest non-reasoning model", "gpt-4.1"),
+        ],
         "anthropic": [
             ("Claude Sonnet 4.6 - Best speed and intelligence balance", "claude-sonnet-4-6"),
             ("Claude Haiku 4.5 - Fast, near-instant responses", "claude-haiku-4-5"),
@@ -429,6 +435,12 @@ def select_deep_thinking_agent(provider) -> str:
             ("GPT-5 Mini - Balanced speed, cost, and capability", "gpt-5-mini"),
             ("GPT-5.4 Pro - Most capable, expensive ($30/$180 per 1M tokens)", "gpt-5.4-pro"),
         ],
+        "vectorengine": [
+            ("GPT-5.4 - Latest frontier via VectorEngine", "gpt-5.4"),
+            ("GPT-5.2 - Strong reasoning, cost-effective", "gpt-5.2"),
+            ("GPT-5 Mini - Balanced speed, cost, and capability", "gpt-5-mini"),
+            ("GPT-5.4 Pro - Most capable, expensive ($30/$180 per 1M tokens)", "gpt-5.4-pro"),
+        ],
         "anthropic": [
             ("Claude Opus 4.6 - Most intelligent, agents and coding", "claude-opus-4-6"),
             ("Claude Opus 4.5 - Premium, max intelligence", "claude-opus-4-5"),
@@ -484,19 +496,20 @@ def select_llm_provider() -> tuple[str, str]:
     """Select the OpenAI api url using interactive selection."""
     # Define OpenAI api options with their corresponding endpoints
     BASE_URLS = [
-        ("OpenAI", "https://api.openai.com/v1"),
-        ("Google", "https://generativelanguage.googleapis.com/v1"),
-        ("Anthropic", "https://api.anthropic.com/"),
-        ("xAI", "https://api.x.ai/v1"),
-        ("Openrouter", "https://openrouter.ai/api/v1"),
-        ("Ollama", "http://localhost:11434/v1"),
+        ("OpenAI", "openai", "https://api.openai.com/v1"),
+        ("VectorEngine (OpenAI-compatible)", "vectorengine", "https://api.vectorengine.ai/v1"),
+        ("Google", "google", "https://generativelanguage.googleapis.com/v1"),
+        ("Anthropic", "anthropic", "https://api.anthropic.com/"),
+        ("xAI", "xai", "https://api.x.ai/v1"),
+        ("OpenRouter", "openrouter", "https://openrouter.ai/api/v1"),
+        ("Ollama", "ollama", "http://localhost:11434/v1"),
     ]
     
     choice = questionary.select(
         "Select Your [Model Backend]:",
         choices=[
-            questionary.Choice(display, value=(display, value))
-            for display, value in BASE_URLS
+            questionary.Choice(display, value=(provider, value))
+            for display, provider, value in BASE_URLS
         ],
         instruction="\n- Use arrow keys to navigate\n- Press Enter to select",
         style=questionary.Style(
@@ -512,8 +525,8 @@ def select_llm_provider() -> tuple[str, str]:
         console.print("\n[red]No model backend selected. Exiting...[/red]")
         exit(1)
     
-    display_name, url = choice
-    return display_name, url
+    provider_key, url = choice
+    return provider_key, url
 
 
 def ask_openai_reasoning_effort() -> str:

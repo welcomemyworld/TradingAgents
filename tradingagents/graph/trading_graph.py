@@ -161,10 +161,19 @@ class FutureInvestGraph:
             if thinking_level:
                 kwargs["thinking_level"] = thinking_level
 
-        elif provider == "openai":
+        elif provider in {"openai", "vectorengine"}:
             reasoning_effort = self.config.get("openai_reasoning_effort")
             if reasoning_effort:
                 kwargs["reasoning_effort"] = reasoning_effort
+            kwargs["transient_retry_attempts"] = self.config.get(
+                "transient_retry_attempts", 3
+            )
+            kwargs["retry_base_delay_seconds"] = self.config.get(
+                "retry_base_delay_seconds", 1.5
+            )
+            kwargs["retry_max_delay_seconds"] = self.config.get(
+                "retry_max_delay_seconds", 8.0
+            )
 
         elif provider == "anthropic":
             effort = self.config.get("anthropic_effort")

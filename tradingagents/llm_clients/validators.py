@@ -58,6 +58,9 @@ def validate_model(provider: str, model: str) -> bool:
     """
     provider_lower = provider.lower()
 
+    if provider_lower == "vectorengine":
+        provider_lower = "openai"
+
     if provider_lower in ("ollama", "openrouter"):
         return True
 

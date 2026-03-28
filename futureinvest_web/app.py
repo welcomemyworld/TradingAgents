@@ -46,6 +46,15 @@ PROVIDER_PRESETS: Dict[str, Dict[str, Any]] = {
         "setting_label": "Reasoning Effort",
         "setting_options": ["medium", "high", "low"],
     },
+    "vectorengine": {
+        "label": "VectorEngine",
+        "backend_url": "https://api.vectorengine.ai/v1",
+        "quick_models": ["gpt-5.4", "gpt-5-mini", "gpt-5-nano", "gpt-4.1"],
+        "deep_models": ["gpt-5.4", "gpt-5.2", "gpt-5-mini", "gpt-5.4-pro"],
+        "setting_field": "openai_reasoning_effort",
+        "setting_label": "Reasoning Effort",
+        "setting_options": ["medium", "high", "low"],
+    },
     "google": {
         "label": "Google",
         "backend_url": "https://generativelanguage.googleapis.com/v1",
