@@ -1,0 +1,112 @@
+<svg width="1400" height="920" viewBox="0 0 1400 920" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1400" height="920" fill="#09111B"/>
+  <rect x="28" y="28" width="1344" height="864" rx="28" fill="url(#bg)"/>
+
+  <text x="72" y="110" fill="#F6F1E8" font-family="Helvetica, Arial, sans-serif" font-size="42" font-weight="700">
+    Future Invest GitHub Upload Workflow
+  </text>
+  <text x="72" y="148" fill="#A8B4C7" font-family="Helvetica, Arial, sans-serif" font-size="20">
+    Use this when deciding what should be committed and pushed versus what should stay local.
+  </text>
+
+  <rect x="70" y="210" width="380" height="138" rx="22" fill="#102238" stroke="#3A6EA5" stroke-width="2"/>
+  <text x="102" y="260" fill="#F6F1E8" font-family="Helvetica, Arial, sans-serif" font-size="28" font-weight="700">
+    1. Check the worktree
+  </text>
+  <text x="102" y="298" fill="#B9C7D8" font-family="Helvetica, Arial, sans-serif" font-size="20">
+    Start with `git status --short`
+  </text>
+  <text x="102" y="327" fill="#B9C7D8" font-family="Helvetica, Arial, sans-serif" font-size="20">
+    and look at what actually changed.
+  </text>
+
+  <rect x="510" y="210" width="380" height="138" rx="22" fill="#102238" stroke="#3A6EA5" stroke-width="2"/>
+  <text x="542" y="260" fill="#F6F1E8" font-family="Helvetica, Arial, sans-serif" font-size="28" font-weight="700">
+    2. Classify each file
+  </text>
+  <text x="542" y="298" fill="#B9C7D8" font-family="Helvetica, Arial, sans-serif" font-size="20">
+    Ask one question:
+  </text>
+  <text x="542" y="327" fill="#B9C7D8" font-family="Helvetica, Arial, sans-serif" font-size="20">
+    source of truth or generated residue?
+  </text>
+
+  <rect x="950" y="210" width="380" height="138" rx="22" fill="#102238" stroke="#3A6EA5" stroke-width="2"/>
+  <text x="982" y="260" fill="#F6F1E8" font-family="Helvetica, Arial, sans-serif" font-size="28" font-weight="700">
+    3. Validate before push
+  </text>
+  <text x="982" y="298" fill="#B9C7D8" font-family="Helvetica, Arial, sans-serif" font-size="20">
+    Run smoke tests, confirm `.gitignore`,
+  </text>
+  <text x="982" y="327" fill="#B9C7D8" font-family="Helvetica, Arial, sans-serif" font-size="20">
+    then commit and push a clean branch.
+  </text>
+
+  <path d="M450 279H510" stroke="#5E87B8" stroke-width="4" stroke-linecap="round"/>
+  <path d="M890 279H950" stroke="#5E87B8" stroke-width="4" stroke-linecap="round"/>
+  <path d="M501 270L514 279L501 288" stroke="#5E87B8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M941 270L954 279L941 288" stroke="#5E87B8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="70" y="420" width="590" height="380" rx="26" fill="#0F2A1F" stroke="#4BBF8A" stroke-width="3"/>
+  <text x="104" y="472" fill="#DFF8EC" font-family="Helvetica, Arial, sans-serif" font-size="32" font-weight="700">
+    Upload to GitHub
+  </text>
+  <text x="104" y="508" fill="#9FD8BE" font-family="Helvetica, Arial, sans-serif" font-size="20">
+    These are durable project assets or sources of truth.
+  </text>
+
+  <rect x="104" y="540" width="522" height="58" rx="14" fill="#153827"/>
+  <text x="128" y="577" fill="#F2FFF8" font-family="Helvetica, Arial, sans-serif" font-size="22">
+    `tradingagents/`, `cli/`, `futureinvest_web/` source files
+  </text>
+
+  <rect x="104" y="612" width="522" height="58" rx="14" fill="#153827"/>
+  <text x="128" y="649" fill="#F2FFF8" font-family="Helvetica, Arial, sans-serif" font-size="22">
+    `tests/` that verify runtime or release behavior
+  </text>
+
+  <rect x="104" y="684" width="522" height="58" rx="14" fill="#153827"/>
+  <text x="128" y="721" fill="#F2FFF8" font-family="Helvetica, Arial, sans-serif" font-size="22">
+    `README.md`, `PROJECT_INDEX.md`, launch docs, proposal sources
+  </text>
+
+  <rect x="104" y="756" width="522" height="58" rx="14" fill="#153827"/>
+  <text x="128" y="793" fill="#F2FFF8" font-family="Helvetica, Arial, sans-serif" font-size="22">
+    `assets/` and curated static graphics used by the repo
+  </text>
+
+  <rect x="740" y="420" width="590" height="380" rx="26" fill="#31181C" stroke="#D96B7B" stroke-width="3"/>
+  <text x="774" y="472" fill="#FFE7EB" font-family="Helvetica, Arial, sans-serif" font-size="32" font-weight="700">
+    Do Not Upload
+  </text>
+  <text x="774" y="508" fill="#F1B4BE" font-family="Helvetica, Arial, sans-serif" font-size="20">
+    These are secrets, local state, or generated outputs.
+  </text>
+
+  <rect x="774" y="540" width="522" height="58" rx="14" fill="#462126"/>
+  <text x="798" y="577" fill="#FFF4F6" font-family="Helvetica, Arial, sans-serif" font-size="22">
+    `.env`, API keys, local credentials, machine-specific config
+  </text>
+
+  <rect x="774" y="612" width="522" height="58" rx="14" fill="#462126"/>
+  <text x="798" y="649" fill="#FFF4F6" font-family="Helvetica, Arial, sans-serif" font-size="22">
+    `results/`, `evaluation/results/`, `eval_results/`
+  </text>
+
+  <rect x="774" y="684" width="522" height="58" rx="14" fill="#462126"/>
+  <text x="798" y="721" fill="#FFF4F6" font-family="Helvetica, Arial, sans-serif" font-size="22">
+    `tradingagents/institution_memory/`, `institution_traces/`
+  </text>
+
+  <rect x="774" y="756" width="522" height="58" rx="14" fill="#462126"/>
+  <text x="798" y="793" fill="#FFF4F6" font-family="Helvetica, Arial, sans-serif" font-size="22">
+    generated PDFs, caches, `.venv/`, one-off local artifacts
+  </text>
+
+  <defs>
+    <linearGradient id="bg" x1="40" y1="40" x2="1360" y2="880" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F1722"/>
+      <stop offset="1" stop-color="#132233"/>
+    </linearGradient>
+  </defs>
+</svg>

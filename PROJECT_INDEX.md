@@ -31,8 +31,12 @@ This file is the fastest way to find the important parts of the repository.
   - Release-surface checklist for a star-oriented GitHub launch.
 - `docs/github-launch-copy.md`
   - Draft launch copy for social posts, HN-style intros, and release messaging.
+- `docs/github-upload-guide.md`
+  - Visual guide for what should and should not be committed to GitHub.
 - `assets/future-invest-workflow.svg`
   - Reusable workflow figure for decks, documents, and proposal material.
+- `assets/github-upload-workflow.svg`
+  - Visual workflow for deciding what belongs in a GitHub commit.
 
 ## 2. Runtime Entry
 

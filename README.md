@@ -1,6 +1,6 @@
 # Future Invest
 
-Future Invest is not an AI stock picker. It is a lean institutional operating system for turning research into position construction.
+Future Invest is an AI-native institution operating system for turning research into position construction, kill criteria, and monitoring.
 
 <div align="center">
 
@@ -8,21 +8,28 @@ Future Invest is not an AI stock picker. It is a lean institutional operating sy
 
 </div>
 
-Future Invest is built for AI builders who want something more opinionated than a finance chatbot and more operational than a research memo generator. The default product is a lean loop: frame the mandate, run capability-native research, debate the thesis, and compress the result into a position-construction packet with explicit kill criteria and monitoring.
+Future Invest is built for AI builders who want something more opinionated than a finance chatbot and more operational than a research memo generator.
 
-## Why It Exists
-
-Most finance agents stop at “here is my analysis.” Future Invest is designed to keep going until the system can express an institutional view: what the variant is, whether the setup belongs in the book, how large the position should be, what would kill it, and what should be monitored after entry.
-
-### What You Get
-- A lean-by-default institutional loop instead of a generic research chat flow
-- A final packet centered on `stance`, `size`, `entry framework`, `kill criteria`, and `monitoring triggers`
-- A full committee extension when the lean loop is not enough
-- Institutional memory and an evaluation harness so the system can be reviewed as a workflow, not just a one-off answer
+Not a stock picker. Not a memo generator. A lean decision loop for portfolio-aware investing.
 
 <p align="center">
-  <img src="assets/schema.png" style="width: 100%; height: auto;">
+  <img src="assets/github-cover.svg" style="width: 100%; height: auto;" alt="Future Invest cover" />
 </p>
+
+The default product is a lean institutional loop:
+
+`mandate -> research -> thesis vs challenge -> position packet`
+
+That packet is the point. Instead of stopping at “here is my analysis,” Future Invest tries to end with `stance`, `size`, `entry framework`, `kill criteria`, and `monitoring triggers`.
+
+## Why Star This
+
+Most finance agents answer questions. Future Invest is trying to model an institution.
+
+- Lean-by-default decision loop instead of a generic research chat flow
+- Position-construction packet instead of a long memo as the terminal artifact
+- Full committee extension when the lean loop is not enough
+- Institutional memory and evaluation harness so the workflow can improve over time
 
 > Future Invest is designed for research purposes. Trading performance may vary based on model choice, market regime, data quality, and other non-deterministic inputs. It is not financial, investment, or trading advice.
 
@@ -36,31 +43,44 @@ Most finance agents stop at “here is my analysis.” Future Invest is designed
 | Portfolio context | Usually late or implicit | Introduced before thesis formation |
 | Memory | Mostly stateless | Institutional memory across runs |
 
-## Quickstart
+## 5-Minute Quickstart
 
-1. Install the package:
+1. Clone and install:
    ```bash
+   git clone <your-repo-url> FutureInvest
+   cd FutureInvest
    pip install -e .
    ```
-2. Set one supported API key:
+2. Set one API key:
    ```bash
    export OPENAI_API_KEY=...
    ```
-3. Launch the product surface you want:
+3. Launch the product:
    ```bash
    future-invest
    # or
    future-invest-web
    ```
-4. Use the recommended lean config:
-   `Run Mode = Hard Loop`, `Provider = OpenAI`, `Quick = gpt-5-mini`, `Deep = gpt-5.4`
+4. Choose your own provider, model pair, and loop mode in the CLI or web control room.
 
-### Known-Good Launch Path
+### Supported Provider Paths
 
-The blessed public path for first-time users is:
+Future Invest supports these backends today. Pick the provider path that fits your account, quota, and model access.
+
+| Provider | `llm_provider` | `backend_url` | Auth |
+| --- | --- | --- | --- |
+| OpenAI | `openai` | `https://api.openai.com/v1` | `OPENAI_API_KEY` |
+| VectorEngine | `vectorengine` | `https://api.vectorengine.ai/v1` | `VECTORENGINE_API_KEY` or `OPENAI_API_KEY` |
+| OpenRouter | `openrouter` | `https://openrouter.ai/api/v1` | `OPENROUTER_API_KEY` |
+| Google | `google` | `https://generativelanguage.googleapis.com/v1` | `GOOGLE_API_KEY` |
+| Anthropic | `anthropic` | `https://api.anthropic.com/` | `ANTHROPIC_API_KEY` |
+| xAI | `xai` | `https://api.x.ai/v1` | `XAI_API_KEY` |
+| Ollama | `ollama` | `http://localhost:11434/v1` | local runtime |
+
+Example configuration shape:
 
 ```yaml
-llm_provider: openai
+llm_provider: openai            # or vectorengine / openrouter / google / anthropic / xai / ollama
 backend_url: https://api.openai.com/v1
 quick_think_llm: gpt-5-mini
 deep_think_llm: gpt-5.4
@@ -72,20 +92,18 @@ selected_analysts:
   - timing_catalyst
 ```
 
-If your provider is rate-limited, first retry the same lean setup before increasing depth. The public launch path should optimize for consistency, not the largest possible graph.
+If your chosen provider is rate-limited, retry the same lean setup before increasing depth or switching to a fuller loop.
 
 <p align="center">
   <img src="assets/cli/cli_init.png" width="100%" style="display: inline-block; margin: 0 2%;">
 </p>
 
-### Optional OpenAI-Compatible Backends
+## What You Are Running
 
-Future Invest also supports OpenAI-compatible backends such as `VectorEngine` and `OpenRouter`. They are useful when you need routing flexibility, but they are intentionally not the primary launch path.
-
-- `VectorEngine`: use `https://api.vectorengine.ai/v1`
-- `OpenRouter`: use `https://openrouter.ai/api/v1`
-
-Treat these as optional backends, not the default recommendation in public docs.
+- `Lean loop`: the default path for building an institutional view fast
+- `Full loop`: a deeper committee-style path for execution and allocation review
+- `Web control room`: a visual surface for the same runtime
+- `Evaluation harness`: a batch path for comparing workflow variants
 
 ## Future Invest Framework
 
@@ -213,6 +231,7 @@ As the run progresses, the CLI shows capability outputs, institutional debate, e
 
 - Release checklist: [docs/github-launch-checklist.md](docs/github-launch-checklist.md)
 - Launch copy draft: [docs/github-launch-copy.md](docs/github-launch-copy.md)
+- Upload guide: [docs/github-upload-guide.md](docs/github-upload-guide.md)
 
 ### Quick Smoke Tests
 
