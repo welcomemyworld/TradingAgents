@@ -31,6 +31,8 @@ This file is the fastest way to find the important parts of the repository.
   - Release-surface checklist for a star-oriented GitHub launch.
 - `docs/github-launch-copy.md`
   - Draft launch copy for social posts, HN-style intros, and release messaging.
+- `docs/release-v0.1.0.md`
+  - First public release notes for the repo launch.
 - `docs/github-upload-guide.md`
   - Visual guide for what should and should not be committed to GitHub.
 - `assets/future-invest-workflow.svg`
