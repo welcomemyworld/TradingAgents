@@ -131,56 +131,18 @@ If your provider is rate-limited, retry the same lean configuration before incre
 
 Future Invest is built as an AI-native institution rather than a collection of isolated analysts.
 
-The core idea is simple:
+The loop is intentionally short:
 
-- run three capability-native research rails in parallel
-- force one thesis-vs-challenge synthesis
-- emit a hard packet by default
-- escalate into committee logic only when the seat justifies the extra cost
+- `Mandate & Context`: define the portfolio role, capital budget, and risk budget
+- `Parallel Research`: run `Business Truth`, `Market Expectations`, and `Timing & Catalysts` at the same time
+- `Thesis vs Challenge`: force the bull case and counterevidence into one view
+- `Position Packet`: emit stance, size, entry framework, kill criteria, monitoring, and missing evidence
+- `Memory & Evaluation`: write back the run trace and what the system should learn next
 
-### Research Capability Stack
-
-- `Business Truth`: what is economically real about the company
-- `Market Expectations`: what the tape and positioning already imply
-- `Timing & Catalysts`: what makes the window actionable now
+Lean mode stops at the position packet. Full mode adds a committee branch only when the seat is important enough to justify the extra work.
 
 <p align="center">
-  <img src="assets/future-invest-research-stack.svg" width="100%" style="display: inline-block; margin: 0 2%;" alt="Future Invest research capability stack" />
-</p>
-
-### Lean Loop
-
-- `Thesis Engine`: builds the strongest upside case
-- `Challenge Engine`: attacks assumptions and surfaces counterevidence
-- `Investment Director`: synthesizes into one investable world model
-- `Position Packet`: emits stance, size, entry framework, kill criteria, monitoring, and missing evidence
-
-<p align="center">
-  <img src="assets/future-invest-decision-core.svg" width="100%" style="display: inline-block; margin: 0 2%;" alt="Future Invest decision core diagram" />
-</p>
-
-### Full Loop Extension
-
-When the seat is important enough, the same front-end bundle can expand into deeper execution and allocation logic.
-
-- `Execution Engine`
-- `Upside Capture`
-- `Downside Guardrail`
-- `Portfolio Fit`
-- `Capital Allocation Committee`
-
-<p align="center">
-  <img src="assets/future-invest-full-loop.svg" width="100%" style="display: inline-block; margin: 0 2%;" alt="Future Invest full loop extension diagram" />
-</p>
-
-<p align="center">
-  <img src="assets/future-invest-capital-committee.svg" width="100%" style="display: inline-block; margin: 0 2%;" alt="Future Invest capital committee diagram" />
-</p>
-
-### Workflow
-
-<p align="center">
-  <img src="assets/future-invest-workflow.svg" width="100%" style="display: inline-block; margin: 0 2%;" alt="Future Invest workflow diagram" />
+  <img src="assets/future-invest-simple-flow.svg" width="100%" style="display: inline-block; margin: 0 2%;" alt="Future Invest simple workflow diagram" />
 </p>
 
 ### What Keeps Compounding
