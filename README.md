@@ -1,6 +1,6 @@
 # Future Invest
 
-AI-native investment institution framework for long/short equity research, execution design, and capital allocation.
+Future Invest is not an AI stock picker. It is a lean institutional operating system for turning research into position construction.
 
 <div align="center">
 
@@ -8,15 +8,17 @@ AI-native investment institution framework for long/short equity research, execu
 
 </div>
 
-## Current Focus
-- AI-native orchestration instead of fixed human-role pipelines
-- Lean-by-default institutional loop with a full committee extension when deeper review is warranted
-- Portfolio mandate and time-horizon splits surfaced before research begins
-- Long-term institutional memory for company context, thesis history, prediction tracking, and agent reliability
+Future Invest is built for AI builders who want something more opinionated than a finance chatbot and more operational than a research memo generator. The default product is a lean loop: frame the mandate, run capability-native research, debate the thesis, and compress the result into a position-construction packet with explicit kill criteria and monitoring.
 
-## Future Invest Framework
+## Why It Exists
 
-Future Invest is an AI-native investment institution framework for long/short equity research and capital allocation. Instead of treating LLMs as isolated analysts, the system organizes them as a coordinated institutional stack: an investment orchestrator frames the mandate, three parallel research engines build a shared world model, thesis and challenge engines debate variant perception, and the institution either resolves directly into a lean position-construction packet or expands into a full committee path for deeper execution and allocation review.
+Most finance agents stop at “here is my analysis.” Future Invest is designed to keep going until the system can express an institutional view: what the variant is, whether the setup belongs in the book, how large the position should be, what would kill it, and what should be monitored after entry.
+
+### What You Get
+- A lean-by-default institutional loop instead of a generic research chat flow
+- A final packet centered on `stance`, `size`, `entry framework`, `kill criteria`, and `monitoring triggers`
+- A full committee extension when the lean loop is not enough
+- Institutional memory and an evaluation harness so the system can be reviewed as a workflow, not just a one-off answer
 
 <p align="center">
   <img src="assets/schema.png" style="width: 100%; height: auto;">
@@ -24,12 +26,70 @@ Future Invest is an AI-native investment institution framework for long/short eq
 
 > Future Invest is designed for research purposes. Trading performance may vary based on model choice, market regime, data quality, and other non-deterministic inputs. It is not financial, investment, or trading advice.
 
-The current architecture is aimed at teams that want to blend:
-- deep business understanding and long-horizon variant perception
-- catalyst awareness, timing, and faster alpha capture
-- explicit portfolio constraints, kill criteria, and capital budgeting
+### Why It Feels Different
 
-The framework decomposes investment work into capabilities and institutional protocols instead of a simple human-role replica. That makes the system easier to route, audit, and evolve.
+| Category | Typical Research Agent | Future Invest |
+| --- | --- | --- |
+| Unit of work | Answer or memo | Institutional decision loop |
+| Final artifact | Research narrative | Position-construction packet |
+| Reasoning structure | Single-run assistant | Orchestrated debate + synthesis |
+| Portfolio context | Usually late or implicit | Introduced before thesis formation |
+| Memory | Mostly stateless | Institutional memory across runs |
+
+## Quickstart
+
+1. Install the package:
+   ```bash
+   pip install -e .
+   ```
+2. Set one supported API key:
+   ```bash
+   export OPENAI_API_KEY=...
+   ```
+3. Launch the product surface you want:
+   ```bash
+   future-invest
+   # or
+   future-invest-web
+   ```
+4. Use the recommended lean config:
+   `Run Mode = Hard Loop`, `Provider = OpenAI`, `Quick = gpt-5-mini`, `Deep = gpt-5.4`
+
+### Known-Good Launch Path
+
+The blessed public path for first-time users is:
+
+```yaml
+llm_provider: openai
+backend_url: https://api.openai.com/v1
+quick_think_llm: gpt-5-mini
+deep_think_llm: gpt-5.4
+institutional_loop_mode: lean
+run_mode: hard_loop
+selected_analysts:
+  - business_truth
+  - market_expectations
+  - timing_catalyst
+```
+
+If your provider is rate-limited, first retry the same lean setup before increasing depth. The public launch path should optimize for consistency, not the largest possible graph.
+
+<p align="center">
+  <img src="assets/cli/cli_init.png" width="100%" style="display: inline-block; margin: 0 2%;">
+</p>
+
+### Optional OpenAI-Compatible Backends
+
+Future Invest also supports OpenAI-compatible backends such as `VectorEngine` and `OpenRouter`. They are useful when you need routing flexibility, but they are intentionally not the primary launch path.
+
+- `VectorEngine`: use `https://api.vectorengine.ai/v1`
+- `OpenRouter`: use `https://openrouter.ai/api/v1`
+
+Treat these as optional backends, not the default recommendation in public docs.
+
+## Future Invest Framework
+
+Future Invest is an AI-native investment institution framework for long/short equity research and capital allocation. Instead of treating LLMs as isolated analysts, the system organizes them as a coordinated institutional stack: an investment orchestrator frames the mandate, three parallel research engines build a shared world model, thesis and challenge engines debate variant perception, and the institution either resolves directly into a lean position-construction packet or expands into a full committee path for deeper execution and allocation review.
 
 ### Research Capability Stack
 - Business Truth: Establishes what is economically real about the company, including earnings power, balance-sheet resilience, and the assumptions that must hold.
@@ -98,6 +158,7 @@ export GOOGLE_API_KEY=...          # Google (Gemini)
 export ANTHROPIC_API_KEY=...       # Anthropic (Claude)
 export XAI_API_KEY=...             # xAI (Grok)
 export OPENROUTER_API_KEY=...      # OpenRouter
+export VECTORENGINE_API_KEY=...    # VectorEngine (optional OpenAI-compatible backend)
 export ALPHA_VANTAGE_API_KEY=...   # Alpha Vantage
 ```
 
@@ -147,6 +208,11 @@ As the run progresses, the CLI shows capability outputs, institutional debate, e
 <p align="center">
   <img src="assets/cli/cli_transaction.png" width="100%" style="display: inline-block; margin: 0 2%;">
 </p>
+
+### Launch Pack
+
+- Release checklist: [docs/github-launch-checklist.md](docs/github-launch-checklist.md)
+- Launch copy draft: [docs/github-launch-copy.md](docs/github-launch-copy.md)
 
 ### Quick Smoke Tests
 

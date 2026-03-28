@@ -27,6 +27,10 @@ This file is the fastest way to find the important parts of the repository.
 - `docs/future-invest-pitch-memo.md`
   - Pitch-oriented narrative for fund, investor, and strategy discussions.
   - Emphasizes positioning, differentiation, lean-first workflow, defensibility, and near-term milestones.
+- `docs/github-launch-checklist.md`
+  - Release-surface checklist for a star-oriented GitHub launch.
+- `docs/github-launch-copy.md`
+  - Draft launch copy for social posts, HN-style intros, and release messaging.
 - `assets/future-invest-workflow.svg`
   - Reusable workflow figure for decks, documents, and proposal material.
 
