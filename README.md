@@ -94,10 +94,6 @@ selected_analysts:
 
 If your chosen provider is rate-limited, retry the same lean setup before increasing depth or switching to a fuller loop.
 
-<p align="center">
-  <img src="assets/cli/cli_init.png" width="100%" style="display: inline-block; margin: 0 2%;">
-</p>
-
 ## What You Are Running
 
 - `Lean loop`: the default path for building an institutional view fast
@@ -213,19 +209,7 @@ future-invest-web
 
 Then open `http://127.0.0.1:8000` in your browser. The web interface uses the same `FutureInvestGraph` runtime as the CLI, but renders the institution dossier as a lean-first control room with an optional full committee path.
 
-<p align="center">
-  <img src="assets/cli/cli_init.png" width="100%" style="display: inline-block; margin: 0 2%;">
-</p>
-
 As the run progresses, the CLI shows capability outputs, institutional debate, execution planning, capital formation, and the evolving AI Investment Dossier in real time.
-
-<p align="center">
-  <img src="assets/cli/cli_news.png" width="100%" style="display: inline-block; margin: 0 2%;">
-</p>
-
-<p align="center">
-  <img src="assets/cli/cli_transaction.png" width="100%" style="display: inline-block; margin: 0 2%;">
-</p>
 
 ### Launch Pack
 
