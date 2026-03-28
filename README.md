@@ -84,6 +84,8 @@ missing_evidence:
    ```bash
    git clone https://github.com/welcomemyworld/TradingAgents.git future-invest
    cd future-invest
+   python3 -m venv .venv
+   source .venv/bin/activate
    pip install -e .
    ```
 2. Set your provider key:
@@ -97,6 +99,20 @@ missing_evidence:
    future-invest-web
    ```
 4. Choose your provider, model pair, and loop mode in the CLI or web control room.
+
+### Environment Note
+
+Install Future Invest in a dedicated virtual environment.
+
+If you install it into an existing Anaconda or research environment, `pip` may warn about unrelated packages such as `streamlit`, `wrds`, or `aext-*` that were already present in that environment. Those warnings usually reflect environment mixing rather than a Future Invest packaging bug.
+
+The clean path is:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+```
 
 ### Provider Paths
 
