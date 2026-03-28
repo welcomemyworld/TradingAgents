@@ -1,10 +1,21 @@
 # Future Invest
 
-Future Invest is an AI-native institution operating system for turning research into position construction, kill criteria, and monitoring.
+Future Invest is not an AI stock picker.
+
+It is an AI-native investment operating system that turns research into a portfolio-aware decision packet: stance, position size, kill criteria, and monitoring.
+
+Instead of stopping at a memo, Future Invest runs a lean institutional loop:
+research, challenge, synthesis, and position construction.
+
+What you get:
+- A portfolio-aware stance, not a generic market opinion
+- A position packet, not just a research summary
+- Explicit kill criteria and monitoring triggers
+- A lean default loop, with a fuller institutional path when needed
 
 <div align="center">
 
-Not a stock picker. Not a memo generator. A lean decision loop for portfolio-aware investing.
+Not a stock picker. Not a memo generator. A lean institutional loop for portfolio-aware investing.
 
 🚀 [Why It Matters](#why-it-matters) | ⚡ [Quickstart](#5-minute-quickstart) | 🧠 [How It Works](#how-it-works) | 🖥️ [Interfaces](#interfaces) | 📦 [Python Runtime](#python-runtime) | 🗂️ [Project Index](PROJECT_INDEX.md)
 
