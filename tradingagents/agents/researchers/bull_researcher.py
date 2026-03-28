@@ -38,13 +38,13 @@ Write a structured memo using exactly these markdown headings:
 ## Core Thesis
 ## Variant Perception
 ## Supporting Evidence
-## Catalyst Path
+## Timing & Catalysts
 
 Guidance:
 - Core Thesis: State the highest-conviction reason this company can outperform or rerate.
 - Variant Perception: Explain what the market is likely misunderstanding or underpricing.
 - Supporting Evidence: Use the capability intelligence to make the case with specifics.
-- Catalyst Path: Explain why this thesis can matter on a tradable time horizon.
+- Timing & Catalysts: Explain why this thesis can matter on a tradable time horizon and what could force the market to move.
 - Address the latest challenge directly where relevant.
 - Be decisive, specific, and investment-oriented.
 

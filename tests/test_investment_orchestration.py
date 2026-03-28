@@ -1,5 +1,7 @@
 import unittest
 
+from langgraph.graph import END
+
 from tradingagents.agents.managers.investment_orchestrator import (
     create_investment_orchestrator,
 )
@@ -9,6 +11,8 @@ from tradingagents.agents.utils.agent_utils import (
     get_capability_catalog,
     normalize_selected_analysts,
 )
+from tradingagents.graph.conditional_logic import ConditionalLogic
+from tradingagents.graph.setup import GraphSetup
 
 
 class FakeResponse:
@@ -27,33 +31,74 @@ class FakeLLM:
 
 
 class InvestmentOrchestrationTests(unittest.TestCase):
+    def test_parallel_join_waits_until_all_reports_exist(self):
+        setup = GraphSetup(
+            object(),
+            object(),
+            {},
+            None,
+            None,
+            None,
+            None,
+            None,
+            ConditionalLogic(),
+            {},
+        )
+
+        waiting_state = {
+            "selected_analysts": [
+                "business_truth",
+                "market_expectations",
+                "timing_catalyst",
+            ],
+            "business_truth_report": "Done",
+            "market_expectations_report": "",
+            "timing_catalyst_report": "Done",
+        }
+        ready_state = {
+            "selected_analysts": [
+                "business_truth",
+                "market_expectations",
+                "timing_catalyst",
+            ],
+            "business_truth_report": "Done",
+            "market_expectations_report": "Done",
+            "timing_catalyst_report": "Done",
+        }
+
+        self.assertEqual(setup._route_parallel_join(waiting_state), END)
+        self.assertEqual(
+            setup._route_parallel_join(ready_state),
+            GraphSetup.RESEARCH_JOIN,
+        )
+
     def test_normalize_selected_analysts_deduplicates_and_filters(self):
         self.assertEqual(
             normalize_selected_analysts(
                 ["catalyst_path", "invalid", "catalyst_path", "market_expectations"]
             ),
-            ["market_expectations", "catalyst_path"],
+            ["market_expectations", "timing_catalyst"],
         )
 
     def test_build_research_context_prefers_shared_artifacts(self):
         state = {
             "analysis_artifacts": {
-                "catalyst_path": {"report": "Shared catalyst report"},
+                "timing_catalyst": {"report": "Shared timing report"},
                 "market_expectations": {"report": "Shared expectations report"},
             },
             "market_expectations_report": "State expectations report",
-            "catalyst_path_report": "State catalyst report",
+            "timing_catalyst_report": "State timing report",
         }
 
         context = build_research_context(
-            state, ["market_expectations", "catalyst_path"]
+            state, ["market_expectations", "timing_catalyst"]
         )
 
         self.assertIn("Shared expectations report", context)
-        self.assertIn("Shared catalyst report", context)
+        self.assertIn("Shared timing report", context)
         self.assertNotIn("State expectations report", context)
         self.assertIn(ANALYST_DISPLAY_NAMES["market_expectations"], context)
-        self.assertIn(ANALYST_DISPLAY_NAMES["catalyst_path"], context)
+        self.assertIn(ANALYST_DISPLAY_NAMES["timing_catalyst"], context)
 
     def test_capability_catalog_uses_abstract_capability_titles(self):
         catalog = get_capability_catalog(["market_expectations", "business_truth"])
@@ -89,7 +134,7 @@ class InvestmentOrchestrationTests(unittest.TestCase):
         self.assertEqual(
             result["analysis_queue"], ["business_truth", "market_expectations"]
         )
-        self.assertEqual(result["current_analyst"], "business_truth")
+        self.assertEqual(result["current_analyst"], "")
         self.assertIn("Blend speed and depth", result["analysis_plan"])
         self.assertIn("Focus on quality first", result["analysis_brief"])
         self.assertEqual(result["orchestration_state"]["position_importance"], "high")
@@ -111,7 +156,7 @@ class InvestmentOrchestrationTests(unittest.TestCase):
         state = {
             "company_of_interest": "NVDA",
             "trade_date": "2024-05-10",
-            "selected_analysts": ["catalyst_path", "market_expectations"],
+            "selected_analysts": ["timing_catalyst", "market_expectations"],
             "completed_analysts": [],
             "analysis_artifacts": {},
             "orchestration_journal": [],
@@ -120,9 +165,9 @@ class InvestmentOrchestrationTests(unittest.TestCase):
         result = node(state)
 
         self.assertEqual(
-            result["analysis_queue"], ["market_expectations", "catalyst_path"]
+            result["analysis_queue"], ["market_expectations", "timing_catalyst"]
         )
-        self.assertEqual(result["current_analyst"], "market_expectations")
+        self.assertEqual(result["current_analyst"], "")
         self.assertIn("Current priority order", result["analysis_plan"])
 
     def test_orchestrator_can_activate_reserve_capabilities(self):
@@ -149,9 +194,9 @@ class InvestmentOrchestrationTests(unittest.TestCase):
 
         result = node(state)
 
-        self.assertEqual(result["selected_analysts"], ["market_expectations", "business_truth"])
+        self.assertEqual(result["selected_analysts"], ["business_truth", "market_expectations"])
         self.assertEqual(result["analysis_queue"], ["business_truth", "market_expectations"])
-        self.assertEqual(result["current_analyst"], "business_truth")
+        self.assertEqual(result["current_analyst"], "")
         self.assertEqual(result["orchestration_state"]["add_capabilities"], ["business_truth"])
         self.assertTrue(result["orchestration_state"]["trigger_counterevidence_search"])
         self.assertIn("Added reserve capabilities", result["analysis_plan"])
@@ -159,7 +204,7 @@ class InvestmentOrchestrationTests(unittest.TestCase):
 
     def test_orchestrator_can_stop_research_early(self):
         llm = FakeLLM(
-            '{"objective":"Stop when the picture is already coherent","ordered_capabilities":["catalyst_path"],"continue_research":false,"stop_reason":"Evidence is coherent enough under the current budget.","uncertainty_level":"low","evidence_conflict_level":"low","token_budget":"tight","position_importance":"standard","trigger_counterevidence_search":false}'
+            '{"objective":"Stop when the picture is already coherent","ordered_capabilities":["timing_catalyst"],"continue_research":false,"stop_reason":"Evidence is coherent enough under the current budget.","uncertainty_level":"low","evidence_conflict_level":"low","token_budget":"tight","position_importance":"standard","trigger_counterevidence_search":false}'
         )
         node = create_investment_orchestrator(
             llm,
@@ -172,7 +217,7 @@ class InvestmentOrchestrationTests(unittest.TestCase):
         state = {
             "company_of_interest": "NVDA",
             "trade_date": "2024-05-10",
-            "selected_analysts": ["market_expectations", "catalyst_path"],
+            "selected_analysts": ["market_expectations", "timing_catalyst"],
             "completed_analysts": ["market_expectations"],
             "analysis_artifacts": {
                 "market_expectations": {"report": "Market expectations already look consistent."}

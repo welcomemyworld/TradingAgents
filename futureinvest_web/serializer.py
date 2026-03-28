@@ -5,7 +5,6 @@ from typing import Any, Dict, List, Tuple
 from tradingagents.agents.utils.agent_utils import (
     ANALYST_DISPLAY_NAMES,
     ANALYST_ORDER,
-    ANALYST_REPORT_FIELDS,
     CAPITAL_ALLOCATION_COMMITTEE,
     CHALLENGE_ENGINE,
     DOWNSIDE_GUARDRAIL_ENGINE,
@@ -14,6 +13,7 @@ from tradingagents.agents.utils.agent_utils import (
     PORTFOLIO_FIT_ENGINE,
     THESIS_ENGINE,
     UPSIDE_CAPTURE_ENGINE,
+    get_analyst_report,
 )
 from tradingagents.agents.utils.decision_protocol import (
     CHALLENGE_STAGE_KEY,
@@ -21,7 +21,9 @@ from tradingagents.agents.utils.decision_protocol import (
     PORTFOLIO_FIT_STAGE_KEY,
     THESIS_STAGE_KEY,
     UPSIDE_STAGE_KEY,
+    build_institutional_loop_packet,
     get_review_output,
+    render_institutional_loop_packet,
     render_portfolio_context,
     render_temporal_context,
 )
@@ -112,6 +114,43 @@ def get_final_decision_entries(state: Dict[str, Any]) -> List[Tuple[str, str]]:
     return [(CAPITAL_ALLOCATION_COMMITTEE, content)]
 
 
+def get_institutional_loop_content(state: Dict[str, Any]) -> str:
+    packet = state.get("institutional_loop_packet") or build_institutional_loop_packet(
+        state
+    )
+    return _clean_text(
+        state.get("institutional_loop_packet_markdown")
+        or render_institutional_loop_packet(packet)
+    )
+
+
+def get_run_trace_content(state: Dict[str, Any]) -> str:
+    trace = state.get("institutional_trace") or {}
+    if not trace:
+        return ""
+
+    parts = ["## Run Trace"]
+    path = _clean_text(trace.get("path"))
+    if path:
+        parts.append(f"### Trace Path\n`{path}`")
+
+    loop_mode = _clean_text(trace.get("loop_mode"))
+    if loop_mode:
+        parts.append(f"### Loop Mode\n{loop_mode}")
+
+    tool_counts = trace.get("tool_call_counts") or {}
+    if tool_counts:
+        parts.append("### Tool Call Counts")
+        parts.extend(f"- `{tool}`: {count}" for tool, count in sorted(tool_counts.items()))
+
+    warnings = trace.get("warnings") or []
+    if warnings:
+        parts.append("### Guardrail Warnings")
+        parts.extend(f"- {warning}" for warning in warnings)
+
+    return "\n\n".join(parts)
+
+
 def build_web_sections(state: Dict[str, Any]) -> List[Dict[str, str]]:
     sections: List[Dict[str, str]] = []
 
@@ -133,7 +172,7 @@ def build_web_sections(state: Dict[str, Any]) -> List[Dict[str, str]]:
 
     analyst_blocks = []
     for analyst_key in ANALYST_ORDER:
-        report = _clean_text(state.get(ANALYST_REPORT_FIELDS[analyst_key]))
+        report = _clean_text(get_analyst_report(state, analyst_key))
         if report:
             analyst_blocks.append(f"### {ANALYST_DISPLAY_NAMES[analyst_key]}\n{report}")
     if analyst_blocks:
@@ -148,6 +187,16 @@ def build_web_sections(state: Dict[str, Any]) -> List[Dict[str, str]]:
     thesis_review = _join_agent_entries(get_thesis_review_entries(state))
     if thesis_review:
         sections.append({"key": "thesis_review", "title": "Thesis Review", "content": thesis_review})
+
+    institutional_loop = get_institutional_loop_content(state)
+    if institutional_loop:
+        sections.append(
+            {
+                "key": "institutional_loop_packet",
+                "title": "Lean-First Institutional Loop",
+                "content": institutional_loop,
+            }
+        )
 
     execution_state = _join_agent_entries(get_execution_state_entries(state))
     if execution_state:
@@ -165,5 +214,8 @@ def build_web_sections(state: Dict[str, Any]) -> List[Dict[str, str]]:
     if dossier:
         sections.append({"key": "decision_dossier_markdown", "title": "Future Invest Dossier", "content": dossier})
 
-    return sections
+    run_trace = get_run_trace_content(state)
+    if run_trace:
+        sections.append({"key": "run_trace", "title": "Run Trace", "content": run_trace})
 
+    return sections

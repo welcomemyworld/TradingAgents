@@ -62,6 +62,7 @@ class Propagator:
             ),
             "market_expectations_report": "",
             "business_truth_report": "",
+            "timing_catalyst_report": "",
             "why_now_report": "",
             "catalyst_path_report": "",
             "investment_plan": "",

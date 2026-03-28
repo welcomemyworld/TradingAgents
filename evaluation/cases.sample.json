@@ -6,8 +6,7 @@
     "selected_analysts": [
       "business_truth",
       "market_expectations",
-      "why_now",
-      "catalyst_path"
+      "timing_catalyst"
     ],
     "notes": "Growth re-rating sample with full capability stack.",
     "config_overrides": {
@@ -22,7 +21,7 @@
     "selected_analysts": [
       "business_truth",
       "market_expectations",
-      "catalyst_path"
+      "timing_catalyst"
     ],
     "notes": "Commodity-sensitive large cap with lighter timing emphasis.",
     "config_overrides": {
@@ -37,7 +36,7 @@
     "selected_analysts": [
       "business_truth",
       "market_expectations",
-      "why_now"
+      "timing_catalyst"
     ],
     "notes": "Platform compounding sample for research-quality comparison.",
     "config_overrides": {

@@ -39,6 +39,7 @@ from tradingagents.agents.utils.agent_utils import (
     RESEARCH_TEAM_NAMES,
     THESIS_ENGINE,
     UPSIDE_CAPTURE_ENGINE,
+    get_analyst_report,
     normalize_selected_analysts,
 )
 from tradingagents.agents.utils.decision_protocol import (
@@ -251,7 +252,7 @@ def build_report_sections_map(state: dict) -> dict[str, str]:
 
     for analyst_key in ANALYST_ORDER:
         report_field = ANALYST_REPORT_FIELDS[analyst_key]
-        report = _clean_text(state.get(report_field))
+        report = _clean_text(get_analyst_report(state, analyst_key))
         if report:
             sections[report_field] = report
 
@@ -335,7 +336,7 @@ class MessageBuffer:
         """Initialize agent status and report sections based on selected capabilities.
 
         Args:
-            selected_analysts: List of capability ids (e.g., ["market_expectations", "catalyst_path"])
+            selected_analysts: List of capability ids (e.g., ["market_expectations", "timing_catalyst"])
         """
         self.selected_analysts = [a.lower() for a in selected_analysts]
 
@@ -1387,6 +1388,14 @@ def run_analysis():
     config["llm_provider"] = selections["llm_provider"].lower()
     config["orchestrator_position_importance"] = selections["position_importance"]
     config["orchestrator_token_budget"] = selections["token_budget"]
+    config["institutional_loop_mode"] = RUN_MODE_LOOP_PRESETS.get(
+        selections["run_mode"], DEFAULT_CONFIG.get("institutional_loop_mode", "lean")
+    )
+    config["enable_dynamic_capability_expansion"] = (
+        config["institutional_loop_mode"] != "lean"
+    )
+    if config["institutional_loop_mode"] == "lean":
+        config["max_risk_discuss_rounds"] = 0
     # Provider-specific thinking configuration
     config["google_thinking_level"] = selections.get("google_thinking_level")
     config["openai_reasoning_effort"] = selections.get("openai_reasoning_effort")

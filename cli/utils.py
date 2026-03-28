@@ -34,6 +34,11 @@ RUN_MODE_PRESETS: Dict[str, Dict[str, object]] = {
         "description": "Full institutional review for sizing and allocation decisions",
         "suggested_depth": 5,
     },
+    "hard_loop": {
+        "label": "Hard Loop",
+        "description": "Lean institutional loop with hard outputs and tighter traceability",
+        "suggested_depth": 2,
+    },
 }
 
 RUN_MODE_CONTROL_PRESETS: Dict[str, Dict[str, str]] = {
@@ -49,6 +54,24 @@ RUN_MODE_CONTROL_PRESETS: Dict[str, Dict[str, str]] = {
         "position_importance": "critical",
         "token_budget": "expansive",
     },
+    "hard_loop": {
+        "position_importance": "high",
+        "token_budget": "balanced",
+    },
+}
+
+RUN_MODE_LOOP_PRESETS: Dict[str, str] = {
+    "scout": "lean",
+    "conviction": "lean",
+    "committee": "full",
+    "hard_loop": "lean",
+}
+
+RUN_MODE_ANALYST_PRESETS: Dict[str, List[str]] = {
+    "scout": ["business_truth", "market_expectations"],
+    "conviction": ["business_truth", "market_expectations", "timing_catalyst"],
+    "committee": list(CAPABILITY_ORDER),
+    "hard_loop": ["business_truth", "market_expectations", "timing_catalyst"],
 }
 
 POSITION_IMPORTANCE_OPTIONS = [
@@ -98,12 +121,14 @@ RESEARCH_DEPTH_OPTIONS = [
         "Shallow - Fast institution run, fewer debate and capital formation cycles",
         1,
     ),
+    ("Focused - Lean institutional loop with one hard synthesis pass", 2),
     ("Medium - Balanced depth with moderate institutional review", 3),
     ("Deep - Full institutional pass with richer debate and risk formation", 5),
 ]
 
 RESEARCH_DEPTH_LABELS = {
     1: "Shallow",
+    2: "Focused",
     3: "Medium",
     5: "Deep",
 }

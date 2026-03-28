@@ -420,7 +420,9 @@ class InstitutionalMemoryStore:
                 dossier.get("short_cycle_execution_window")
             ),
             "counterevidence": self._clean_text(dossier.get("counterevidence")),
-            "catalyst_path": self._clean_text(dossier.get("catalyst_path")),
+            "timing_catalyst": self._clean_text(
+                dossier.get("timing_catalyst") or dossier.get("catalyst_path")
+            ),
             "time_horizon": self._clean_text(dossier.get("time_horizon")),
             "kill_criteria": self._clean_text(dossier.get("kill_criteria") or final_decision.get("kill_criteria")),
             "final_recommendation": self._clean_text(dossier.get("final_recommendation") or final_decision.get("rating")),
@@ -450,7 +452,9 @@ class InstitutionalMemoryStore:
             "short_cycle_execution_window": self._clean_text(
                 dossier.get("short_cycle_execution_window")
             ),
-            "catalyst_path": self._clean_text(dossier.get("catalyst_path")),
+            "timing_catalyst": self._clean_text(
+                dossier.get("timing_catalyst") or dossier.get("catalyst_path")
+            ),
             "kill_criteria": self._clean_text(final_decision.get("kill_criteria") or dossier.get("kill_criteria")),
             "monitoring_triggers": self._clean_text(final_decision.get("monitoring_triggers") or dossier.get("monitoring_triggers")),
             "status": "open",
@@ -459,7 +463,7 @@ class InstitutionalMemoryStore:
         }
         if any(
             self._clean_text(forecast_entry.get(key))
-            for key in ("rating", "position_size", "portfolio_role", "catalyst_path", "kill_criteria")
+            for key in ("rating", "position_size", "portfolio_role", "timing_catalyst", "kill_criteria")
         ):
             memory["forecast_records"] = self._replace_or_append(
                 memory.get("forecast_records", []),

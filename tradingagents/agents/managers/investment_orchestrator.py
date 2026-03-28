@@ -170,7 +170,7 @@ def _default_counterevidence_search(
 
 def _default_position_archetype(active_capabilities: List[str]) -> str:
     capability_set = set(active_capabilities)
-    if "catalyst_path" in capability_set or "why_now" in capability_set:
+    if "timing_catalyst" in capability_set:
         return "Event-driven alpha seat with meaningful timing sensitivity."
     if "business_truth" in capability_set and "market_expectations" in capability_set:
         return "Fundamental alpha seat built around variant perception."
@@ -182,7 +182,7 @@ def _default_position_archetype(active_capabilities: List[str]) -> str:
 def _default_portfolio_role(position_importance: str, active_capabilities: List[str]) -> str:
     if position_importance == "critical":
         return "Potential core book driver if differentiated edge survives portfolio-fit review."
-    if "catalyst_path" in active_capabilities or "why_now" in active_capabilities:
+    if "timing_catalyst" in active_capabilities:
         return "Tactical sleeve expressed around catalysts and attention shifts."
     return "Satellite alpha seat that can earn more capital as the dossier strengthens."
 
@@ -199,7 +199,7 @@ def _default_crowding_risk(
 ) -> str:
     if evidence_conflict_level == "low":
         return "Potential crowding risk is elevated because the current evidence stack looks unusually one-sided."
-    if "why_now" in active_capabilities or "catalyst_path" in active_capabilities:
+    if "timing_catalyst" in active_capabilities:
         return "Catalyst-driven setups can crowd quickly; watch narrative and positioning overlap closely."
     return "Crowding risk remains uncertain and should be tested in challenge and portfolio-fit review."
 
@@ -291,6 +291,7 @@ def _build_plan_text(
     lines = [
         "## Investment Orchestration Plan",
         f"Objective: {objective}",
+        "Research mode: Parallel hard loop across the active research engines.",
         f"Active capabilities: {active_names}",
         f"Completed capabilities: {completed_names}",
         f"Reserve capabilities: {reserve_names}",
@@ -416,6 +417,8 @@ def create_investment_orchestrator(llm, config):
                 "reserve_capabilities": [],
                 "trigger_counterevidence_search": False,
                 "counterevidence_focus": "",
+                "research_mode": "parallel_hard_loop",
+                "missing_capabilities": [],
             }
             return {
                 "selected_analysts": [],
@@ -625,6 +628,8 @@ Institutional memory:
             ],
             "trigger_counterevidence_search": trigger_counterevidence_search,
             "counterevidence_focus": counterevidence_focus,
+            "research_mode": "parallel_hard_loop",
+            "missing_capabilities": [],
         }
 
         existing_portfolio_context = state.get("portfolio_context") or {}
@@ -684,7 +689,7 @@ Institutional memory:
             "selected_analysts": active_capabilities,
             "analysis_queue": remaining_order,
             "completed_analysts": completed_analysts,
-            "current_analyst": remaining_order[0] if remaining_order else "",
+            "current_analyst": "",
             "analysis_plan": plan_text,
             "analysis_brief": _build_analysis_brief(
                 state["company_of_interest"],

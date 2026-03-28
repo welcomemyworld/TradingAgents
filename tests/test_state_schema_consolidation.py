@@ -145,6 +145,7 @@ def make_canonical_state():
         "decision_dossier_markdown": "## AI Investment Dossier\n\n### World Model\nCanonical world model.",
         "market_expectations_report": "Canonical expectations report.",
         "business_truth_report": "Canonical business truth report.",
+        "timing_catalyst_report": "",
         "why_now_report": "",
         "catalyst_path_report": "",
         "thesis_review": thesis_review,

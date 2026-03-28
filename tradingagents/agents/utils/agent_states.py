@@ -56,6 +56,12 @@ class OrchestrationState(TypedDict):
     counterevidence_focus: Annotated[
         str, "Specific focus area for downstream challenge or disconfirming work"
     ]
+    research_mode: Annotated[
+        str, "How the research front-end is being executed, e.g. parallel_hard_loop"
+    ]
+    missing_capabilities: Annotated[
+        list[str], "Capabilities that did not produce a completed report before synthesis"
+    ]
 
 
 class PortfolioContextState(TypedDict):
@@ -139,8 +145,11 @@ class AgentState(MessagesState):
     ]
 
     market_expectations_report: Annotated[str, "Report from the Market Expectations capability"]
-    why_now_report: Annotated[str, "Report from the Why Now capability"]
-    catalyst_path_report: Annotated[str, "Report from the Catalyst Path capability"]
+    timing_catalyst_report: Annotated[
+        str, "Report from the merged Timing & Catalysts capability"
+    ]
+    why_now_report: Annotated[str, "Legacy report slot retained for compatibility"]
+    catalyst_path_report: Annotated[str, "Legacy report slot retained for compatibility"]
     business_truth_report: Annotated[str, "Report from the Business Truth capability"]
 
     thesis_review: Annotated[

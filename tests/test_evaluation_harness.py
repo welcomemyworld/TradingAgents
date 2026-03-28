@@ -75,6 +75,7 @@ def make_eval_state():
         "institution_memory_brief": "Canonical memory brief.",
         "business_truth_report": "Canonical business truth report.",
         "market_expectations_report": "Canonical expectations report.",
+        "timing_catalyst_report": "",
         "why_now_report": "",
         "catalyst_path_report": "",
         "thesis_review": thesis_review,
@@ -101,7 +102,7 @@ class EvaluationHarnessTests(unittest.TestCase):
 
         self.assertEqual(len(cases), 1)
         self.assertEqual(cases[0]["case_id"], "nvda_20240510")
-        self.assertEqual(cases[0]["selected_analysts"], ["why_now", "business_truth"])
+        self.assertEqual(cases[0]["selected_analysts"], ["business_truth", "timing_catalyst"])
 
     def test_section_presence_and_scores_use_canonical_state(self):
         state = make_eval_state()

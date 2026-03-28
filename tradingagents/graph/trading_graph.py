@@ -24,6 +24,10 @@ from tradingagents.agents.utils.agent_utils import (
     ANALYST_REPORT_FIELDS,
     normalize_selected_analysts,
 )
+from tradingagents.agents.utils.decision_protocol import (
+    build_institutional_loop_packet,
+    render_institutional_loop_packet,
+)
 from tradingagents.dataflows.config import set_config
 
 # Import the new abstract tool methods from agent_utils
@@ -40,6 +44,7 @@ from tradingagents.agents.utils.agent_utils import (
 )
 
 from .conditional_logic import ConditionalLogic
+from .run_trace import RunTraceRecorder, activate_run_trace, wrap_tool_with_trace
 from .setup import GraphSetup
 from .propagation import Propagator
 from .reflection import Reflector
@@ -170,36 +175,42 @@ class FutureInvestGraph:
 
     def _create_tool_nodes(self) -> Dict[str, ToolNode]:
         """Create tool nodes for different data sources using abstract methods."""
+        wrapped_get_stock_data = wrap_tool_with_trace(get_stock_data)
+        wrapped_get_indicators = wrap_tool_with_trace(get_indicators)
+        wrapped_get_news = wrap_tool_with_trace(get_news)
+        wrapped_get_global_news = wrap_tool_with_trace(get_global_news)
+        wrapped_get_insider_transactions = wrap_tool_with_trace(
+            get_insider_transactions
+        )
+        wrapped_get_fundamentals = wrap_tool_with_trace(get_fundamentals)
+        wrapped_get_balance_sheet = wrap_tool_with_trace(get_balance_sheet)
+        wrapped_get_cashflow = wrap_tool_with_trace(get_cashflow)
+        wrapped_get_income_statement = wrap_tool_with_trace(get_income_statement)
+
         return {
-            "market_expectations": ToolNode(
-                [
-                    # Core stock data tools
-                    get_stock_data,
-                    # Technical indicators
-                    get_indicators,
-                ]
-            ),
-            "why_now": ToolNode(
-                [
-                    # News tools for timing and narrative analysis
-                    get_news,
-                ]
-            ),
-            "catalyst_path": ToolNode(
-                [
-                    # News and insider information
-                    get_news,
-                    get_global_news,
-                    get_insider_transactions,
-                ]
-            ),
             "business_truth": ToolNode(
                 [
                     # Fundamental analysis tools
-                    get_fundamentals,
-                    get_balance_sheet,
-                    get_cashflow,
-                    get_income_statement,
+                    wrapped_get_fundamentals,
+                    wrapped_get_balance_sheet,
+                    wrapped_get_cashflow,
+                    wrapped_get_income_statement,
+                ]
+            ),
+            "market_expectations": ToolNode(
+                [
+                    # Core stock data tools
+                    wrapped_get_stock_data,
+                    # Technical indicators
+                    wrapped_get_indicators,
+                ]
+            ),
+            "timing_catalyst": ToolNode(
+                [
+                    # News, macro flow, and insider information for timing-aware catalyst work
+                    wrapped_get_news,
+                    wrapped_get_global_news,
+                    wrapped_get_insider_transactions,
                 ]
             ),
         }
@@ -208,6 +219,14 @@ class FutureInvestGraph:
         """Run the trading agents graph for a company on a specific date."""
 
         self.ticker = company_name
+        loop_mode = self.config.get("institutional_loop_mode", "full")
+        recorder = RunTraceRecorder(
+            self.config,
+            company_name,
+            str(trade_date),
+            self.selected_analysts,
+            loop_mode,
+        )
 
         # Initialize state
         init_agent_state = self.propagator.create_initial_state(
@@ -221,31 +240,44 @@ class FutureInvestGraph:
         )
         args = self.propagator.get_graph_args()
 
-        if self.debug:
-            # Debug mode with tracing
-            trace = []
-            for chunk in self.graph.stream(init_agent_state, **args):
-                if len(chunk["messages"]) == 0:
-                    pass
-                else:
-                    chunk["messages"][-1].pretty_print()
-                    trace.append(chunk)
+        with activate_run_trace(recorder):
+            if self.debug:
+                # Debug mode with tracing
+                trace = []
+                for chunk in self.graph.stream(init_agent_state, **args):
+                    if len(chunk["messages"]) == 0:
+                        pass
+                    else:
+                        chunk["messages"][-1].pretty_print()
+                        trace.append(chunk)
 
-            final_state = trace[-1]
-        else:
-            # Standard mode without tracing
-            final_state = self.graph.invoke(init_agent_state, **args)
+                final_state = trace[-1]
+            else:
+                # Standard mode without tracing
+                final_state = self.graph.invoke(init_agent_state, **args)
 
         # Store current state for reflection
         self.curr_state = final_state
 
-        # Log state
-        self._log_state(trade_date, final_state)
+        final_state["institutional_loop_mode"] = loop_mode
+        final_state["institutional_trace"] = recorder.summary()
+        final_state["institutional_loop_packet"] = build_institutional_loop_packet(
+            final_state
+        )
+        final_state["institutional_loop_packet_markdown"] = (
+            render_institutional_loop_packet(final_state["institutional_loop_packet"])
+        )
 
         # Return decision and processed signal
         final_decision_text = extract_final_decision_text(final_state)
+        processed_signal = self.process_signal(final_decision_text)
+        recorder.finalize(final_state, processed_signal)
+        final_state["institutional_trace"] = recorder.summary()
         self.institutional_memory.record_run(company_name, trade_date, final_state)
-        return final_state, self.process_signal(final_decision_text)
+
+        # Log state after trace finalization so downstream surfaces see the final summary.
+        self._log_state(trade_date, final_state)
+        return final_state, processed_signal
 
     def _log_state(self, trade_date, final_state):
         """Log the final state to a JSON file."""
@@ -328,6 +360,12 @@ def build_state_log_entry(final_state: Dict[str, Any]) -> Dict[str, Any]:
         "institution_memory_brief": final_state.get("institution_memory_brief", ""),
         "decision_dossier": final_state.get("decision_dossier", {}),
         "decision_dossier_markdown": final_state.get("decision_dossier_markdown", ""),
+        "institutional_loop_mode": final_state.get("institutional_loop_mode", "full"),
+        "institutional_trace": final_state.get("institutional_trace", {}),
+        "institutional_loop_packet": final_state.get("institutional_loop_packet", {}),
+        "institutional_loop_packet_markdown": final_state.get(
+            "institutional_loop_packet_markdown", ""
+        ),
         "thesis_review": final_state.get("thesis_review", {}),
         "execution_state": final_state.get("execution_state", {}),
         "allocation_review": final_state.get("allocation_review", {}),

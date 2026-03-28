@@ -19,6 +19,7 @@ CANONICAL_SECTION_KEYS = [
     "institution_memory_brief",
     "research_capability_reports",
     "thesis_review",
+    "institutional_loop_packet",
     "execution_state",
     "allocation_review",
     "final_decision",
@@ -54,6 +55,23 @@ def _mean_bool(values: Iterable[bool]) -> float:
     return round(mean(1.0 if value else 0.0 for value in values), 4)
 
 
+def get_required_section_keys(final_state: Dict[str, Any]) -> List[str]:
+    loop_mode = _clean_text(final_state.get("institutional_loop_mode")) or "full"
+    if loop_mode == "lean":
+        return [
+            "analysis_plan",
+            "portfolio_context",
+            "temporal_context",
+            "institution_memory_brief",
+            "research_capability_reports",
+            "thesis_review",
+            "institutional_loop_packet",
+            "final_decision",
+            "decision_dossier_markdown",
+        ]
+    return list(CANONICAL_SECTION_KEYS)
+
+
 def get_section_presence(final_state: Dict[str, Any]) -> Dict[str, bool]:
     sections = {
         section["key"]: _clean_text(section.get("content"))
@@ -61,7 +79,7 @@ def get_section_presence(final_state: Dict[str, Any]) -> Dict[str, bool]:
     }
     return {
         key: bool(sections.get(key))
-        for key in CANONICAL_SECTION_KEYS
+        for key in get_required_section_keys(final_state)
     }
 
 
@@ -97,6 +115,7 @@ def get_decision_quality_flags(
     final_decision = final_state.get("final_decision") or {}
     portfolio_context = final_state.get("portfolio_context") or {}
     temporal_context = final_state.get("temporal_context") or {}
+    loop_mode = _clean_text(final_state.get("institutional_loop_mode")) or "full"
 
     return {
         "has_rating": bool(
@@ -122,6 +141,13 @@ def get_decision_quality_flags(
         "has_execution_blueprint": bool(
             _clean_text(execution_state.get("execution_plan"))
             or _clean_text(execution_state.get("full_blueprint"))
+            or (
+                loop_mode == "lean"
+                and bool(
+                    _clean_text(final_decision.get("entry_exit"))
+                    or _clean_text(final_decision.get("position_size"))
+                )
+            )
         ),
     }
 
@@ -183,6 +209,9 @@ def build_case_summary(
         "processed_signal": _clean_text(processed_signal),
         "runtime_seconds": round(runtime_seconds, 3),
         "selected_analysts": list(case.get("selected_analysts") or []),
+        "institutional_loop_mode": _clean_text(
+            final_state.get("institutional_loop_mode")
+        ),
         "token_budget": _clean_text(
             (final_state.get("orchestration_state") or {}).get("token_budget")
         ),
@@ -213,11 +242,12 @@ def build_error_summary(
         "processed_signal": "",
         "runtime_seconds": round(runtime_seconds, 3),
         "selected_analysts": list(case.get("selected_analysts") or []),
+        "institutional_loop_mode": "",
         "token_budget": "",
         "position_importance": "",
         "portfolio_role": "",
         "kill_criteria": "",
-        "missing_sections": CANONICAL_SECTION_KEYS,
+        "missing_sections": list(CANONICAL_SECTION_KEYS),
         "section_presence": {key: False for key in CANONICAL_SECTION_KEYS},
         "research_coverage": {
             "selected": list(case.get("selected_analysts") or []),

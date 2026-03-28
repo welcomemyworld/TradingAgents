@@ -1,7 +1,5 @@
 from typing import Any, Dict, Iterable, List
 
-from langchain_core.messages import HumanMessage, RemoveMessage
-
 # Import tools from separate utility files
 from tradingagents.agents.utils.core_stock_tools import (
     get_stock_data
@@ -22,26 +20,26 @@ from tradingagents.agents.utils.news_data_tools import (
 )
 
 
+ANALYST_ALIASES = {
+    "why_now": "timing_catalyst",
+    "catalyst_path": "timing_catalyst",
+}
+
 ANALYST_CAPABILITIES = {
+    "business_truth": {
+        "display_name": "Business Truth",
+        "report_field": "business_truth_report",
+        "summary": "Establish the business truth: earnings power, unit economics, resilience, balance-sheet strength, and the underlying reality of the company.",
+    },
     "market_expectations": {
         "display_name": "Market Expectations",
         "report_field": "market_expectations_report",
         "summary": "Infer what the market already expects from price action, momentum, volatility, and positioning so the fund knows what is priced in.",
     },
-    "why_now": {
-        "display_name": "Why Now",
-        "report_field": "why_now_report",
-        "summary": "Explain why the idea matters right now by tracking attention, sentiment acceleration, and whether narrative momentum is strengthening or fading.",
-    },
-    "catalyst_path": {
-        "display_name": "Catalyst Path",
-        "report_field": "catalyst_path_report",
-        "summary": "Map the catalyst path through company-specific and macro events, showing what can force a re-rating and on what timeline.",
-    },
-    "business_truth": {
-        "display_name": "Business Truth",
-        "report_field": "business_truth_report",
-        "summary": "Establish the business truth: earnings power, unit economics, resilience, balance-sheet strength, and the underlying reality of the company.",
+    "timing_catalyst": {
+        "display_name": "Timing & Catalysts",
+        "report_field": "timing_catalyst_report",
+        "summary": "Unify narrative momentum, sentiment, near-term catalysts, and the re-rating path into one timing-aware capability that explains why the idea matters now.",
     },
 }
 
@@ -57,6 +55,22 @@ ANALYST_REPORT_FIELDS = {
 
 ANALYST_REPORT_FIELD_TO_KEY = {
     report_field: key for key, report_field in ANALYST_REPORT_FIELDS.items()
+}
+
+ANALYST_COMPATIBILITY_KEYS = {
+    "business_truth": ["business_truth"],
+    "market_expectations": ["market_expectations"],
+    "timing_catalyst": ["timing_catalyst", "why_now", "catalyst_path"],
+}
+
+ANALYST_COMPATIBILITY_REPORT_FIELDS = {
+    "business_truth": ["business_truth_report"],
+    "market_expectations": ["market_expectations_report"],
+    "timing_catalyst": [
+        "timing_catalyst_report",
+        "why_now_report",
+        "catalyst_path_report",
+    ],
 }
 
 ANALYST_SELECTION_LABELS = ANALYST_DISPLAY_NAMES.copy()
@@ -110,24 +124,29 @@ def build_instrument_context(ticker: str) -> str:
 
 def create_msg_delete():
     def delete_messages(state):
-        """Clear messages and add placeholder for Anthropic compatibility"""
-        messages = state["messages"]
+        """No-op cleanup node.
 
-        # Remove all messages
-        removal_operations = [RemoveMessage(id=m.id) for m in messages]
-
-        # Add a minimal placeholder message
-        placeholder = HumanMessage(content="Continue")
-
-        return {"messages": removal_operations + [placeholder]}
+        Parallel research branches share the same message channel, so deleting by
+        message ID inside multiple branches can race and fail. The current graph
+        only uses this node as a routing barrier after a capability is done, so a
+        no-op is safer than destructive message cleanup.
+        """
+        return {}
 
     return delete_messages
+
+
+def canonicalize_analyst_key(analyst_key: str | None) -> str:
+    """Map deprecated analyst ids onto the canonical capability key."""
+    normalized = str(analyst_key or "").strip().lower()
+    return ANALYST_ALIASES.get(normalized, normalized)
 
 
 def normalize_selected_analysts(selected_analysts: Iterable[str] | None) -> List[str]:
     """Return valid analyst keys in canonical order without duplicates."""
     requested = set()
     for analyst_key in selected_analysts or []:
+        analyst_key = canonicalize_analyst_key(analyst_key)
         if analyst_key in ANALYST_ORDER:
             requested.add(analyst_key)
     return [analyst_key for analyst_key in ANALYST_ORDER if analyst_key in requested]
@@ -169,16 +188,25 @@ def get_capability_catalog(selected_analysts: Iterable[str] | None) -> str:
 
 def get_analyst_report(state: Dict[str, Any], analyst_key: str) -> str:
     """Fetch a capability report from the shared artifact store or state."""
+    analyst_key = canonicalize_analyst_key(analyst_key)
     artifacts = state.get("analysis_artifacts") or {}
-    artifact = artifacts.get(analyst_key)
-    if isinstance(artifact, dict):
-        report = artifact.get("report", "")
+    for compatibility_key in ANALYST_COMPATIBILITY_KEYS.get(analyst_key, [analyst_key]):
+        artifact = artifacts.get(compatibility_key)
+        if isinstance(artifact, dict):
+            report = artifact.get("report", "")
+            if report:
+                return report
+        elif isinstance(artifact, str) and artifact:
+            return artifact
+
+    for report_field in ANALYST_COMPATIBILITY_REPORT_FIELDS.get(
+        analyst_key, [get_report_field_for_analyst(analyst_key)]
+    ):
+        report = state.get(report_field, "")
         if report:
             return report
-    elif isinstance(artifact, str) and artifact:
-        return artifact
 
-    return state.get(get_report_field_for_analyst(analyst_key), "")
+    return ""
 
 
 def collect_analyst_reports(

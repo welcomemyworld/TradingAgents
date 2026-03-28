@@ -73,7 +73,7 @@ def make_final_state():
             "core_thesis": "Earnings power is inflecting higher.",
             "variant_perception": "Street is too bearish on margin durability.",
             "counterevidence": "Valuation leaves less room for error.",
-            "catalyst_path": "Product cycle plus estimate revisions.",
+            "timing_catalyst": "Product cycle plus estimate revisions.",
             "time_horizon": "6-12 months",
             "kill_criteria": "Demand inflects down materially.",
             "final_recommendation": "Overweight",

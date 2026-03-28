@@ -8,6 +8,7 @@ from langgraph.prebuilt import ToolNode
 from tradingagents.agents import *
 from tradingagents.agents.utils.agent_states import AgentState
 from tradingagents.agents.utils.agent_utils import (
+    ANALYST_DISPLAY_NAMES,
     ANALYST_ORDER,
     CAPITAL_ALLOCATION_COMMITTEE,
     CHALLENGE_ENGINE,
@@ -19,16 +20,28 @@ from tradingagents.agents.utils.agent_utils import (
     UPSIDE_CAPTURE_ENGINE,
     get_analyst_clear_node_name,
     get_analyst_node_name,
+    get_analyst_report,
     get_report_field_for_analyst,
     get_analyst_tool_node_name,
     normalize_selected_analysts,
 )
+from tradingagents.agents.utils.decision_protocol import (
+    BUSINESS_TRUTH_SECTION_MAP,
+    MARKET_EXPECTATIONS_SECTION_MAP,
+    TIMING_CATALYST_SECTION_MAP,
+    build_dossier_update,
+    build_temporal_context_update,
+)
 
 from .conditional_logic import ConditionalLogic
+from .run_trace import get_active_trace_recorder
 
 
 class GraphSetup:
     """Handles the setup and configuration of the agent graph."""
+
+    RESEARCH_FANOUT = "Parallel Research Fanout"
+    RESEARCH_JOIN = "Parallel Research Join"
 
     def __init__(
         self,
@@ -56,40 +69,134 @@ class GraphSetup:
         self.config = config
 
     def _wrap_analyst_node(self, analyst_key: str, node):
-        """Persist analyst outputs into the shared artifact store."""
+        """Persist only the canonical capability report; merge shared state at the join."""
         report_field = get_report_field_for_analyst(analyst_key)
 
         def wrapped_node(state):
+            recorder = get_active_trace_recorder()
+            if recorder:
+                recorder.record_capability_event(
+                    analyst_key,
+                    "started",
+                    detail={"agent_name": get_analyst_node_name(analyst_key)},
+                )
             result = node(state)
             report = result.get(report_field, "")
 
-            if not report:
-                return result
+            if recorder:
+                recorder.record_capability_event(
+                    analyst_key,
+                    "completed",
+                    report=report,
+                    status="completed" if report else "missing_report",
+                    detail={"agent_name": get_analyst_node_name(analyst_key)},
+                )
 
-            artifacts = dict(state.get("analysis_artifacts", {}))
-            artifacts[analyst_key] = {
-                "agent_name": get_analyst_node_name(analyst_key),
-                "report": report,
-                "report_field": report_field,
-            }
-
-            completed = list(state.get("completed_analysts", []))
-            if analyst_key not in completed:
-                completed.append(analyst_key)
-
-            remaining = [key for key in state.get("analysis_queue", []) if key != analyst_key]
-
-            result.update(
-                {
-                    "analysis_artifacts": artifacts,
-                    "completed_analysts": completed,
-                    "analysis_queue": remaining,
-                    "current_analyst": "",
-                }
-            )
-            return result
+            cleaned_result = dict(result)
+            for shared_key in (
+                "analysis_artifacts",
+                "completed_analysts",
+                "analysis_queue",
+                "current_analyst",
+                "decision_dossier",
+                "decision_dossier_markdown",
+                "temporal_context",
+            ):
+                cleaned_result.pop(shared_key, None)
+            return cleaned_result
 
         return wrapped_node
+
+    def _create_parallel_research_fanout(self):
+        def fanout_node(state):
+            return {
+                "analysis_queue": normalize_selected_analysts(
+                    state.get("analysis_queue") or state.get("selected_analysts")
+                )
+            }
+
+        return fanout_node
+
+    def _create_parallel_research_join(self):
+        section_maps = {
+            "business_truth": BUSINESS_TRUTH_SECTION_MAP,
+            "market_expectations": MARKET_EXPECTATIONS_SECTION_MAP,
+            "timing_catalyst": TIMING_CATALYST_SECTION_MAP,
+        }
+
+        def join_node(state):
+            selected = normalize_selected_analysts(state.get("selected_analysts"))
+            completed = []
+            artifacts = {}
+            dossier_state = {
+                "decision_dossier": state.get("decision_dossier"),
+                "temporal_context": state.get("temporal_context"),
+            }
+
+            for analyst_key in selected:
+                report = get_analyst_report(state, analyst_key)
+                if not report:
+                    continue
+                report_field = get_report_field_for_analyst(analyst_key)
+                completed.append(analyst_key)
+                artifacts[analyst_key] = {
+                    "agent_name": ANALYST_DISPLAY_NAMES[analyst_key],
+                    "report": report,
+                    "report_field": report_field,
+                }
+                dossier_state.update(
+                    build_dossier_update(
+                        dossier_state,
+                        report,
+                        section_maps[analyst_key],
+                    )
+                )
+                dossier_state.update(
+                    build_temporal_context_update(
+                        dossier_state,
+                        report,
+                        section_maps[analyst_key],
+                    )
+                )
+
+            missing = [key for key in selected if key not in completed]
+            orchestration_state = dict(state.get("orchestration_state") or {})
+            orchestration_state["missing_capabilities"] = missing
+            orchestration_state["continue_research"] = False
+            orchestration_state["research_mode"] = "parallel_hard_loop"
+            if missing:
+                orchestration_state["stop_reason"] = (
+                    "Parallel research bundle completed with gaps; proceed to thesis synthesis with explicit missing evidence."
+                )
+
+            recorder = get_active_trace_recorder()
+            if recorder:
+                recorder.record_capability_event(
+                    "parallel_research_bundle",
+                    "joined",
+                    status="completed_with_gaps" if missing else "completed",
+                    detail={
+                        "completed_capabilities": completed,
+                        "missing_capabilities": missing,
+                    },
+                )
+
+            return {
+                "analysis_artifacts": artifacts,
+                "completed_analysts": completed,
+                "analysis_queue": [],
+                "current_analyst": "",
+                "orchestration_state": orchestration_state,
+                **dossier_state,
+            }
+
+        return join_node
+
+    def _route_parallel_join(self, state):
+        selected = normalize_selected_analysts(state.get("selected_analysts"))
+        if all(get_analyst_report(state, analyst_key) for analyst_key in selected):
+            return self.RESEARCH_JOIN
+        return END
 
     def setup_graph(
         self, selected_analysts=None
@@ -98,14 +205,14 @@ class GraphSetup:
 
         Args:
             selected_analysts (list): List of capability ids to include. Options are:
-                - "market_expectations"
-                - "why_now"
-                - "catalyst_path"
                 - "business_truth"
+                - "market_expectations"
+                - "timing_catalyst"
         """
         selected_analysts = normalize_selected_analysts(
             selected_analysts or ANALYST_ORDER
         )
+        lean_loop = self.config.get("institutional_loop_mode", "full") == "lean"
         compiled_analysts = (
             ANALYST_ORDER
             if self.config.get("enable_dynamic_capability_expansion", True)
@@ -121,10 +228,9 @@ class GraphSetup:
         tool_nodes = {}
 
         analyst_factories = {
-            "market_expectations": create_market_analyst,
-            "why_now": create_social_media_analyst,
-            "catalyst_path": create_news_analyst,
             "business_truth": create_fundamentals_analyst,
+            "market_expectations": create_market_analyst,
+            "timing_catalyst": create_timing_catalyst_analyst,
         }
 
         for analyst_key in compiled_analysts:
@@ -162,6 +268,8 @@ class GraphSetup:
         workflow = StateGraph(AgentState)
 
         workflow.add_node("Investment Orchestrator", investment_orchestrator_node)
+        workflow.add_node(self.RESEARCH_FANOUT, self._create_parallel_research_fanout())
+        workflow.add_node(self.RESEARCH_JOIN, self._create_parallel_research_join())
 
         # Add analyst nodes to the graph
         for analyst_type, node in analyst_nodes.items():
@@ -188,17 +296,40 @@ class GraphSetup:
 
         # Define edges
         workflow.add_edge(START, "Investment Orchestrator")
+        def route_research_phase(state):
+            analysis_queue = normalize_selected_analysts(
+                state.get("analysis_queue") or state.get("selected_analysts")
+            )
+            if analysis_queue and (state.get("orchestration_state") or {}).get(
+                "continue_research", True
+            ):
+                return self.RESEARCH_FANOUT
+            return THESIS_ENGINE
+
         workflow.add_conditional_edges(
             "Investment Orchestrator",
-            self.conditional_logic.route_next_analyst,
+            route_research_phase,
             {
-                get_analyst_node_name(analyst_type): get_analyst_node_name(analyst_type)
-                for analyst_type in compiled_analysts
-            }
-            | {THESIS_ENGINE: THESIS_ENGINE},
+                self.RESEARCH_FANOUT: self.RESEARCH_FANOUT,
+                THESIS_ENGINE: THESIS_ENGINE,
+            },
         )
 
-        # Analysts are now dynamically re-routed after each completion.
+        def route_parallel_analysts(state):
+            queued = normalize_selected_analysts(
+                state.get("analysis_queue") or state.get("selected_analysts")
+            )
+            return [get_analyst_node_name(analyst_key) for analyst_key in queued]
+
+        workflow.add_conditional_edges(
+            self.RESEARCH_FANOUT,
+            route_parallel_analysts,
+            [
+                get_analyst_node_name(analyst_type)
+                for analyst_type in compiled_analysts
+            ],
+        )
+
         for analyst_type in compiled_analysts:
             current_analyst = get_analyst_node_name(analyst_type)
             current_tools = get_analyst_tool_node_name(analyst_type)
@@ -211,7 +342,16 @@ class GraphSetup:
                 [current_tools, current_clear],
             )
             workflow.add_edge(current_tools, current_analyst)
-            workflow.add_edge(current_clear, "Investment Orchestrator")
+            workflow.add_conditional_edges(
+                current_clear,
+                self._route_parallel_join,
+                {
+                    self.RESEARCH_JOIN: self.RESEARCH_JOIN,
+                    END: END,
+                },
+            )
+
+        workflow.add_edge(self.RESEARCH_JOIN, THESIS_ENGINE)
 
         # Add remaining edges
         workflow.add_conditional_edges(
@@ -230,32 +370,35 @@ class GraphSetup:
                 INVESTMENT_DIRECTOR: INVESTMENT_DIRECTOR,
             },
         )
-        workflow.add_edge(INVESTMENT_DIRECTOR, EXECUTION_ENGINE)
-        workflow.add_edge(EXECUTION_ENGINE, UPSIDE_CAPTURE_ENGINE)
-        workflow.add_conditional_edges(
-            UPSIDE_CAPTURE_ENGINE,
-            self.conditional_logic.should_continue_risk_analysis,
-            {
-                DOWNSIDE_GUARDRAIL_ENGINE: DOWNSIDE_GUARDRAIL_ENGINE,
-                CAPITAL_ALLOCATION_COMMITTEE: CAPITAL_ALLOCATION_COMMITTEE,
-            },
-        )
-        workflow.add_conditional_edges(
-            DOWNSIDE_GUARDRAIL_ENGINE,
-            self.conditional_logic.should_continue_risk_analysis,
-            {
-                PORTFOLIO_FIT_ENGINE: PORTFOLIO_FIT_ENGINE,
-                CAPITAL_ALLOCATION_COMMITTEE: CAPITAL_ALLOCATION_COMMITTEE,
-            },
-        )
-        workflow.add_conditional_edges(
-            PORTFOLIO_FIT_ENGINE,
-            self.conditional_logic.should_continue_risk_analysis,
-            {
-                UPSIDE_CAPTURE_ENGINE: UPSIDE_CAPTURE_ENGINE,
-                CAPITAL_ALLOCATION_COMMITTEE: CAPITAL_ALLOCATION_COMMITTEE,
-            },
-        )
+        if lean_loop:
+            workflow.add_edge(INVESTMENT_DIRECTOR, CAPITAL_ALLOCATION_COMMITTEE)
+        else:
+            workflow.add_edge(INVESTMENT_DIRECTOR, EXECUTION_ENGINE)
+            workflow.add_edge(EXECUTION_ENGINE, UPSIDE_CAPTURE_ENGINE)
+            workflow.add_conditional_edges(
+                UPSIDE_CAPTURE_ENGINE,
+                self.conditional_logic.should_continue_risk_analysis,
+                {
+                    DOWNSIDE_GUARDRAIL_ENGINE: DOWNSIDE_GUARDRAIL_ENGINE,
+                    CAPITAL_ALLOCATION_COMMITTEE: CAPITAL_ALLOCATION_COMMITTEE,
+                },
+            )
+            workflow.add_conditional_edges(
+                DOWNSIDE_GUARDRAIL_ENGINE,
+                self.conditional_logic.should_continue_risk_analysis,
+                {
+                    PORTFOLIO_FIT_ENGINE: PORTFOLIO_FIT_ENGINE,
+                    CAPITAL_ALLOCATION_COMMITTEE: CAPITAL_ALLOCATION_COMMITTEE,
+                },
+            )
+            workflow.add_conditional_edges(
+                PORTFOLIO_FIT_ENGINE,
+                self.conditional_logic.should_continue_risk_analysis,
+                {
+                    UPSIDE_CAPTURE_ENGINE: UPSIDE_CAPTURE_ENGINE,
+                    CAPITAL_ALLOCATION_COMMITTEE: CAPITAL_ALLOCATION_COMMITTEE,
+                },
+            )
 
         workflow.add_edge(CAPITAL_ALLOCATION_COMMITTEE, END)
 

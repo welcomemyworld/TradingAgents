@@ -7,7 +7,12 @@ DEFAULT_CONFIG = {
         os.path.abspath(os.path.join(os.path.dirname(__file__), ".")),
         "institution_memory",
     ),
+    "institution_trace_dir": os.path.join(
+        os.path.abspath(os.path.join(os.path.dirname(__file__), ".")),
+        "institution_traces",
+    ),
     "institution_memory_history_limit": 50,
+    "institution_trace_preview_chars": 700,
     "data_cache_dir": os.path.join(
         os.path.abspath(os.path.join(os.path.dirname(__file__), ".")),
         "dataflows/data_cache",
@@ -27,6 +32,9 @@ DEFAULT_CONFIG = {
     "enable_dynamic_capability_expansion": True,
     "orchestrator_token_budget": "balanced",  # Options: tight, balanced, expansive
     "orchestrator_position_importance": "standard",  # Options: standard, high, critical
+    "institutional_loop_mode": "lean",  # Options: lean, full
+    "tool_call_soft_limit": 3,
+    "tool_repeat_soft_limit": 2,
     # Debate and discussion settings
     "max_debate_rounds": 1,
     "max_risk_discuss_rounds": 1,

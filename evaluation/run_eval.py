@@ -39,6 +39,7 @@ SUMMARY_FIELD_ORDER = [
     "canonical_completeness_score",
     "research_coverage_score",
     "decision_quality_score",
+    "institutional_loop_mode",
     "token_budget",
     "position_importance",
     "portfolio_role",

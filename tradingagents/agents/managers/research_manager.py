@@ -24,6 +24,9 @@ def create_research_manager(llm, memory):
         shared_research_context = build_research_context(
             state, state.get("selected_analysts")
         )
+        missing_capabilities = (
+            (state.get("orchestration_state") or {}).get("missing_capabilities") or []
+        )
 
         dossier_snapshot = render_dossier_brief(
             state.get("decision_dossier"),
@@ -57,7 +60,7 @@ Write the memo using exactly these markdown headings:
 ## Long-Cycle Mispricing
 ## Medium-Cycle Re-Rating Path
 ## Short-Cycle Execution Window
-## Catalyst Path
+## Timing & Catalysts
 ## Time Horizon
 ## Portfolio Role
 ## Initial Sizing View
@@ -68,6 +71,7 @@ Rules:
 - Translate debate into a clear institutional recommendation.
 - Focus on what is both true and tradable.
 - Use past lessons where relevant.
+- If any research capability is missing, name the gap explicitly, lower confidence accordingly, and state the next evidence that would close it.
 
 Past reflections:
 \"{past_memory_str}\"
@@ -79,6 +83,9 @@ Cross-functional research brief:
 
 Completed capability intelligence:
 {shared_research_context}
+
+Missing capability evidence:
+{", ".join(missing_capabilities) if missing_capabilities else "None"}
 
 Structured dossier snapshot:
 {dossier_snapshot}

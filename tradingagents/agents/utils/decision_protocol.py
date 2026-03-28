@@ -48,7 +48,7 @@ DECISION_DOSSIER_ORDER = [
     ("consensus_view", "Consensus View"),
     ("counterevidence", "Counterevidence"),
     ("failure_modes", "Failure Modes"),
-    ("catalyst_path", "Catalyst Path"),
+    ("timing_catalyst", "Timing & Catalysts"),
     ("time_horizon", "Time Horizon"),
     ("timing_triggers", "Timing Triggers"),
     ("execution_plan", "Execution Plan"),
@@ -87,27 +87,25 @@ MARKET_EXPECTATIONS_SECTION_MAP = {
     ],
 }
 
-WHY_NOW_SECTION_MAP = {
-    "attention_regime": ["Attention Shift"],
-    "narrative_momentum": ["Narrative Momentum"],
-    "sentiment_inflection": ["Sentiment Inflection"],
-    "time_horizon": ["Why This Matters Now"],
+TIMING_CATALYST_SECTION_MAP = {
+    "timing_catalyst": ["Timing & Catalysts Summary", "Timing & Catalysts"],
+    "attention_regime": ["Attention / Narrative / Sentiment"],
+    "narrative_momentum": ["Attention / Narrative / Sentiment"],
+    "sentiment_inflection": ["Attention / Narrative / Sentiment"],
+    "event_map": ["Near-Term Catalysts"],
+    "timing_triggers": ["Near-Term Catalysts"],
+    "medium_cycle_rerating_path": ["Re-Rating Path", "Medium-Cycle Re-Rating Path"],
+    "failure_modes": ["Timing Risks / Invalidation"],
+    "kill_criteria": ["Timing Risks / Invalidation"],
+    "time_horizon": ["Re-Rating Path"],
     "short_cycle_execution_window": ["Short-Cycle Execution Window"],
-}
-
-CATALYST_PATH_SECTION_MAP = {
-    "event_map": ["Event Map"],
-    "catalyst_path": ["Catalyst Tree"],
-    "time_horizon": ["Timeline"],
-    "timing_triggers": ["Market-Relevance"],
-    "medium_cycle_rerating_path": ["Medium-Cycle Re-Rating Path"],
 }
 
 THESIS_ENGINE_SECTION_MAP = {
     "core_thesis": ["Core Thesis"],
     "variant_perception": ["Variant Perception"],
     "supporting_evidence": ["Supporting Evidence"],
-    "catalyst_path": ["Catalyst Path"],
+    "timing_catalyst": ["Timing & Catalysts"],
 }
 
 CHALLENGE_ENGINE_SECTION_MAP = {
@@ -126,7 +124,7 @@ INVESTMENT_DIRECTOR_SECTION_MAP = {
     "long_cycle_mispricing": ["Long-Cycle Mispricing"],
     "medium_cycle_rerating_path": ["Medium-Cycle Re-Rating Path"],
     "short_cycle_execution_window": ["Short-Cycle Execution Window"],
-    "catalyst_path": ["Catalyst Path"],
+    "timing_catalyst": ["Timing & Catalysts"],
     "time_horizon": ["Time Horizon"],
     "portfolio_role": ["Portfolio Role"],
     "position_sizing": ["Initial Sizing View"],
@@ -211,7 +209,7 @@ RESEARCH_DOSSIER_BRIEF_KEYS = [
     "attention_regime",
     "narrative_momentum",
     "event_map",
-    "catalyst_path",
+    "timing_catalyst",
     "time_horizon",
     "medium_cycle_rerating_path",
     "short_cycle_execution_window",
@@ -229,7 +227,7 @@ EXECUTION_DOSSIER_BRIEF_KEYS = [
     "long_cycle_mispricing",
     "medium_cycle_rerating_path",
     "short_cycle_execution_window",
-    "catalyst_path",
+    "timing_catalyst",
     "time_horizon",
     "position_sizing",
     "portfolio_role",
@@ -247,7 +245,7 @@ RISK_DOSSIER_BRIEF_KEYS = [
     "medium_cycle_rerating_path",
     "short_cycle_execution_window",
     "failure_modes",
-    "catalyst_path",
+    "timing_catalyst",
     "time_horizon",
     "position_sizing",
     "portfolio_role",
@@ -267,7 +265,7 @@ CAPITAL_ALLOCATION_DOSSIER_BRIEF_KEYS = [
     "medium_cycle_rerating_path",
     "short_cycle_execution_window",
     "failure_modes",
-    "catalyst_path",
+    "timing_catalyst",
     "time_horizon",
     "portfolio_role",
     "position_archetype",
@@ -336,6 +334,86 @@ def create_final_decision_state() -> Dict[str, str]:
     }
 
 
+def build_institutional_loop_packet(state: Dict[str, Any] | None) -> Dict[str, str]:
+    """Build a lean, hard decision packet for institution-facing surfaces."""
+    state = state or {}
+    dossier = state.get("decision_dossier") or {}
+    final_decision = state.get("final_decision") or {}
+
+    rating = _clean_text(final_decision.get("rating")) or _clean_text(
+        dossier.get("final_recommendation")
+    )
+    portfolio_role = _clean_text(final_decision.get("portfolio_mandate")) or _clean_text(
+        dossier.get("portfolio_role")
+    )
+    timing_window = _clean_text(dossier.get("timing_catalyst") or dossier.get("catalyst_path")) or _clean_text(
+        dossier.get("short_cycle_execution_window")
+    ) or _clean_text(dossier.get("medium_cycle_rerating_path"))
+    position_size = _clean_text(final_decision.get("position_size")) or _clean_text(
+        dossier.get("position_sizing")
+    )
+    entry_exit = _clean_text(final_decision.get("entry_exit")) or _clean_text(
+        dossier.get("entry_framework")
+    )
+    kill_criteria = _clean_text(final_decision.get("kill_criteria")) or _clean_text(
+        dossier.get("kill_criteria")
+    )
+    monitoring = _clean_text(final_decision.get("monitoring_triggers")) or _clean_text(
+        dossier.get("monitoring_triggers")
+    )
+    counterevidence = _clean_text(dossier.get("counterevidence")) or _clean_text(
+        dossier.get("failure_modes")
+    )
+    capital_rationale = _clean_text(
+        final_decision.get("capital_allocation_rationale")
+    ) or _clean_text(dossier.get("capital_allocation_rationale"))
+
+    return {
+        "institutional_stance": rating,
+        "portfolio_role": portfolio_role,
+        "world_model": _clean_text(dossier.get("world_model")),
+        "core_thesis": _clean_text(dossier.get("core_thesis"))
+        or _clean_text(dossier.get("final_recommendation")),
+        "variant_perception": _clean_text(dossier.get("variant_perception")),
+        "timing_window": timing_window,
+        "timing_catalyst": _clean_text(
+            dossier.get("timing_catalyst") or dossier.get("catalyst_path")
+        ),
+        "position_size": position_size,
+        "entry_exit": entry_exit,
+        "kill_criteria": kill_criteria,
+        "monitoring_triggers": monitoring,
+        "counterevidence": counterevidence,
+        "capital_allocation_rationale": capital_rationale,
+    }
+
+
+def render_institutional_loop_packet(packet: Dict[str, str] | None) -> str:
+    """Render the lean institutional loop packet as markdown."""
+    packet = packet or {}
+    sections = [
+        ("institutional_stance", "Institutional Stance"),
+        ("portfolio_role", "Portfolio Role"),
+        ("world_model", "World Model"),
+        ("core_thesis", "Core Thesis"),
+        ("variant_perception", "Variant Perception"),
+        ("timing_window", "Timing Window"),
+        ("timing_catalyst", "Timing & Catalysts"),
+        ("position_size", "Position Size"),
+        ("entry_exit", "Entry / Exit"),
+        ("kill_criteria", "Kill Criteria"),
+        ("monitoring_triggers", "Monitoring Triggers"),
+        ("counterevidence", "Counterevidence"),
+        ("capital_allocation_rationale", "Capital Allocation Rationale"),
+    ]
+    parts = ["## Lean Institutional Loop"]
+    for key, heading in sections:
+        value = _clean_text(packet.get(key, ""))
+        if value:
+            parts.append(f"### {heading}\n{value}")
+    return "\n\n".join(parts)
+
+
 def create_orchestration_state() -> Dict[str, Any]:
     """Create the orchestration control-state container."""
     return {
@@ -350,6 +428,8 @@ def create_orchestration_state() -> Dict[str, Any]:
         "reserve_capabilities": [],
         "trigger_counterevidence_search": False,
         "counterevidence_focus": "",
+        "research_mode": "parallel_hard_loop",
+        "missing_capabilities": [],
     }
 
 
@@ -653,8 +733,12 @@ def merge_decision_dossier(
 ) -> Dict[str, str]:
     """Merge dossier updates, preferring new non-empty values."""
     merged = dict(existing or {})
+    normalized_updates = dict(updates or {})
+    legacy_timing = _clean_text(normalized_updates.pop("catalyst_path", ""))
+    if legacy_timing and not _clean_text(normalized_updates.get("timing_catalyst", "")):
+        normalized_updates["timing_catalyst"] = legacy_timing
 
-    for key, value in (updates or {}).items():
+    for key, value in normalized_updates.items():
         if value and value.strip():
             merged[key] = value.strip()
 
