@@ -4,44 +4,77 @@ Future Invest is an AI-native institution operating system for turning research 
 
 <div align="center">
 
-🚀 [Overview](#future-invest-framework) | 🗂️ [Project Index](PROJECT_INDEX.md) | ⚡ [Installation & CLI](#installation-and-cli) | 📦 [Python Runtime](#python-runtime) | 🤝 [Contributing](#contributing) | 📄 [Citation](#citation)
+Not a stock picker. Not a memo generator. A lean decision loop for portfolio-aware investing.
+
+🚀 [Why It Matters](#why-it-matters) | ⚡ [Quickstart](#5-minute-quickstart) | 🧠 [How It Works](#how-it-works) | 🖥️ [Interfaces](#interfaces) | 📦 [Python Runtime](#python-runtime) | 🗂️ [Project Index](PROJECT_INDEX.md)
 
 </div>
-
-Future Invest is built for AI builders who want something more opinionated than a finance chatbot and more operational than a research memo generator.
-
-Not a stock picker. Not a memo generator. A lean decision loop for portfolio-aware investing.
 
 <p align="center">
   <img src="assets/github-cover.svg" style="width: 100%; height: auto;" alt="Future Invest cover" />
 </p>
 
-The default product is a lean institutional loop:
+## Why It Matters
+
+Most finance agents stop at analysis.
+
+Future Invest is built around a harder endpoint:
 
 `mandate -> research -> thesis vs challenge -> position packet`
 
-That packet is the point. Instead of stopping at “here is my analysis,” Future Invest tries to end with `stance`, `size`, `entry framework`, `kill criteria`, and `monitoring triggers`.
+That packet is the product. Instead of ending with "here is my memo," Future Invest tries to end with:
 
-## Why Star This
+- `stance`
+- `size`
+- `entry framework`
+- `kill criteria`
+- `monitoring triggers`
 
-Most finance agents answer questions. Future Invest is trying to model an institution.
+This repo is for AI builders who want something more opinionated than a finance chatbot and more operational than a research copilot.
 
-- Lean-by-default decision loop instead of a generic research chat flow
-- Position-construction packet instead of a long memo as the terminal artifact
-- Full committee extension when the lean loop is not enough
-- Institutional memory and evaluation harness so the workflow can improve over time
+### Why It Gets Attention
 
-> Future Invest is designed for research purposes. Trading performance may vary based on model choice, market regime, data quality, and other non-deterministic inputs. It is not financial, investment, or trading advice.
+- It is built around an institutional decision loop, not a generic question-answer flow.
+- It compresses output into a position-construction packet instead of a long narrative memo.
+- It introduces portfolio context before conviction hardens.
+- It keeps a persistent memory layer so runs can compound over time.
+- It includes an evaluation harness, so workflow quality can be tested rather than guessed.
 
 ### Why It Feels Different
 
 | Category | Typical Research Agent | Future Invest |
 | --- | --- | --- |
 | Unit of work | Answer or memo | Institutional decision loop |
-| Final artifact | Research narrative | Position-construction packet |
+| Final artifact | Research narrative | Position packet |
 | Reasoning structure | Single-run assistant | Orchestrated debate + synthesis |
 | Portfolio context | Usually late or implicit | Introduced before thesis formation |
 | Memory | Mostly stateless | Institutional memory across runs |
+
+> Future Invest is designed for research and workflow prototyping. It is not financial, investment, or trading advice.
+
+## What You Get
+
+One successful run is supposed to feel less like "analysis complete" and more like "a seat is ready to discuss."
+
+Example packet shape:
+
+```yaml
+stance: long
+variant: market underestimates earnings durability
+portfolio_role: core growth seat
+size: medium
+entry_framework: build on weakness around catalyst window
+kill_criteria:
+  - thesis breaks if demand normalization stalls for two quarters
+  - cut if catalyst path slips and expectations reset higher anyway
+monitoring:
+  - estimate revisions
+  - positioning and crowding
+  - next catalyst date
+missing_evidence:
+  - channel check quality
+  - management credibility under new guidance
+```
 
 ## 5-Minute Quickstart
 
@@ -51,7 +84,7 @@ Most finance agents answer questions. Future Invest is trying to model an instit
    cd future-invest
    pip install -e .
    ```
-2. Set one API key:
+2. Set your provider key:
    ```bash
    export OPENAI_API_KEY=...
    ```
@@ -61,11 +94,11 @@ Most finance agents answer questions. Future Invest is trying to model an instit
    # or
    future-invest-web
    ```
-4. Choose your own provider, model pair, and loop mode in the CLI or web control room.
+4. Choose your provider, model pair, and loop mode in the CLI or web control room.
 
-### Supported Provider Paths
+### Provider Paths
 
-Future Invest supports these backends today. Pick the provider path that fits your account, quota, and model access.
+Future Invest is bring-your-own-provider. Use the path that matches your account, quota, and model access.
 
 | Provider | `llm_provider` | `backend_url` | Auth |
 | --- | --- | --- | --- |
@@ -77,10 +110,10 @@ Future Invest supports these backends today. Pick the provider path that fits yo
 | xAI | `xai` | `https://api.x.ai/v1` | `XAI_API_KEY` |
 | Ollama | `ollama` | `http://localhost:11434/v1` | local runtime |
 
-Example configuration shape:
+Example config shape:
 
 ```yaml
-llm_provider: openai            # or vectorengine / openrouter / google / anthropic / xai / ollama
+llm_provider: openai
 backend_url: https://api.openai.com/v1
 quick_think_llm: gpt-5-mini
 deep_think_llm: gpt-5.4
@@ -92,131 +125,104 @@ selected_analysts:
   - timing_catalyst
 ```
 
-If your chosen provider is rate-limited, retry the same lean setup before increasing depth or switching to a fuller loop.
+If your provider is rate-limited, retry the same lean configuration before increasing loop depth.
 
-## What You Are Running
+## How It Works
 
-- `Lean loop`: the default path for building an institutional view fast
-- `Full loop`: a deeper committee-style path for execution and allocation review
-- `Web control room`: a visual surface for the same runtime
-- `Evaluation harness`: a batch path for comparing workflow variants
+Future Invest is built as an AI-native institution rather than a collection of isolated analysts.
 
-## Future Invest Framework
+The core idea is simple:
 
-Future Invest is an AI-native investment institution framework for long/short equity research and capital allocation. Instead of treating LLMs as isolated analysts, the system organizes them as a coordinated institutional stack: an investment orchestrator frames the mandate, three parallel research engines build a shared world model, thesis and challenge engines debate variant perception, and the institution either resolves directly into a lean position-construction packet or expands into a full committee path for deeper execution and allocation review.
+- run three capability-native research rails in parallel
+- force one thesis-vs-challenge synthesis
+- emit a hard packet by default
+- escalate into committee logic only when the seat justifies the extra cost
 
 ### Research Capability Stack
-- Business Truth: Establishes what is economically real about the company, including earnings power, balance-sheet resilience, and the assumptions that must hold.
-- Market Expectations: Infers what the tape, trend, momentum, and positioning imply the market already expects.
-- Timing & Catalysts: Combines attention, narrative momentum, near-term catalysts, re-rating paths, and invalidation risks into one canonical research capability.
+
+- `Business Truth`: what is economically real about the company
+- `Market Expectations`: what the tape and positioning already imply
+- `Timing & Catalysts`: what makes the window actionable now
 
 <p align="center">
   <img src="assets/future-invest-research-stack.svg" width="100%" style="display: inline-block; margin: 0 2%;" alt="Future Invest research capability stack" />
 </p>
 
 ### Lean Loop
-- Thesis Engine: Builds the strongest investable upside case and makes variant perception explicit.
-- Challenge Engine: Attacks weak assumptions, surfaces counterevidence, and defines failure modes.
-- Investment Director: Synthesizes the debate into a shared world model, portfolio role, time horizon, and initial sizing view.
-- Position Construction Packet: The default path compresses the run into stance, size, entry framework, kill criteria, monitoring triggers, and missing evidence.
+
+- `Thesis Engine`: builds the strongest upside case
+- `Challenge Engine`: attacks assumptions and surfaces counterevidence
+- `Investment Director`: synthesizes into one investable world model
+- `Position Packet`: emits stance, size, entry framework, kill criteria, monitoring, and missing evidence
 
 <p align="center">
   <img src="assets/future-invest-decision-core.svg" width="100%" style="display: inline-block; margin: 0 2%;" alt="Future Invest decision core diagram" />
 </p>
 
 ### Full Loop Extension
-- Execution Engine: Converts the institutional view into an execution blueprint, including entry framework, position construction, liquidity plan, and monitoring triggers.
+
+When the seat is important enough, the same front-end bundle can expand into deeper execution and allocation logic.
+
+- `Execution Engine`
+- `Upside Capture`
+- `Downside Guardrail`
+- `Portfolio Fit`
+- `Capital Allocation Committee`
 
 <p align="center">
   <img src="assets/future-invest-full-loop.svg" width="100%" style="display: inline-block; margin: 0 2%;" alt="Future Invest full loop extension diagram" />
 </p>
 
-### Committee and Capital Formation
-- Upside Capture Engine: Protects the fund from under-sizing asymmetric opportunities.
-- Downside Guardrail Engine: Defines hard limits, scenario maps, and explicit kill criteria.
-- Portfolio Fit Engine: Judges correlation, crowding, capital budget, and the trade's role inside the book.
-- Capital Allocation Committee: Issues the final rating, position size, monitoring triggers, and capital-allocation rationale when the full loop is enabled.
-
 <p align="center">
-  <img src="assets/future-invest-capital-committee.svg" width="100%" style="display: inline-block; margin: 0 2%;" alt="Future Invest capital committee and governance diagram" />
+  <img src="assets/future-invest-capital-committee.svg" width="100%" style="display: inline-block; margin: 0 2%;" alt="Future Invest capital committee diagram" />
 </p>
 
-## Installation and CLI
+### Workflow
 
-### Installation
+<p align="center">
+  <img src="assets/future-invest-workflow.svg" width="100%" style="display: inline-block; margin: 0 2%;" alt="Future Invest workflow diagram" />
+</p>
 
-Clone your Future Invest repository:
-```bash
-git clone https://github.com/welcomemyworld/TradingAgents.git future-invest
-cd future-invest
-```
+### What Keeps Compounding
 
-Create a virtual environment in any of your favorite environment managers:
-```bash
-conda create -n futureinvest python=3.13
-conda activate futureinvest
-```
+- institutional memory
+- prediction ledgers
+- run traces
+- evaluation against repeatable case sets
 
-Install the package in editable mode:
-```bash
-pip install -e .
-```
+## Interfaces
 
-### Required APIs
-
-Future Invest supports multiple LLM providers. Set the API key for your chosen provider:
+### CLI
 
 ```bash
-export OPENAI_API_KEY=...          # OpenAI (GPT)
-export GOOGLE_API_KEY=...          # Google (Gemini)
-export ANTHROPIC_API_KEY=...       # Anthropic (Claude)
-export XAI_API_KEY=...             # xAI (Grok)
-export OPENROUTER_API_KEY=...      # OpenRouter
-export VECTORENGINE_API_KEY=...    # VectorEngine (optional OpenAI-compatible backend)
-export ALPHA_VANTAGE_API_KEY=...   # Alpha Vantage
+future-invest
+python -m cli.main
 ```
 
-For local models, configure Ollama with `llm_provider: "ollama"` in your config.
+The CLI is the main operator surface. It lets you choose:
 
-Alternatively, copy `.env.example` to `.env` and fill in your keys:
-```bash
-cp .env.example .env
-```
+- provider and model pair
+- lean vs full loop depth
+- capability stack
+- mandate intensity and run posture
 
-### CLI Usage
+A legacy CLI alias still exists for backward compatibility, but the product surface is Future Invest.
 
-Launch the interactive CLI:
-```bash
-future-invest          # primary installed command
-python -m cli.main     # run directly from source
-```
-You will see a live interface where you can configure the research capability stack, lean or full institutional loop depth, LLM provider, and model pairing for an institution run. A legacy CLI alias is still available for backward compatibility.
-
-### Web Interface
-
-Launch the local Future Invest web control room:
-
-```bash
-python -m futureinvest_web.app
-```
-
-Or, after reinstalling editable scripts:
+### Web Control Room
 
 ```bash
 future-invest-web
+# or
+python -m futureinvest_web.app
 ```
 
-Then open `http://127.0.0.1:8000` in your browser. The web interface uses the same `FutureInvestGraph` runtime as the CLI, but renders the institution dossier as a lean-first control room with an optional full committee path.
+Then open `http://127.0.0.1:8000`.
 
-As the run progresses, the CLI shows capability outputs, institutional debate, execution planning, capital formation, and the evolving AI Investment Dossier in real time.
+The web control room uses the same runtime as the CLI, but renders the institution dossier in a lean-first interface with an optional full committee path.
 
-### Launch Pack
+## Evaluation
 
-- Release checklist: [docs/github-launch-checklist.md](docs/github-launch-checklist.md)
-- Launch copy draft: [docs/github-launch-copy.md](docs/github-launch-copy.md)
-- Upload guide: [docs/github-upload-guide.md](docs/github-upload-guide.md)
-
-### Quick Smoke Tests
+Future Invest includes a batch evaluation path so workflow quality can be measured.
 
 Run the publish-facing smoke tests from the repo root:
 
@@ -228,64 +234,67 @@ python -m unittest \
   tests.test_institutional_memory
 ```
 
-These smoke tests are the default release gate. Broader end-to-end checks may require provider credentials, market-data access, and network connectivity.
+For broader experiments, see:
+
+- [PROJECT_INDEX.md](PROJECT_INDEX.md)
+- [evaluation/README.md](evaluation/README.md)
+- [docs/future-invest-proposal.md](docs/future-invest-proposal.md)
 
 ## Python Runtime
 
-### Implementation Details
+Future Invest uses LangGraph to keep the institution modular, inspectable, and reroutable.
 
-Future Invest uses LangGraph to keep the institution modular, inspectable, and easy to re-route. The framework supports multiple LLM providers: OpenAI, Google, Anthropic, xAI, OpenRouter, and Ollama.
+The public brand is Future Invest. The current Python package path remains `tradingagents` for compatibility.
 
-### Python Usage
-
-The runtime currently keeps the legacy Python package path `tradingagents`, but the primary graph entrypoint is now `FutureInvestGraph()`. A legacy compatibility alias remains available for older integrations.
-
-You can run `main.py`, or use the runtime directly:
+Example:
 
 ```python
 from tradingagents.graph.trading_graph import FutureInvestGraph
 from tradingagents.default_config import DEFAULT_CONFIG
 
-ta = FutureInvestGraph(debug=True, config=DEFAULT_CONFIG.copy())
-
-# forward propagate
-_, decision = ta.propagate("NVDA", "2026-01-15")
+graph = FutureInvestGraph(debug=True, config=DEFAULT_CONFIG.copy())
+_, decision = graph.propagate("NVDA", "2026-01-15")
 print(decision)
 ```
 
-You can also adjust the default configuration to set your own capability stack, model pairing, orchestration depth, and debate intensity.
+You can adjust the runtime configuration to change:
 
-```python
-from tradingagents.graph.trading_graph import FutureInvestGraph
-from tradingagents.default_config import DEFAULT_CONFIG
+- provider and backend URL
+- quick and deep model pair
+- capability selection
+- debate depth
+- lean vs full institutional loop mode
 
-config = DEFAULT_CONFIG.copy()
-config["llm_provider"] = "openai"        # openai, google, anthropic, xai, openrouter, ollama
-config["deep_think_llm"] = "gpt-5.2"     # Model for complex reasoning
-config["quick_think_llm"] = "gpt-5-mini" # Model for quick tasks
-config["max_debate_rounds"] = 2
+See `tradingagents/default_config.py` for the full configuration surface.
 
-ta = FutureInvestGraph(debug=True, config=config)
-_, decision = ta.propagate("NVDA", "2026-01-15")
-print(decision)
-```
+## Repo Map
 
-See `tradingagents/default_config.py` for all configuration options.
+- [PROJECT_INDEX.md](PROJECT_INDEX.md): fastest way to find the important files
+- [docs/future-invest-proposal.md](docs/future-invest-proposal.md): proposal-style framing
+- [docs/future-invest-pitch-memo.md](docs/future-invest-pitch-memo.md): pitch-oriented positioning memo
+- [docs/github-launch-checklist.md](docs/github-launch-checklist.md): release checklist
+- [docs/github-upload-guide.md](docs/github-upload-guide.md): what should and should not be committed
 
 ## Contributing
 
-We welcome contributions that improve the institution design, research quality, capital-allocation logic, evaluation stack, and operator experience.
+Contributions are most useful when they improve one of these layers:
+
+- institution design
+- research quality
+- decision protocol quality
+- evaluation quality
+- operator experience
 
 ## Citation
 
 If you build on Future Invest, please cite the repository:
 
-```
+```bibtex
 @software{futureinvest2026,
-      author={{Future Invest Project}},
-      title={Future Invest: AI-Native Institution Operating System},
-      year={2026},
-      url={https://github.com/welcomemyworld/TradingAgents},
-      note={GitHub repository},
+  author = {{Future Invest Project}},
+  title = {Future Invest: AI-Native Institution Operating System},
+  year = {2026},
+  url = {https://github.com/welcomemyworld/TradingAgents},
+  note = {GitHub repository}
 }
 ```

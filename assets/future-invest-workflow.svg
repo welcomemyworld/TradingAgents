@@ -41,7 +41,7 @@
   <path d="M70 54H1466L1534 122V840L1464 926H146L66 846V114L70 54Z" class="guide"/>
 
   <text x="80" y="102" class="title">Future Invest Workflow</text>
-  <text x="80" y="134" class="subtitle">Parallel rails up front. One decision core. Lean packet first. Committee only when needed.</text>
+  <text x="80" y="134" class="subtitle">Parallel rails up front. One decision core. Lean first.</text>
 
   <rect x="84" y="186" width="296" height="164" rx="24" class="panel"/>
   <text x="116" y="224" class="label">PHASE 01</text>
@@ -51,12 +51,12 @@
   <rect x="432" y="186" width="364" height="164" rx="24" class="panel"/>
   <text x="464" y="224" class="label">PHASE 02</text>
   <text x="464" y="266" class="heading">Institutional Framing</text>
-  <text x="464" y="300" class="body">portfolio role, horizon split, memory brief</text>
+  <text x="464" y="300" class="body">role, horizon split, memory brief</text>
 
   <rect x="848" y="186" width="672" height="218" rx="24" class="panel"/>
   <text x="880" y="224" class="label">PHASE 03</text>
   <text x="880" y="266" class="heading">Parallel Research Rails</text>
-  <text x="880" y="300" class="small">three concurrent passes feed one shared bundle</text>
+  <text x="880" y="300" class="small">three passes feed one shared bundle</text>
   <rect x="892" y="330" width="164" height="48" rx="16" class="chip"/>
   <text x="920" y="361" class="body">Truth</text>
   <rect x="1080" y="330" width="214" height="48" rx="16" class="chip"/>
@@ -80,20 +80,20 @@
 
   <rect x="1022" y="474" width="412" height="212" rx="24" class="panel"/>
   <text x="1054" y="512" class="label">PHASE 05B</text>
-  <text x="1054" y="554" class="heading">Full Committee Extension</text>
+  <text x="1054" y="554" class="heading">Committee Extension</text>
   <text x="1054" y="590" class="body">execution engine</text>
   <text x="1054" y="622" class="body">allocation review stack</text>
   <text x="1054" y="654" class="body">capital committee</text>
 
   <rect x="404" y="760" width="390" height="132" rx="24" class="panel"/>
   <text x="436" y="798" class="label">PHASE 06</text>
-  <text x="436" y="840" class="heading">Final Institutional Decision</text>
+  <text x="436" y="840" class="heading">Final Decision</text>
   <text x="436" y="870" class="small">rating, role, entry, kill criteria</text>
 
   <rect x="848" y="742" width="560" height="150" rx="24" class="panel"/>
   <text x="880" y="780" class="label">LEARNING LOOP</text>
-  <text x="880" y="822" class="heading">Memory + Evaluation + Trace</text>
-  <text x="880" y="854" class="small">cross-run residue, prediction ledgers, workflow iteration</text>
+  <text x="880" y="822" class="heading">Memory + Eval + Trace</text>
+  <text x="880" y="854" class="small">residue, prediction ledgers, iteration</text>
 
   <path d="M380 268H432" class="line"/>
   <path d="M796 268H848" class="line"/>

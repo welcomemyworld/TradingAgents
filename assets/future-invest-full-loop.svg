@@ -27,14 +27,14 @@
   </defs>
   <rect width="1600" height="860" fill="url(#fl-bg)"/>
   <text x="78" y="98" class="title">Full Loop Extension</text>
-  <text x="78" y="130" class="subtitle">Deeper governance only when capital at risk deserves it.</text>
+  <text x="78" y="130" class="subtitle">Deeper governance only when the seat deserves it.</text>
   <rect x="96" y="262" width="278" height="214" rx="24" class="panel"/>
   <text x="128" y="300" class="label">INPUT</text>
   <text x="128" y="342" class="heading">Research Bundle</text>
   <text x="128" y="378" class="body">truth / expectations / timing</text>
   <rect x="428" y="262" width="278" height="214" rx="24" class="panel"/>
   <text x="460" y="300" class="label">DIRECTOR</text>
-  <text x="460" y="342" class="heading">Institutional View</text>
+  <text x="460" y="342" class="heading">Institution View</text>
   <text x="460" y="378" class="body">world model / role / urgency</text>
   <rect x="760" y="220" width="300" height="298" rx="24" class="panel"/>
   <text x="792" y="258" class="label">EXECUTION</text>
@@ -46,8 +46,8 @@
   <text x="1146" y="338" class="body">upside capture / downside guardrail / fit</text>
   <rect x="484" y="606" width="634" height="148" rx="24" class="panel"/>
   <text x="516" y="644" class="label">FINAL RESULT</text>
-  <text x="516" y="686" class="heading">Capital Committee Decision</text>
-  <text x="516" y="718" class="body">rating, size, entry path, kill criteria, rationale</text>
+  <text x="516" y="686" class="heading">Committee Decision</text>
+  <text x="516" y="718" class="body">rating, size, entry path, kill criteria</text>
   <path d="M374 370H428" class="line"/>
   <path d="M706 370H760" class="line"/>
   <path d="M1060 370H1114" class="line"/>

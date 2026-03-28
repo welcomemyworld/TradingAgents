@@ -31,7 +31,7 @@
   <rect x="122" y="250" width="338" height="236" rx="24" class="panel"/>
   <text x="154" y="288" class="label">ENGINE A</text>
   <text x="154" y="330" class="heading">Thesis Engine</text>
-  <text x="154" y="368" class="body">strongest investable upside case</text>
+  <text x="154" y="368" class="body">strongest upside case</text>
   <rect x="502" y="250" width="338" height="236" rx="24" class="panel"/>
   <text x="534" y="288" class="label">ENGINE B</text>
   <text x="534" y="330" class="heading">Challenge Engine</text>
@@ -50,8 +50,8 @@
   <text x="1308" y="440" class="body">monitoring triggers</text>
   <rect x="390" y="606" width="834" height="146" rx="24" class="panel"/>
   <text x="422" y="644" class="label">WHY IT STICKS</text>
-  <text x="422" y="686" class="heading">The run ends in a packet, not a memo.</text>
-  <text x="422" y="718" class="body">That is what makes the loop actionable, falsifiable, and portfolio-aware.</text>
+  <text x="422" y="686" class="heading">The run ends in a packet.</text>
+  <text x="422" y="718" class="body">That keeps the loop actionable and falsifiable.</text>
   <path d="M460 368H502" class="line"/>
   <path d="M840 368H918" class="line"/>
   <path d="M1220 368H1276" class="line"/>

@@ -27,11 +27,11 @@
   </defs>
   <rect width="1600" height="860" fill="url(#cc-bg)"/>
   <text x="78" y="98" class="title">Committee + Capital Formation</text>
-  <text x="78" y="130" class="subtitle">Three governance views shape the final capital decision.</text>
+  <text x="78" y="130" class="subtitle">Three governance views shape the final decision.</text>
   <rect x="100" y="236" width="382" height="252" rx="24" class="panel"/>
   <text x="132" y="274" class="label">REVIEW 01</text>
   <text x="132" y="316" class="heading">Upside Capture</text>
-  <text x="132" y="354" class="body">are we under-sizing an asymmetric seat?</text>
+  <text x="132" y="354" class="body">are we under-sizing this seat?</text>
   <rect x="610" y="236" width="382" height="252" rx="24" class="panel"/>
   <text x="642" y="274" class="label">REVIEW 02</text>
   <text x="642" y="316" class="heading">Downside Guardrail</text>
@@ -42,8 +42,8 @@
   <text x="1152" y="354" class="body">how does the seat change the book?</text>
   <rect x="452" y="598" width="696" height="158" rx="24" class="panel"/>
   <text x="484" y="636" class="label">FINAL GOVERNANCE</text>
-  <text x="484" y="678" class="heading">Capital Allocation Committee</text>
-  <text x="484" y="712" class="body">final rating, position size, entry path, kill criteria, monitoring</text>
+  <text x="484" y="678" class="heading">Capital Committee</text>
+  <text x="484" y="712" class="body">rating, size, entry path, kill criteria, monitoring</text>
   <path d="M292 488C292 546 456 572 586 598" class="line"/>
   <path d="M800 488V598" class="line"/>
   <path d="M1308 488C1308 546 1144 572 1014 598" class="line"/>

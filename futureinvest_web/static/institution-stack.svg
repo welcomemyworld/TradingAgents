@@ -42,7 +42,7 @@
   <path d="M66 54H1160L1230 124V792L1160 862H120L50 792V112L66 54Z" class="guide"/>
 
   <text x="74" y="92" class="title">Future Invest Institutional Stack</text>
-  <text x="74" y="122" class="subtitle">Parallel research rails, one synthesis core, two institutional exits.</text>
+  <text x="74" y="122" class="subtitle">Parallel research rails, one synthesis core, two exits.</text>
 
   <rect x="74" y="164" width="1132" height="112" rx="24" class="panel"/>
   <text x="108" y="200" class="kicker">BOOT / STAGE 01</text>
@@ -51,13 +51,13 @@
 
   <rect x="74" y="316" width="1132" height="124" rx="24" class="panel"/>
   <text x="108" y="354" class="kicker">STACK / STAGE 02</text>
-  <text x="108" y="394" class="heading">Institutional Context Before Conviction</text>
-  <text x="108" y="424" class="body">portfolio role, horizon split, memory brief, stop rules</text>
+  <text x="108" y="394" class="heading">Context Before Conviction</text>
+  <text x="108" y="424" class="body">role, horizon split, memory brief, stop rules</text>
 
   <rect x="74" y="478" width="1132" height="220" rx="24" class="panel"/>
   <text x="108" y="516" class="kicker">RAILS / STAGE 03</text>
   <text x="108" y="556" class="heading">Parallel Research Bundle</text>
-  <text x="108" y="586" class="small">three neon rails feed one institutional bundle instead of roleplay serialism</text>
+  <text x="108" y="586" class="small">three rails feed one bundle instead of roleplay serialism</text>
 
   <rect x="110" y="612" width="252" height="52" rx="16" class="chip"/>
   <text x="144" y="644" class="body">Business Truth</text>
@@ -69,12 +69,12 @@
   <rect x="74" y="738" width="536" height="116" rx="24" class="panel"/>
   <text x="108" y="776" class="kicker">CORE / STAGE 04</text>
   <text x="108" y="816" class="heading">Decision Core</text>
-  <text x="108" y="844" class="body">thesis engine, challenge engine, investment director</text>
+  <text x="108" y="844" class="body">thesis, challenge, investment director</text>
 
   <rect x="670" y="738" width="536" height="116" rx="24" class="panel"/>
   <text x="704" y="776" class="kicker">EXIT / STAGE 05</text>
   <text x="704" y="816" class="heading">Lean Packet Or Full Loop</text>
-  <text x="704" y="844" class="body">hard packet by default, committee extension when the seat matters</text>
+  <text x="704" y="844" class="body">packet by default, committee when the seat matters</text>
 
   <path d="M640 276V316" class="line"/>
   <path d="M640 440V478" class="line"/>

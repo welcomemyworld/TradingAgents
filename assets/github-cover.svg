@@ -49,7 +49,7 @@
   <path d="M1346 510V750" class="wire"/>
 
   <text x="92" y="170" class="title">Future Invest</text>
-  <text x="96" y="218" class="subtitle">INSTITUTION_OS / PARALLEL_RESEARCH / POSITION_PACKET</text>
+  <text x="96" y="218" class="subtitle">INSTITUTION_OS / RESEARCH_RAILS / POSITION_PACKET</text>
   <text x="92" y="304" class="lede">Research, timing, and portfolio logic</text>
   <text x="92" y="348" class="lede">compressed into one live packet.</text>
   <text x="92" y="428" class="body">Not a finance chatbot.</text>
@@ -69,8 +69,8 @@
 
   <rect x="872" y="550" width="566" height="174" rx="24" class="panel"/>
   <text x="906" y="590" class="section">COMPOUNDING LAYER</text>
-  <text x="906" y="634" class="heading">Memory + Evaluation + Trace</text>
-  <text x="906" y="674" class="small">cross-run learning, institutional residue, workflow iteration</text>
+  <text x="906" y="634" class="heading">Memory + Eval + Trace</text>
+  <text x="906" y="674" class="small">cross-run learning, residue, iteration</text>
 
   <rect x="1018" y="152" width="146" height="106" rx="18" class="panel"/>
   <text x="1042" y="188" class="section">R1</text>
@@ -86,8 +86,8 @@
 
   <rect x="1142" y="332" width="286" height="138" rx="24" class="panel"/>
   <text x="1174" y="372" class="section">DECISION CORE</text>
-  <text x="1174" y="416" class="heading">Thesis + Challenge + Director</text>
-  <text x="1174" y="448" class="tiny">one synthesis layer for one institutional view</text>
+  <text x="1174" y="416" class="heading">Thesis / Challenge / Director</text>
+  <text x="1174" y="448" class="tiny">one synthesis layer, one institutional view</text>
 
   <path d="M1164 258C1198 284 1222 304 1252 332" class="line"/>
   <path d="M1278 212C1278 250 1278 276 1278 332" class="line"/>

@@ -38,7 +38,7 @@
 
   <rect width="1200" height="920" fill="url(#mem-bg)"/>
   <text x="68" y="86" class="title">Memory + Evaluation Loop</text>
-  <text x="68" y="118" class="subtitle">Future Invest compounds by carrying institutional residue across runs.</text>
+  <text x="68" y="118" class="subtitle">Future Invest compounds by carrying residue across runs.</text>
 
   <circle cx="600" cy="468" r="224" class="ring"/>
   <circle cx="600" cy="468" r="292" class="guide"/>
@@ -48,7 +48,7 @@
   <text x="458" y="430" class="heading">Institutional Context</text>
   <text x="458" y="468" class="body">company memory, thesis residue,</text>
   <text x="458" y="498" class="body">timing history, and missing evidence</text>
-  <text x="458" y="542" class="small">fed back into orchestration, challenge, and sizing</text>
+  <text x="458" y="542" class="small">feeds orchestration, challenge, and sizing</text>
 
   <rect x="114" y="206" width="260" height="126" rx="20" class="card"/>
   <text x="146" y="246" class="heading">World Model History</text>
@@ -73,7 +73,7 @@
   <rect x="426" y="688" width="348" height="124" rx="20" class="card"/>
   <text x="458" y="726" class="kicker">EVALUATION</text>
   <text x="458" y="768" class="heading">Compare / Audit / Refine</text>
-  <text x="458" y="796" class="small">engineering quality, decision quality, outcome quality</text>
+  <text x="458" y="796" class="small">engineering, decision, and outcome quality</text>
 
   <path d="M374 270C448 312 488 348 524 404" class="link"/>
   <path d="M826 270C752 312 712 348 676 404" class="link"/>
