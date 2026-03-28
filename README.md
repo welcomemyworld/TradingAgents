@@ -1,5 +1,7 @@
 # Future Invest
 
+English | [简体中文](README.zh-CN.md)
+
 Future Invest is not an AI stock picker.
 
 It is an AI-native investment operating system that turns research into a portfolio-aware decision packet: stance, position size, kill criteria, and monitoring.
