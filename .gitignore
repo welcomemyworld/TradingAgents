@@ -218,7 +218,15 @@ __marimo__/
 # Cache
 **/data_cache/
 
+# Future Invest generated outputs
+results/
+evaluation/results/
+eval_results/
+tradingagents/institution_memory/
+tradingagents/institution_traces/
+
 # Local generated artifacts
 /results/
 /evaluation/results/
 /main-py-example.pdf
+/docs/*.pdf

@@ -19,6 +19,17 @@ This file is the fastest way to find the important parts of the repository.
 - `futureinvest_web/static/cci-monogram.svg`
   - Current CCI monogram asset.
 
+## Proposal and Narrative Docs
+
+- `docs/future-invest-proposal.md`
+  - Proposal-style narrative for the Future Invest project.
+  - Includes motivation, problem statement, timing-and-catalyst research design, lean/full workflow, evaluation plan, and contribution framing.
+- `docs/future-invest-pitch-memo.md`
+  - Pitch-oriented narrative for fund, investor, and strategy discussions.
+  - Emphasizes positioning, differentiation, lean-first workflow, defensibility, and near-term milestones.
+- `assets/future-invest-workflow.svg`
+  - Reusable workflow figure for decks, documents, and proposal material.
+
 ## 2. Runtime Entry
 
 - `main.py`
@@ -71,6 +82,7 @@ This file is the fastest way to find the important parts of the repository.
 - `tradingagents/agents/managers/investment_orchestrator.py`
   - Institution-level control brain.
   - Handles token budget, position importance, dynamic capability expansion, counterevidence triggers, early stopping, portfolio mandate, and time-horizon split.
+  - In hard-loop mode it fans research into parallel engines before synthesis.
 
 ### Research Capability Stack
 
@@ -78,10 +90,12 @@ This file is the fastest way to find the important parts of the repository.
   - Business Truth
 - `tradingagents/agents/analysts/market_analyst.py`
   - Market Expectations
+- `tradingagents/agents/analysts/timing_catalyst_analyst.py`
+  - Timing & Catalysts
 - `tradingagents/agents/analysts/social_media_analyst.py`
-  - Why Now
+  - Legacy compatibility wrapper that maps to `timing_catalyst`
 - `tradingagents/agents/analysts/news_analyst.py`
-  - Catalyst Path
+  - Legacy compatibility wrapper that maps to `timing_catalyst`
 
 ### Decision and Capital Layers
 
@@ -176,7 +190,11 @@ future-invest-eval --cases evaluation/cases.sample.json --label baseline
 Run tests:
 
 ```bash
-python -m unittest discover -s tests
+python -m unittest \
+  tests.test_investment_orchestration \
+  tests.test_state_schema_consolidation \
+  tests.test_evaluation_harness \
+  tests.test_institutional_memory
 ```
 
 ## 10. Output Locations
@@ -185,6 +203,8 @@ python -m unittest discover -s tests
   - `results/<ticker>/<analysis_date>/`
 - Evaluation batches:
   - `evaluation/results/<timestamp>_<label>/`
+- Institution traces:
+  - `tradingagents/institution_traces/`
 - Institution memory:
   - `tradingagents/institution_memory/`
 

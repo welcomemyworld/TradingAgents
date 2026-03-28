@@ -10,12 +10,13 @@ AI-native investment institution framework for long/short equity research, execu
 
 ## Current Focus
 - AI-native orchestration instead of fixed human-role pipelines
+- Lean-by-default institutional loop with a full committee extension when deeper review is warranted
 - Portfolio mandate and time-horizon splits surfaced before research begins
 - Long-term institutional memory for company context, thesis history, prediction tracking, and agent reliability
 
 ## Future Invest Framework
 
-Future Invest is an AI-native investment institution framework for long/short equity research and capital allocation. Instead of treating LLMs as isolated analysts, the system organizes them as a coordinated institutional stack: an investment orchestrator plans the research path, capability modules build a shared world model, thesis and challenge engines debate variant perception, execution turns that view into a tradable expression, and capital-allocation engines decide how the idea belongs inside a portfolio.
+Future Invest is an AI-native investment institution framework for long/short equity research and capital allocation. Instead of treating LLMs as isolated analysts, the system organizes them as a coordinated institutional stack: an investment orchestrator frames the mandate, three parallel research engines build a shared world model, thesis and challenge engines debate variant perception, and the institution either resolves directly into a lean position-construction packet or expands into a full committee path for deeper execution and allocation review.
 
 <p align="center">
   <img src="assets/schema.png" style="width: 100%; height: auto;">
@@ -33,34 +34,34 @@ The framework decomposes investment work into capabilities and institutional pro
 ### Research Capability Stack
 - Business Truth: Establishes what is economically real about the company, including earnings power, balance-sheet resilience, and the assumptions that must hold.
 - Market Expectations: Infers what the tape, trend, momentum, and positioning imply the market already expects.
-- Why Now: Tracks attention, narrative momentum, and sentiment inflections to explain why the idea matters on this horizon.
-- Catalyst Path: Maps the event chain that can compress uncertainty, shift expectations, or force a re-rating.
+- Timing & Catalysts: Combines attention, narrative momentum, near-term catalysts, re-rating paths, and invalidation risks into one canonical research capability.
 
 <p align="center">
   <img src="assets/analyst.png" width="100%" style="display: inline-block; margin: 0 2%;">
 </p>
 
-### Institutional Debate Layer
+### Lean Loop
 - Thesis Engine: Builds the strongest investable upside case and makes variant perception explicit.
 - Challenge Engine: Attacks weak assumptions, surfaces counterevidence, and defines failure modes.
 - Investment Director: Synthesizes the debate into a shared world model, portfolio role, time horizon, and initial sizing view.
+- Position Construction Packet: The default path compresses the run into stance, size, entry framework, kill criteria, monitoring triggers, and missing evidence.
 
 <p align="center">
   <img src="assets/researcher.png" width="70%" style="display: inline-block; margin: 0 2%;">
 </p>
 
-### Execution Layer
+### Full Loop Extension
 - Execution Engine: Converts the institutional view into an execution blueprint, including entry framework, position construction, liquidity plan, and monitoring triggers.
 
 <p align="center">
   <img src="assets/trader.png" width="70%" style="display: inline-block; margin: 0 2%;">
 </p>
 
-### Capital Formation Layer
+### Committee and Capital Formation
 - Upside Capture Engine: Protects the fund from under-sizing asymmetric opportunities.
 - Downside Guardrail Engine: Defines hard limits, scenario maps, and explicit kill criteria.
 - Portfolio Fit Engine: Judges correlation, crowding, capital budget, and the trade's role inside the book.
-- Capital Allocation Committee: Issues the final rating, position size, monitoring triggers, and capital-allocation rationale.
+- Capital Allocation Committee: Issues the final rating, position size, monitoring triggers, and capital-allocation rationale when the full loop is enabled.
 
 <p align="center">
   <img src="assets/risk.png" width="70%" style="display: inline-block; margin: 0 2%;">
@@ -82,9 +83,9 @@ conda create -n futureinvest python=3.13
 conda activate futureinvest
 ```
 
-Install the package and its dependencies:
+Install the package in editable mode:
 ```bash
-pip install .
+pip install -e .
 ```
 
 ### Required APIs
@@ -115,7 +116,7 @@ future-invest          # primary installed command
 tradingagents          # legacy compatibility alias
 python -m cli.main     # run directly from source
 ```
-You will see a live interface where you can configure the research capability stack, orchestration depth, LLM provider, and model pairing for an institution run.
+You will see a live interface where you can configure the research capability stack, lean or full institutional loop depth, LLM provider, and model pairing for an institution run.
 
 ### Web Interface
 
@@ -131,7 +132,7 @@ Or, after reinstalling editable scripts:
 future-invest-web
 ```
 
-Then open `http://127.0.0.1:8000` in your browser. The web interface uses the same `FutureInvestGraph` runtime as the CLI, but renders the institution dossier in a cyberpunk single-page dashboard.
+Then open `http://127.0.0.1:8000` in your browser. The web interface uses the same `FutureInvestGraph` runtime as the CLI, but renders the institution dossier as a lean-first control room with an optional full committee path.
 
 <p align="center">
   <img src="assets/cli/cli_init.png" width="100%" style="display: inline-block; margin: 0 2%;">
@@ -146,6 +147,20 @@ As the run progresses, the CLI shows capability outputs, institutional debate, e
 <p align="center">
   <img src="assets/cli/cli_transaction.png" width="100%" style="display: inline-block; margin: 0 2%;">
 </p>
+
+### Quick Smoke Tests
+
+Run the publish-facing smoke tests from the repo root:
+
+```bash
+python -m unittest \
+  tests.test_investment_orchestration \
+  tests.test_state_schema_consolidation \
+  tests.test_evaluation_harness \
+  tests.test_institutional_memory
+```
+
+These smoke tests are the default release gate. Broader end-to-end checks may require provider credentials, market-data access, and network connectivity.
 
 ## Python Runtime
 
